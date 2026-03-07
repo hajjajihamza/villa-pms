@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -7,7 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class RecurringExpense extends Model
 {
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
 
+    /** @var array<int, string> */
     protected $fillable = [
         'name',
         'amount',
@@ -18,6 +23,9 @@ class RecurringExpense extends Model
         'next_run_date',
     ];
 
+    /**
+     * @return array<string, string|class-string|array>
+     */
     protected function casts(): array
     {
         return [
@@ -29,4 +37,3 @@ class RecurringExpense extends Model
         ];
     }
 }
-

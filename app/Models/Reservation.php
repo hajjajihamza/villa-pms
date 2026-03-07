@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -14,8 +15,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Reservation extends Model
 {
+    // ────────────────────────────────────────────────
+    //  Traits
+    // ────────────────────────────────────────────────
+
     use SoftDeletes;
 
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
+
+    /** @var array<int, string> */
     protected $fillable = [
         'check_in',
         'check_out',
@@ -33,6 +43,9 @@ class Reservation extends Model
         'accommodation_id',
     ];
 
+    /**
+     * @return array<string, string|class-string|array>
+     */
     protected function casts(): array
     {
         return [
@@ -46,6 +59,39 @@ class Reservation extends Model
             'service_price' => 'decimal:2',
         ];
     }
+
+    // ────────────────────────────────────────────────
+    //  Relationships
+    // ────────────────────────────────────────────────
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function channel(): BelongsTo
+    {
+        return $this->belongsTo(Channel::class);
+    }
+
+    public function accommodation(): BelongsTo
+    {
+        return $this->belongsTo(Accommodation::class);
+    }
+
+    public function visitors(): HasMany
+    {
+        return $this->hasMany(Visitor::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    // ────────────────────────────────────────────────
+    //  Accessors & Mutators
+    // ────────────────────────────────────────────────
 
     protected function amountToPay(): Attribute
     {
@@ -85,14 +131,14 @@ class Reservation extends Model
     {
         return Attribute::get(function (): int {
             if ($this->real_check_in && $this->real_check_out) {
-                return Carbon::parse($this->real_check_in)->diffInDays(Carbon::parse($this->real_check_out));
+                return (int) Carbon::parse($this->real_check_in)->diffInDays(Carbon::parse($this->real_check_out));
             }
 
             if (! $this->check_in || ! $this->check_out) {
                 return 0;
             }
 
-            return Carbon::parse($this->check_in)->diffInDays(Carbon::parse($this->check_out));
+            return (int) Carbon::parse($this->check_in)->diffInDays(Carbon::parse($this->check_out));
         });
     }
 
@@ -111,6 +157,10 @@ class Reservation extends Model
             }
         );
     }
+
+    // ────────────────────────────────────────────────
+    //  Local Scopes
+    // ────────────────────────────────────────────────
 
     #[Scope]
     protected function confirmed(Builder $query): void
@@ -138,30 +188,5 @@ class Reservation extends Model
     protected function reported(Builder $query): void
     {
         $query->where('reported', true);
-    }
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function channel(): BelongsTo
-    {
-        return $this->belongsTo(Channel::class);
-    }
-
-    public function accommodation(): BelongsTo
-    {
-        return $this->belongsTo(Accommodation::class);
-    }
-
-    public function visitors(): HasMany
-    {
-        return $this->hasMany(Visitor::class);
-    }
-
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
     }
 }

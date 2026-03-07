@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -9,6 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
+
+    /** @var array<int, string> */
     protected $fillable = [
         'name',
         'price',
@@ -16,12 +22,19 @@ class Product extends Model
         'category_id',
     ];
 
+    /**
+     * @return array<string, string|class-string|array>
+     */
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
         ];
     }
+
+    // ────────────────────────────────────────────────
+    //  Relationships
+    // ────────────────────────────────────────────────
 
     public function category(): BelongsTo
     {
@@ -46,4 +59,3 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 }
-

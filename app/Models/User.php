@@ -1,9 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
 use App\Enums\RoleEnum;
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,13 +12,17 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    // ────────────────────────────────────────────────
+    //  Traits
+    // ────────────────────────────────────────────────
+
     use Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
+
+    /** @var array<int, string> */
     protected $fillable = [
         'name',
         'username',
@@ -27,20 +31,14 @@ class User extends Authenticatable
         'role',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    /** @var array<int, string> */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * @return array<string, string|class-string|array>
      */
     protected function casts(): array
     {
@@ -50,6 +48,10 @@ class User extends Authenticatable
             'role' => RoleEnum::class,
         ];
     }
+
+    // ────────────────────────────────────────────────
+    //  Relationships
+    // ────────────────────────────────────────────────
 
     public function reservations(): HasMany
     {
@@ -65,6 +67,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Expense::class, 'created_by');
     }
+
+    // ────────────────────────────────────────────────
+    //  Local Scopes
+    // ────────────────────────────────────────────────
 
     #[Scope]
     protected function admins(Builder $query): void

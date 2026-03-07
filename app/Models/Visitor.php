@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -8,7 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Visitor extends Model
 {
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
 
+    /** @var array<int, string> */
     protected $fillable = [
         'full_name',
         'phone',
@@ -17,12 +22,19 @@ class Visitor extends Model
         'reservation_id',
     ];
 
+    /**
+     * @return array<string, string|class-string|array>
+     */
     protected function casts(): array
     {
         return [
             'is_main' => 'boolean',
         ];
     }
+
+    // ────────────────────────────────────────────────
+    //  Relationships
+    // ────────────────────────────────────────────────
 
     public function reservation(): BelongsTo
     {
@@ -34,4 +46,3 @@ class Visitor extends Model
         return $this->hasMany(Document::class);
     }
 }
-

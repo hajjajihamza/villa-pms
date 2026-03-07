@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -9,8 +10,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrderItem extends Model
 {
+    // ────────────────────────────────────────────────
+    //  Traits
+    // ────────────────────────────────────────────────
+
     use SoftDeletes;
 
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
+
+    /** @var array<int, string> */
     protected $fillable = [
         'product_name',
         'quantity',
@@ -20,6 +30,9 @@ class OrderItem extends Model
         'created_by',
     ];
 
+    /**
+     * @return array<string, string|class-string|array>
+     */
     protected function casts(): array
     {
         return [
@@ -27,14 +40,9 @@ class OrderItem extends Model
         ];
     }
 
-    protected function total(): Attribute
-    {
-        return Attribute::get(function (): string {
-            $total = (float) $this->quantity * (float) $this->price;
-
-            return number_format($total, 2, '.', '');
-        });
-    }
+    // ────────────────────────────────────────────────
+    //  Relationships
+    // ────────────────────────────────────────────────
 
     public function order(): BelongsTo
     {
@@ -50,5 +58,17 @@ class OrderItem extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-}
 
+    // ────────────────────────────────────────────────
+    //  Accessors & Mutators
+    // ────────────────────────────────────────────────
+
+    protected function total(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $total = (float) $this->quantity * (float) $this->price;
+
+            return number_format($total, 2, '.', '');
+        });
+    }
+}

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -9,7 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Expense extends Model
 {
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
 
+    /** @var array<int, string> */
     protected $fillable = [
         'name',
         'amount',
@@ -20,6 +25,9 @@ class Expense extends Model
         'unit_id',
     ];
 
+    /**
+     * @return array<string, string|class-string|array>
+     */
     protected function casts(): array
     {
         return [
@@ -27,6 +35,10 @@ class Expense extends Model
             'date' => 'date',
         ];
     }
+
+    // ────────────────────────────────────────────────
+    //  Relationships
+    // ────────────────────────────────────────────────
 
     public function creator(): BelongsTo
     {
@@ -43,6 +55,10 @@ class Expense extends Model
         return $this->belongsTo(Unit::class);
     }
 
+    // ────────────────────────────────────────────────
+    //  Local Scopes
+    // ────────────────────────────────────────────────
+
     #[Scope]
     protected function thisMonth(Builder $query): void
     {
@@ -57,4 +73,3 @@ class Expense extends Model
         $query->whereYear('date', now()->year);
     }
 }
-

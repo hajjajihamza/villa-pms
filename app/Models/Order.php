@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -10,11 +11,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
+
+    /** @var array<int, string> */
     protected $fillable = [
         'date',
         'reservation_id',
     ];
 
+    /**
+     * @return array<string, string|class-string|array>
+     */
     protected function casts(): array
     {
         return [
@@ -22,22 +31,9 @@ class Order extends Model
         ];
     }
 
-    protected function totalAmount(): Attribute
-    {
-        return Attribute::get(function (): string {
-            if ($this->relationLoaded('orderItems')) {
-                $total = $this->orderItems->sum(fn (OrderItem $item): float => (float) $item->total);
-
-                return number_format($total, 2, '.', '');
-            }
-
-            $total = $this->orderItems()
-                ->selectRaw('COALESCE(SUM(quantity * price), 0) as total')
-                ->value('total');
-
-            return number_format((float) $total, 2, '.', '');
-        });
-    }
+    // ────────────────────────────────────────────────
+    //  Relationships
+    // ────────────────────────────────────────────────
 
     public function reservation(): BelongsTo
     {
@@ -60,5 +56,26 @@ class Order extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    // ────────────────────────────────────────────────
+    //  Accessors & Mutators
+    // ────────────────────────────────────────────────
+
+    protected function totalAmount(): Attribute
+    {
+        return Attribute::get(function (): string {
+            if ($this->relationLoaded('orderItems')) {
+                $total = $this->orderItems->sum(fn (OrderItem $item): float => (float) $item->total);
+
+                return number_format($total, 2, '.', '');
+            }
+
+            $total = $this->orderItems()
+                ->selectRaw('COALESCE(SUM(quantity * price), 0) as total')
+                ->value('total');
+
+            return number_format((float) $total, 2, '.', '');
+        });
     }
 }

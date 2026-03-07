@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -8,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Accommodation extends Model
 {
+    // ────────────────────────────────────────────────
+    //  Table, Key & Mass Assignment
+    // ────────────────────────────────────────────────
+
+    /** @var array<int, string> */
     protected $fillable = [
         'name',
         'daily_price',
@@ -17,6 +23,9 @@ class Accommodation extends Model
         'color',
     ];
 
+    /**
+     * @return array<string, string|class-string|array>
+     */
     protected function casts(): array
     {
         return [
@@ -24,6 +33,10 @@ class Accommodation extends Model
             'service_price' => 'decimal:2',
         ];
     }
+
+    // ────────────────────────────────────────────────
+    //  Relationships
+    // ────────────────────────────────────────────────
 
     public function units(): BelongsToMany
     {
