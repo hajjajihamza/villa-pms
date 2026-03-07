@@ -1,12 +1,12 @@
-export type User = {
-    id: number;
+import type { BaseModel, DateTimeString, Role } from '@/types/models';
+
+export type User = BaseModel & {
     name: string;
+    username: string;
     email: string;
     avatar?: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
-    [key: string]: unknown;
+    email_verified_at: DateTimeString | null;
+    role: Role;
 };
 
 export type Auth = {
