@@ -1,0 +1,167 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\StatusEnum;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Reservation extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'check_in',
+        'check_out',
+        'real_check_in',
+        'real_check_out',
+        'adults',
+        'children',
+        'reported',
+        'advance_amount',
+        'daily_price',
+        'service_price',
+        'deleted_note',
+        'created_by',
+        'channel_id',
+        'accommodation_id',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'check_in' => 'date',
+            'check_out' => 'date',
+            'real_check_in' => 'datetime',
+            'real_check_out' => 'datetime',
+            'reported' => 'boolean',
+            'advance_amount' => 'decimal:2',
+            'total_price' => 'decimal:2',
+            'service_price' => 'decimal:2',
+        ];
+    }
+
+    protected function amountToPay(): Attribute
+    {
+        return Attribute::make(
+            get: function (): float {
+                $ordersTotal = 0.0;
+
+                if ($this->relationLoaded('orders')) {
+                    $ordersTotal = $this->orders->sum(fn (Order $order) => (float) $order->total_amount);
+                } else {
+                    $ordersTotal = (float) OrderItem::query()
+                        ->whereHas('order', fn (Builder $query): Builder => $query->where('reservation_id', $this->id))
+                        ->selectRaw('COALESCE(SUM(quantity * price), 0) as total')
+                        ->value('total');
+                }
+
+                return ((float) $this->total_price + $ordersTotal) - (float) $this->advance_amount;
+            },
+        );
+    }
+
+    protected function totalPrice(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->daily_price * $this->duration,
+        );
+    }
+
+    protected function totalGuests(): Attribute
+    {
+        return Attribute::get(
+            fn (): int => (int) $this->adults + (int) $this->children
+        );
+    }
+
+    protected function duration(): Attribute
+    {
+        return Attribute::get(function (): int {
+            if ($this->real_check_in && $this->real_check_out) {
+                return Carbon::parse($this->real_check_in)->diffInDays(Carbon::parse($this->real_check_out));
+            }
+
+            if (! $this->check_in || ! $this->check_out) {
+                return 0;
+            }
+
+            return Carbon::parse($this->check_in)->diffInDays(Carbon::parse($this->check_out));
+        });
+    }
+
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): StatusEnum {
+                $today = Carbon::today();
+
+                return match (true) {
+                    $this->trashed() => StatusEnum::CANCELLED,
+                    $this->real_check_in && Carbon::parse($this->real_check_out)->lt($today) => StatusEnum::CONFIRMED,
+                    $this->real_check_out && Carbon::parse($this->real_check_out)->greaterThanOrEqualTo($today) => StatusEnum::CHECKED_OUT,
+                    default => StatusEnum::PENDING,
+                };
+            }
+        );
+    }
+
+    #[Scope]
+    protected function confirmed(Builder $query): void
+    {
+        $query
+            ->whereNotNull('real_check_in')
+            ->where('real_check_out', '<', now()->toDateString());
+    }
+
+    #[Scope]
+    protected function checkedOut(Builder $query): void
+    {
+        $query
+            ->whereNotNull('real_check_in')
+            ->where('real_check_out', '>=', now()->toDateString());
+    }
+
+    #[Scope]
+    protected function pending(Builder $query): void
+    {
+        $query->whereNot(fn (Builder $q) => $q->confirmed()->checkedOut());
+    }
+
+    #[Scope]
+    protected function reported(Builder $query): void
+    {
+        $query->where('reported', true);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function channel(): BelongsTo
+    {
+        return $this->belongsTo(Channel::class);
+    }
+
+    public function accommodation(): BelongsTo
+    {
+        return $this->belongsTo(Accommodation::class);
+    }
+
+    public function visitors(): HasMany
+    {
+        return $this->hasMany(Visitor::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+}
