@@ -3,7 +3,6 @@ import type { User } from '@/types/auth';
 export type Timestamp = string;
 export type DateString = string;
 export type DateTimeString = string;
-export type DecimalString = string;
 
 export type DocType = 'ID_CARD' | 'PASSPORT' | 'DRIVERS_LICENSE' | 'RESIDENCE_CARD';
 export type Frequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
@@ -23,16 +22,16 @@ export type SoftDeletable = {
 
 export type Accommodation = BaseModel & {
     name: string;
-    daily_price: DecimalString;
+    daily_price: number;
     max_adults: number;
     max_children: number;
-    service_price: DecimalString;
+    service_price: number;
     color: string | null;
 };
 
 export type Channel = BaseModel & {
     name: string;
-    commission: DecimalString;
+    commission: number;
     color: string | null;
 };
 
@@ -45,7 +44,7 @@ export type Document = BaseModel & {
 
 export type Expense = BaseModel & {
     name: string;
-    amount: DecimalString;
+    amount: number;
     date: DateString;
     description: string | null;
     created_by: number;
@@ -64,26 +63,26 @@ export type Order = BaseModel & {
     date: DateString;
     reservation_id: number | null;
     reservation?: Reservation;
-    total_amount?: DecimalString;
+    total_amount?: number;
 };
 
 export type OrderItem = BaseModel &
     SoftDeletable & {
         product_name: string;
         quantity: number;
-        price: DecimalString;
+        price: number;
         order_id: number;
         order?: Order;
         product_id: number;
         product?: Product;
         created_by: number;
         creator?: User;
-        total?: DecimalString;
+        total?: number;
     };
 
 export type Product = BaseModel & {
     name: string;
-    price: DecimalString;
+    price: number;
     icon: string | null;
     category_id: number;
     category?: ProductCategory;
@@ -95,7 +94,7 @@ export type ProductCategory = BaseModel & {
 
 export type RecurringExpense = BaseModel & {
     name: string;
-    amount: DecimalString;
+    amount: number;
     frequency: Frequency;
     interval: number;
     start_date: DateString;

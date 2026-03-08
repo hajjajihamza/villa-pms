@@ -88,8 +88,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($accommodationsData as $accommodationData) {
+            $unitIds = $accommodationData['units'];
+            unset($accommodationData['units']);
             $accommodation = Accommodation::create($accommodationData);
-            $accommodation->units()->attach($accommodationData['units']);
+            $accommodation->units()->attach($unitIds);
         }
 
         // ────────────────────────────────────────────────
