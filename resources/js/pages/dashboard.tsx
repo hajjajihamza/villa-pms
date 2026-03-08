@@ -1,36 +1,29 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
+import AuthenticatedLayout from '@/layouts/authenticated-layout';
+import type { Auth } from '@/types/auth';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-    },
-];
+type SharedProps = {
+    auth: Auth;
+};
 
 export default function Dashboard() {
+    const { auth } = usePage<SharedProps>().props;
+
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AuthenticatedLayout>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
-            </div>
-        </AppLayout>
+
+            <section className="rounded-[2rem] border border-white bg-white/80 p-8 shadow-2xl backdrop-blur-2xl dark:border-white/5 dark:bg-gray-900/80">
+                <p className="text-[10px] font-black tracking-widest text-gray-400 uppercase">
+                    Dashboard
+                </p>
+                <h1 className="mt-3 text-3xl font-black text-black dark:text-white">
+                    Bienvenue, {auth.user.username}
+                </h1>
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                    Vous etes connecte avec une session securisee Laravel.
+                </p>
+            </section>
+        </AuthenticatedLayout>
     );
 }
