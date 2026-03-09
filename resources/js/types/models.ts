@@ -26,13 +26,13 @@ export type Accommodation = BaseModel & {
     max_adults: number;
     max_children: number;
     service_price: number;
-    color: string | null;
+    color: string;
 };
 
 export type Channel = BaseModel & {
     name: string;
     commission: number;
-    color: string | null;
+    color: string;
 };
 
 export type Document = BaseModel & {

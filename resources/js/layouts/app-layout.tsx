@@ -3,6 +3,8 @@ import type { AppLayoutProps } from '@/types';
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
     <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-        {children}
+        <div className="px-4 py-6">
+            {children}
+        </div>
     </AppLayoutTemplate>
 );

@@ -14,7 +14,7 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Profile settings',
+        title: 'Parametres du profil',
         href: edit(),
     },
 ];
@@ -24,16 +24,16 @@ export default function Profile() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+            <Head title="Parametres du profil" />
 
-            <h1 className="sr-only">Profile settings</h1>
+            <h1 className="sr-only">Parametres du profil</h1>
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <Heading
                         variant="small"
-                        title="Profile information"
-                        description="Update your name and email address"
+                        title="Informations du profil"
+                        description="Mettez a jour votre nom et votre adresse e-mail"
                     />
 
                     <Form
@@ -46,7 +46,7 @@ export default function Profile() {
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
+                                    <Label htmlFor="name">Nom</Label>
 
                                     <Input
                                         id="name"
@@ -55,7 +55,7 @@ export default function Profile() {
                                         name="name"
                                         required
                                         autoComplete="name"
-                                        placeholder="Full name"
+                                        placeholder="Nom complet"
                                     />
 
                                     <InputError
@@ -65,7 +65,7 @@ export default function Profile() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
+                                    <Label htmlFor="email">Adresse e-mail</Label>
 
                                     <Input
                                         id="email"
@@ -75,7 +75,7 @@ export default function Profile() {
                                         name="email"
                                         required
                                         autoComplete="username"
-                                        placeholder="Email address"
+                                        placeholder="Adresse e-mail"
                                     />
 
                                     <InputError
@@ -89,7 +89,7 @@ export default function Profile() {
                                         disabled={processing}
                                         data-test="update-profile-button"
                                     >
-                                        Save
+                                        Enregistrer
                                     </Button>
 
                                     <Transition
@@ -100,7 +100,7 @@ export default function Profile() {
                                         leaveTo="opacity-0"
                                     >
                                         <p className="text-sm text-neutral-600">
-                                            Saved
+                                            Enregistre
                                         </p>
                                     </Transition>
                                 </div>

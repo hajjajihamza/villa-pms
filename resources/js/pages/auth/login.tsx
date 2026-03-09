@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowRight, Loader2, Lock, User, AlertCircle } from 'lucide-react';
 import type { FormEventHandler } from 'react';
+import AuthController from '@/actions/App/Http/Controllers/Auth/AuthController';
 import Logo from '@/components/logo';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -25,14 +26,14 @@ export default function Login() {
     const submit: FormEventHandler = (event) => {
         event.preventDefault();
 
-        post('/login', {
+        post(AuthController.login().url, {
             onFinish: () => reset('password'),
         });
     };
 
     return (
         <GuestLayout>
-            <Head title="Login" />
+            <Head title="Connexion" />
 
             <div className="animate-fade-in-up w-full max-w-md">
                 <div className="space-y-8 rounded-[3rem] border border-white bg-white/80 p-10 shadow-2xl backdrop-blur-2xl dark:border-white/5 dark:bg-gray-900/80">
@@ -50,6 +51,7 @@ export default function Login() {
                                 <Input
                                     type="text"
                                     autoComplete="username"
+                                    autoFocus={true}
                                     value={data.username}
                                     onChange={(event) => setData('username', event.target.value)}
                                     className="h-16 w-full rounded-3xl border-2 border-gray-100 bg-gray-50/50 px-6 pl-16 font-bold shadow-sm outline-none transition-all duration-300 hover:border-gray-200 focus-visible:border-brand-500 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-brand-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white dark:hover:border-white/10 dark:focus-visible:ring-brand-500/20"
