@@ -103,7 +103,7 @@ export default function ChannelForm({ open, channel, onOpenChange }: Props) {
                 </DialogHeader>
 
                 <form onSubmit={submit} className="space-y-4 px-6 pt-2 pb-6">
-                    <ScrollArea className="max-h-[62vh] pr-2">
+                    <ScrollArea className="no-scrollbar -mx-4 max-h-[62vh] overflow-y-auto px-4 pr-2">
                         <div className="grid gap-4 pb-2">
                             <div className="space-y-2">
                                 <Label
