@@ -53,14 +53,6 @@ class ExpenseController extends Controller
         ]);
     }
 
-    public function create(): Response
-    {
-        return Inertia::render('expenses/create', [
-            'categories' => ExpenseCategory::query()->orderBy('name')->get(['id', 'name']),
-            'units' => Unit::query()->orderBy('name')->get(['id', 'name']),
-        ]);
-    }
-
     public function store(StoreExpenseRequest $request): RedirectResponse
     {
         Expense::create([
@@ -69,15 +61,6 @@ class ExpenseController extends Controller
         ]);
 
         return to_route('expenses.index');
-    }
-
-    public function edit(Expense $expense): Response
-    {
-        return Inertia::render('expenses/edit', [
-            'expense' => $expense,
-            'categories' => ExpenseCategory::query()->orderBy('name')->get(['id', 'name']),
-            'units' => Unit::query()->orderBy('name')->get(['id', 'name']),
-        ]);
     }
 
     public function update(UpdateExpenseRequest $request, Expense $expense): RedirectResponse

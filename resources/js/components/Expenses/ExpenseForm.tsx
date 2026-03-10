@@ -175,8 +175,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
         }
     };
 
-    const selectedCategory =
-        categoryOptions.find((option) => String(option.value) === form.data.category_id) ?? null;
+    const selectedCategory = categoryOptions.find((option) => String(option.value) === form.data.category_id) ?? null;
     const selectedUnit = unitOptions.find((option) => String(option.value) === form.data.unit_id) ?? null;
 
     return (
@@ -196,7 +195,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                 </DialogHeader>
 
                 <form onSubmit={onSubmit} className="space-y-4 px-6 pt-2 pb-6">
-                    <ScrollArea className="max-h-[62vh] pr-2">
+                    <ScrollArea className="no-scrollbar -mx-4 max-h-[62vh] overflow-y-auto px-4 pr-2">
                         <div className="grid gap-4 pb-2 md:grid-cols-2">
                             <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="expense-name">Name</Label>
@@ -241,7 +240,9 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                             className="h-11 w-full justify-start rounded-xl bg-background/90 text-left font-normal shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]"
                                         >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {formatDateDisplay(form.data.date) || 'Choisir une date'}
+                                            {formatDateDisplay(
+                                                form.data.date,
+                                            ) || 'Choisir une date'}
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent

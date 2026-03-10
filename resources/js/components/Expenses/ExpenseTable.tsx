@@ -1,7 +1,14 @@
 import { router } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import {
+    Filter,
+    Pencil,
+    Plus,
+    Trash2,
+} from 'lucide-react';
+import {  useState } from 'react';
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
+import type { Filters } from '@/components/Expenses/ExpenseFilter';
+import ExpenseFilter from '@/components/Expenses/ExpenseFilter';
 import ExpenseForm from '@/components/Expenses/ExpenseForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,10 +28,12 @@ type Props = {
     expenses: Expense[];
     categories: ExpenseCategory[];
     units: Unit[];
+    filters: Filters;
 };
 
-export default function ExpenseTable({ expenses, categories, units }: Props) {
+export default function ExpenseTable({ expenses, categories, units, filters }: Props) {
     const [open, setOpen] = useState(false);
+    const [openFilters, setOpenFilters] = useState(false);
     const [selected, setSelected] = useState<Expense | null>(null);
 
     const openCreate = () => {
@@ -47,15 +56,43 @@ export default function ExpenseTable({ expenses, categories, units }: Props) {
 
     return (
         <Card>
-            <CardHeader className="flex flex-col gap-4 space-y-0 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <CardTitle className="text-xl">Liste des depenses</CardTitle>
-                    <CardDescription>Consultez et gerez les depenses enregistrees.</CardDescription>
+            <CardHeader>
+                <div className="flex flex-col gap-4 space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <CardTitle className="text-xl">
+                            Liste des depenses
+                        </CardTitle>
+                        <CardDescription>
+                            Consultez et gerez les depenses enregistrees.
+                        </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setOpenFilters(!openFilters)}
+                            className="flex-1 sm:flex-none"
+                        >
+                            <Filter className="mr-2 h-4 w-4" />
+                            {openFilters ? 'Masquer Filtres' : 'Filtres'}
+                        </Button>
+                        <Button
+                            onClick={openCreate}
+                            className="flex-1 sm:flex-none"
+                        >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Ajouter
+                        </Button>
+                    </div>
                 </div>
-                <Button onClick={openCreate} className="w-full sm:w-auto">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Ajouter
-                </Button>
+
+                {/* Collapsible Filter Card */}
+                <ExpenseFilter
+                    units={units}
+                    categories={categories}
+                    filters={filters}
+                    open={openFilters}
+                    onOpenChange={setOpenFilters}
+                />
             </CardHeader>
             <CardContent>
                 <Table>
@@ -67,13 +104,18 @@ export default function ExpenseTable({ expenses, categories, units }: Props) {
                             <TableHead>Categorie</TableHead>
                             <TableHead>Unite</TableHead>
                             <TableHead>Cree par</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead className="text-right">
+                                Actions
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {expenses.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                                <TableCell
+                                    colSpan={7}
+                                    className="py-8 text-center text-muted-foreground"
+                                >
                                     Aucune depense trouvee.
                                 </TableCell>
                             </TableRow>
@@ -81,12 +123,26 @@ export default function ExpenseTable({ expenses, categories, units }: Props) {
 
                         {expenses.map((expense) => (
                             <TableRow key={expense.id}>
-                                <TableCell className="font-medium">{expense.name}</TableCell>
-                                <TableCell>{formatNumber(expense.amount, { endWith: 'DH' })}</TableCell>
-                                <TableCell>{formatDateDisplay(expense.date)}</TableCell>
-                                <TableCell>{expense.category?.name ?? '-'}</TableCell>
-                                <TableCell>{expense.unit?.name ?? '-'}</TableCell>
-                                <TableCell>{expense.creator?.name ?? '-'}</TableCell>
+                                <TableCell className="font-medium">
+                                    {expense.name}
+                                </TableCell>
+                                <TableCell>
+                                    {formatNumber(expense.amount, {
+                                        endWith: 'DH',
+                                    })}
+                                </TableCell>
+                                <TableCell>
+                                    {formatDateDisplay(expense.date)}
+                                </TableCell>
+                                <TableCell>
+                                    {expense.category?.name ?? '-'}
+                                </TableCell>
+                                <TableCell>
+                                    {expense.unit?.name ?? '-'}
+                                </TableCell>
+                                <TableCell>
+                                    {expense.creator?.name ?? '-'}
+                                </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-2">
                                         <Button
