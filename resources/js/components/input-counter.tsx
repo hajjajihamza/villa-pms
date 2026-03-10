@@ -126,7 +126,7 @@ export default function InputCounter({
 
             <div
                 className={cn(
-                    'bg-background/90 ring-ring/40 flex h-12 w-full items-center rounded-2xl border px-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_1px_3px_rgba(0,0,0,0.06)] transition-all',
+                    'bg-background/90 ring-ring/40 flex h-11 w-full items-center rounded-2xl border px-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_1px_3px_rgba(0,0,0,0.06)] transition-all',
                     'focus-within:border-ring focus-within:ring-2',
                     isInvalid && 'border-destructive/70 focus-within:border-destructive focus-within:ring-destructive/25',
                     disabled && 'opacity-60'

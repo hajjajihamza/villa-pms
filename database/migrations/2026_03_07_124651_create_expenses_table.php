@@ -22,13 +22,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->foreignId('category_id')
+                ->nullable()
                 ->constrained('expense_categories')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->foreignId('unit_id')
+                ->nullable()
                 ->constrained()
                 ->cascadeOnUpdate()
-                ->restrictOnDelete();
+                ->nullOnDelete();
             $table->timestamps();
         });
     }

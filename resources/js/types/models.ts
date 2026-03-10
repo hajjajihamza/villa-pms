@@ -51,7 +51,7 @@ export type Expense = BaseModel & {
     creator?: User;
     category_id: number;
     category?: ExpenseCategory;
-    unit_id: number;
+    unit_id: number | null;
     unit?: Unit;
 };
 

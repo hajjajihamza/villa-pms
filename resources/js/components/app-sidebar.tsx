@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Settings } from 'lucide-react';
+import { BookOpen, FolderGit2, HandCoins, LayoutGrid, Settings } from 'lucide-react';
 import DashboardController from '@/actions/App/Http/Controllers/DashboardController';
+import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
 import SettingController from '@/actions/App/Http/Controllers/Settings/SettingController';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -43,6 +44,11 @@ export function AppSidebar() {
             title: 'Parametres',
             href: SettingController.index(),
             icon: Settings,
+        },
+        {
+            title: 'Depenses',
+            href: ExpenseController.index(),
+            icon: HandCoins,
         },
     ];
 
