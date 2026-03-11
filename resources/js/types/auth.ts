@@ -7,6 +7,7 @@ export type User = BaseModel & {
     avatar?: string;
     email_verified_at: DateTimeString | null;
     role: Role;
+    is_admin: boolean;
 };
 
 export type Auth = {

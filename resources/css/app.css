@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
+@import 'react-phone-input-2/lib/style.css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -156,4 +157,41 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Phone Input Styles */
+.react-tel-input .form-control {
+    @apply h-11 w-full rounded-xl bg-background/90 border-input shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)] text-sm transition-colors;
+}
+
+.react-tel-input .flag-dropdown {
+    @apply bg-transparent border-none rounded-l-xl;
+}
+
+.react-tel-input .selected-flag {
+    @apply bg-transparent rounded-l-xl hover:bg-muted/50 transition-colors;
+}
+
+.react-tel-input .country-list {
+    @apply bg-popover text-popover-foreground rounded-xl border-none shadow-xl mt-2 overflow-hidden;
+}
+
+.react-tel-input .country-list .country {
+    @apply transition-colors;
+}
+
+.react-tel-input .country-list .country:hover {
+    @apply bg-accent text-accent-foreground;
+}
+
+.react-tel-input .country-list .country.highlight {
+    @apply bg-accent text-accent-foreground;
+}
+
+.react-tel-input .selected-flag .arrow {
+    @apply border-t-muted-foreground;
+}
+
+.react-tel-input .selected-flag .arrow.up {
+    @apply border-b-muted-foreground;
 }

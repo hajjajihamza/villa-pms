@@ -180,7 +180,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[92vh] rounded-2xl border-0 p-0 shadow-xl sm:max-w-3xl">
+            <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl sm:max-w-2xl overflow-hidden bg-background">
                 <DialogHeader className="border-b px-6 py-4">
                     <DialogTitle>
                         {isEditing
@@ -194,8 +194,8 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={onSubmit} className="space-y-4 px-6 pt-2 pb-6">
-                    <ScrollArea className="no-scrollbar -mx-4 max-h-[62vh] overflow-y-auto px-4 pr-2">
+                <form onSubmit={onSubmit} className="flex flex-col">
+                    <ScrollArea className="px-8 max-h-[60vh] overflow-y-auto">
                         <div className="grid gap-4 pb-2 md:grid-cols-2">
                             <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="expense-name">Name</Label>
@@ -339,19 +339,21 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                         </div>
                     </ScrollArea>
 
-                    <DialogFooter className="border-t pt-4">
+                    <DialogFooter className="border-t bg-muted/30 px-8 py-6 grid sm:grid-cols-1 md:grid-cols-2 gap-4">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={closeAndReset}
+                            size="lg"
                         >
                             Annuler
                         </Button>
                         <Button
                             type="submit"
                             disabled={form.processing || creatingCategory}
+                            size="lg"
                         >
-                            {isEditing ? 'Mettre a jour' : 'Creer'}
+                            {form.processing ? 'Enregistrement...' : (isEditing ? 'Mettre à jour' : 'Creer')}
                         </Button>
                     </DialogFooter>
                 </form>

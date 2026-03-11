@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -41,6 +42,15 @@ class Reservation extends Model
         'created_by',
         'channel_id',
         'accommodation_id',
+    ];
+
+    protected $appends = [
+        'amount_to_pay',
+        'total_price',
+        'total_guests',
+        'duration',
+        'status',
+        'main_visitor',
     ];
 
     /**
@@ -155,6 +165,20 @@ class Reservation extends Model
                     default => StatusEnum::PENDING,
                 };
             }
+        );
+    }
+
+    protected function mainVisitor(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->visitors()->where('is_main', true)->first(),
+        );
+    }
+
+    protected function canValidate(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Carbon::today()->betweenIncluded(Carbon::parse($this->check_in), Carbon::parse($this->check_out)),
         );
     }
 
