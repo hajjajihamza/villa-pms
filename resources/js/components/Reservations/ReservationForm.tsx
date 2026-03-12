@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { startOfToday, addDays } from 'date-fns';
 import { useEffect, useState } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -10,14 +11,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
-import type { Accommodation, Channel, Reservation } from '@/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { toFormDate } from '@/lib/format-date';
+import type { Accommodation, Channel, Reservation, Unit } from '@/types';
+import { Badge } from '../ui/badge';
 import StepBooking from './StepBooking';
 import StepVisitor from './StepVisitor';
-import { Badge } from '../ui/badge';
-import { toFormDate } from '@/lib/format-date';
 
 type ReservationFormData = {
     check_in: string;
@@ -40,6 +40,7 @@ type Props = {
     channels: Channel[];
     accommodations: Accommodation[];
     reservation?: Reservation | null;
+    units: Unit[]
 };
 
 const initialData: ReservationFormData = {
@@ -62,6 +63,7 @@ export default function ReservationForm({
     channels,
     accommodations,
     reservation,
+    units
 }: Props) {
     initialData.channel_id = String(channels[0].id);
     const form = useForm<ReservationFormData>(initialData);
@@ -168,6 +170,7 @@ export default function ReservationForm({
                                 channels={channels}
                                 accommodations={accommodations}
                                 isEditing={isEditing}
+                                units={units}
                             />
                         ) : (
                             <StepVisitor

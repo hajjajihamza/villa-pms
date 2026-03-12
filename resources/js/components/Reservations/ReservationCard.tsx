@@ -131,17 +131,17 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
 
                 {/* 4. Desktop-only Quick Actions (Hover visible or Subtle) */}
                 <div className="flex items-center gap-1 border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto justify-end">
-                    {/* <Button 
+                    {/* <Button
                         title="Modifier"
-                        variant="ghost" 
-                        size="icon" 
+                        variant="ghost"
+                        size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-foreground text-sky-600"
                         onClick={(e) => handleAction(e, () => onEdit(reservation))}
                     >
                         <Edit3 size={14} />
                     </Button> */}
 
-                    {reservation.can_validate && (
+                    {reservation.can_validate && reservation.status === 'PENDING' && (
                         <Button
                             title="Valider le séjour"
                             variant="outline"
@@ -165,7 +165,7 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
                         </Button>
                     )}
 
-                    {user.is_admin && (
+                    {user.is_admin && !reservation.deleted_at && (
                         <Button
                             title="Supprimer"
                             variant="outline"

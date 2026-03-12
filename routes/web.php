@@ -19,6 +19,12 @@ Route::middleware('auth')->group(function (): void {
     // ────────────────────────────────────────────────
     //  Reservations
     // ────────────────────────────────────────────────
+    Route::get('reservations/arrivals', [ReservationController::class, 'arrivals'])->name('reservations.arrivals');
+    Route::get('reservations/departures', [ReservationController::class, 'departures'])->name('reservations.departures');
+    Route::get('reservations/requests', [ReservationController::class, 'requests'])->name('reservations.requests');
+    Route::get('reservations/archive', [ReservationController::class, 'archive'])->name('reservations.archive');
+    Route::get('reservations/stay-overs', [ReservationController::class, 'stayOvers'])->name('reservations.stay-overs');
+
     Route::patch('reservations/{reservation}/reported', [ReservationController::class, 'toggleReported'])
         ->name('reservations.reported');
     Route::patch('reservations/{reservation}/validate', [ReservationController::class, 'validateStay'])

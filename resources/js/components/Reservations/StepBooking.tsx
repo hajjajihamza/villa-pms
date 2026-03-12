@@ -1,3 +1,4 @@
+import { usePage } from '@inertiajs/react';
 import { addDays, differenceInDays, startOfToday, isBefore } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
@@ -8,22 +9,35 @@ import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { formatDateDisplay, toFormDate } from '@/lib/format-date';
-import { cn } from '@/lib/utils';
-import type { Accommodation, Channel } from '@/types';
-import { usePage } from '@inertiajs/react';
-import { Badge } from '../ui/badge';
 import { formatNumber } from '@/lib/format-number';
+import { cn } from '@/lib/utils';
+import type { Accommodation, Channel, Unit } from '@/types';
+import { Badge } from '../ui/badge';
 
 type Props = {
-  data: any;
-  setData: (key: any, value?: any) => void;
-  errors: any;
-  channels: Channel[];
-  accommodations: Accommodation[];
-  isEditing: boolean
+    data: any;
+    setData: (key: any, value?: any) => void;
+    errors: any;
+    channels: Channel[];
+    accommodations: Accommodation[];
+    isEditing: boolean;
+    units: Unit[];
 };
 
-export default function StepBooking({ data, setData, errors, channels, accommodations, isEditing }: Props) {
+const checkIsReserved = (unites: Unit[], accommodation: Accommodation, check_in: string, check_out: string) => {
+    let isReserved = false;
+    unites.map((unit) => {
+        if (accommodation.units?.some((u) => u.id === unit.id)) {
+            if (unit.reserved_periods?.some((r) => r.check_in < check_out && r.check_out > check_in)) {
+                isReserved = true;
+            }
+        }
+    });
+
+    return isReserved;
+};
+
+export default function StepBooking({ data, setData, errors, channels, accommodations, isEditing, units }: Props) {
   const user = usePage().props.auth.user;
 
   const nights = useMemo(() => {
@@ -84,7 +98,7 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                disabled={{ before: isEditing && user.is_admin ? undefined : startOfToday() }}
+                disabled={{ before: /*isEditing && user.is_admin ? undefined :*/ startOfToday() }}
                 selected={data.check_in ? new Date(data.check_in) : undefined}
                 onSelect={handleCheckInSelect}
               />
@@ -132,29 +146,38 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-1">
           {accommodations.map((accommodation) => {
             const isSelected = data.accommodation_id === String(accommodation.id);
+            const isReserved = checkIsReserved(units, accommodation, data.check_in, data.check_out);
             return (
-              <button
-                key={accommodation.id}
-                type="button"
-                onClick={() => handleAccommodationSelect(accommodation)}
-                className={cn(
-                  'flex flex-col gap-1 rounded-xl border p-3 text-left transition-all',
-                  isSelected
-                    ? 'border-primary bg-primary/5 ring-2 ring-primary'
-                    : 'border-border hover:border-primary/40'
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-4 w-4 rounded-full"
-                    style={{ backgroundColor: accommodation.color }}
-                  />
-                  <span className="font-semibold text-sm">{accommodation.name}</span>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {formatNumber(accommodation.daily_price, { endWith: 'DH' })} / night
-                </span>
-              </button>
+                <button
+                    key={accommodation.id}
+                    type="button"
+                    disabled={isReserved}
+                    onClick={() => handleAccommodationSelect(accommodation)}
+                    className={cn(
+                        'flex flex-col gap-1 rounded-xl border p-3 text-left transition-all',
+                        isSelected
+                            ? 'border-primary bg-primary/5 shadow-sm ring-2 ring-primary'
+                            : isReserved
+                              ? 'cursor-not-allowed border-gray-50 bg-gray-50/50 opacity-40'
+                              : 'border-border hover:border-primary/40',
+                    )}
+                >
+                    <div className="flex items-center gap-2">
+                        <div
+                            className="h-4 w-4 rounded-full"
+                            style={{ backgroundColor: accommodation.color }}
+                        />
+                        <span className="text-sm font-semibold">
+                            {accommodation.name}
+                        </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                        {formatNumber(accommodation.daily_price, {
+                            endWith: 'DH',
+                        })}{' '}
+                        / night
+                    </span>
+                </button>
             );
           })}
         </div>

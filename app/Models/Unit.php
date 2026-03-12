@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Unit extends Model
 {
@@ -21,6 +21,10 @@ class Unit extends Model
         'name',
     ];
 
+    protected $appends = [
+        'reserved_periods',
+    ];
+
     // ────────────────────────────────────────────────
     //  Relationships
     // ────────────────────────────────────────────────
@@ -30,44 +34,35 @@ class Unit extends Model
         return $this->belongsToMany(Accommodation::class);
     }
 
-    public function reservaions(): HasManyThrough
-    {
-        return $this->hasManyThrough(Reservation::class, Accommodation::class);
-    }
-
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
     }
 
     // ────────────────────────────────────────────────
-    //  Methods
+    //  Accessors & Mutators
     // ────────────────────────────────────────────────
-    public function reservedDays(): array
+
+    protected function reservedPeriods(): Attribute
     {
-        $days = [];
+        return Attribute::get(function () {
+            $today = Carbon::today();
 
-        $reservations = Reservation::query()
-            ->whereIn(
-                'accommodation_id',
-                $this->accommodations()->pluck('accommodations.id')
-            )
-            ->whereNull('deleted_at')
-            ->get(['check_in', 'check_out']);
-
-        foreach ($reservations as $reservation) {
-
-            $start = Carbon::parse($reservation->check_in);
-            $end = Carbon::parse($reservation->check_out);
-
-            while ($start->lt($end)) {
-
-                $days[] = $start->format('Y-m-d');
-
-                $start->addDay();
-            }
-        }
-
-        return array_values(array_unique($days));
+            return $this->accommodations()
+                ->with(['reservations' => function ($query) use ($today) {
+                    $query->where('check_in', '>=', $today)
+                        ->select(['id', 'accommodation_id', 'check_in', 'check_out']);
+                }])
+                ->get()
+                ->pluck('reservations')
+                ->flatten()
+                ->map(fn ($reservation) => [
+                    'check_in' => $reservation->check_in->toDateString(),
+                    'check_out' => $reservation->check_out->toDateString(),
+                ])
+                ->values()
+                ->toArray();
+        });
     }
+
 }

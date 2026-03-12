@@ -51,6 +51,7 @@ class Reservation extends Model
         'duration',
         'status',
         'main_visitor',
+        'can_validate',
     ];
 
     /**
@@ -158,12 +159,19 @@ class Reservation extends Model
             get: function (): StatusEnum {
                 $today = Carbon::today();
 
-                return match (true) {
-                    $this->trashed() => StatusEnum::CANCELLED,
-                    $this->real_check_in && Carbon::parse($this->real_check_out)->lt($today) => StatusEnum::CONFIRMED,
-                    $this->real_check_out && Carbon::parse($this->real_check_out)->greaterThanOrEqualTo($today) => StatusEnum::CHECKED_OUT,
-                    default => StatusEnum::PENDING,
-                };
+                if ($this->trashed()) {
+                    return StatusEnum::CANCELLED;
+                }
+
+                if ($this->real_check_in && $today->lt($this->real_check_out)) {
+                    return StatusEnum::CONFIRMED;
+                }
+
+                if ($this->real_check_out && Carbon::parse($this->real_check_out)->greaterThanOrEqualTo($today)) {
+                    return StatusEnum::CHECKED_OUT;
+                }
+
+                return StatusEnum::PENDING;
             }
         );
     }
@@ -212,5 +220,41 @@ class Reservation extends Model
     protected function reported(Builder $query): void
     {
         $query->where('reported', true);
+    }
+
+    #[Scope]
+    protected function arrivals(Builder $query): void
+    {
+        $query->whereDate('check_in', Carbon::today())
+            ->whereNull('real_check_in');
+    }
+
+    #[Scope]
+    protected function departures(Builder $query): void
+    {
+        $query->whereDate('real_check_out', Carbon::today());
+    }
+
+    #[Scope]
+    protected function requests(Builder $query): void
+    {
+        $query->whereDate('check_in', '>', Carbon::today())
+            ->whereNull('real_check_in');
+    }
+
+    #[Scope]
+    protected function archive(Builder $query): void
+    {
+        $query->onlyTrashed();
+    }
+
+    #[Scope]
+    protected function stayOvers(Builder $query): void
+    {
+        $today = Carbon::today()->toDateTimeString();
+        $query->whereNotNull('real_check_in')
+            ->whereNotNull('real_check_out')
+            ->where('real_check_in', '<=', $today)
+            ->where('real_check_out', '>', $today);
     }
 }

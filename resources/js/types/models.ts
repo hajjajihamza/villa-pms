@@ -27,6 +27,7 @@ export type Accommodation = BaseModel & {
     max_children: number;
     service_price: number;
     color: string;
+    units?: Unit[]
 };
 
 export type Channel = BaseModel & {
@@ -131,8 +132,9 @@ export type Reservation = BaseModel &
         main_visitor?: Visitor;
     };
 
-export type Unit =  BaseModel & {
+export type Unit = BaseModel & {
     name: string;
+    reserved_periods: { check_in: string; check_out: string }[];
 };
 
 export type Visitor = BaseModel & {

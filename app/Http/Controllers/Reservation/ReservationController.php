@@ -10,7 +10,9 @@ use App\Http\Requests\Reservation\UpdateReservationRequest;
 use App\Models\Accommodation;
 use App\Models\Channel;
 use App\Models\Reservation;
+use App\Models\Unit;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,16 +22,48 @@ class ReservationController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = Reservation::query()
+        return $this->renderReservations(Reservation::query(), 'all');
+    }
+
+    public function arrivals(): Response
+    {
+        return $this->renderReservations(Reservation::arrivals(), 'arrivals');
+    }
+
+    public function departures(): Response
+    {
+        return $this->renderReservations(Reservation::departures(), 'departures');
+    }
+
+    public function requests(): Response
+    {
+        return $this->renderReservations(Reservation::requests(), 'requests');
+    }
+
+    public function archive(): Response
+    {
+        return $this->renderReservations(Reservation::archive(), 'archive');
+    }
+
+    public function stayOvers(): Response
+    {
+        return $this->renderReservations(Reservation::stayOvers(), 'stay-overs');
+    }
+
+    protected function renderReservations(Builder $query, string $activeTab): Response
+    {
+        $reservations = $query
             ->with(['accommodation', 'channel', 'creator', 'visitors'])
-            ->latest('check_in');
+            ->orderBy('check_in')
+            ->paginate(12)
+            ->withQueryString();
 
         return Inertia::render('reservations/index', [
-            'reservations' => $query
-                ->paginate(12)
-                ->withQueryString(),
+            'reservations' => $reservations,
             'channels' => Channel::all(),
-            'accommodations' => Accommodation::all(),
+            'accommodations' => Accommodation::with('units:id')->get(),
+            'activeTab' => $activeTab,
+            'units' => Unit::all(),
         ]);
     }
 

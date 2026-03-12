@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder
         $suitePrincipal = Accommodation::where('name', 'Suite Principal')->first();
         $comboAccommodation = Accommodation::where('name', 'Villa + Suite Combo')->first();
 
-        $reservationsData = [
+        /*$reservationsData = [
             [
                 'reservation' => [
                     'check_in' => Carbon::today()->addDays(2)->toDateString(),
@@ -180,7 +180,7 @@ class DatabaseSeeder extends Seeder
         foreach ($reservationsData as $reservationData) {
             $reservation = Reservation::create($reservationData['reservation']);
             $reservation->visitors()->createMany($reservationData['visitors']);
-        }
+        }*/
 
         $categoriesData = [
             ['name' => 'Food'],

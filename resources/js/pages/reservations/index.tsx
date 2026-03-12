@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { Archive, Bed, CalendarCheck, CalendarClock, Clock, LayoutGrid, Plus } from 'lucide-react';
 import { useState } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
 
@@ -7,23 +7,36 @@ import ReservationForm from '@/components/Reservations/ReservationForm';
 import ReservationList from '@/components/Reservations/ReservationList';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { Accommodation, BreadcrumbItem, Channel, Reservation } from '@/types';
+import type {
+    Accommodation,
+    BreadcrumbItem,
+    Channel, Paginated,
+    Reservation,
+    Unit,
+} from '@/types';
 
-type PaginatedReservations = {
+export type PaginatedReservations = Paginated & {
     data: Reservation[];
-    current_page: number;
-    last_page: number;
-    prev_page_url: string | null;
-    next_page_url: string | null;
 };
 
 type Props = {
     reservations: PaginatedReservations;
     channels: Channel[];
     accommodations: Accommodation[];
+    activeTab: string;
+    units: Unit[]
 };
 
-export default function ReservationIndex({ reservations, channels, accommodations }: Props) {
+const TABS = [
+    { label: 'Toutes', id: 'all', href: '/reservations', icon: LayoutGrid },
+    { label: 'Arrivées', id: 'arrivals', href: '/reservations/arrivals', icon: CalendarCheck },
+    { label: 'Départs', id: 'departures', href: '/reservations/departures', icon: CalendarClock },
+    { label: 'En attente', id: 'requests', href: '/reservations/requests', icon: Clock },
+    { label: 'Séjours en cours', id: 'stay-overs', href: '/reservations/stay-overs', icon: Bed },
+    { label: 'Archive', id: 'archive', href: '/reservations/archive', icon: Archive },
+];
+
+export default function ReservationIndex({ reservations, channels, accommodations, activeTab, units }: Props) {
     const [formOpen, setFormOpen] = useState(false);
     const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
 
@@ -57,6 +70,23 @@ export default function ReservationIndex({ reservations, channels, accommodation
                     </Button>
                 </div>
 
+                <div className="flex overflow-x-auto border-b border-border scrollbar-hide">
+                    {TABS.map((tab) => (
+                        <Link
+                            key={tab.id}
+                            href={tab.href}
+                            className={`flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 hover:text-primary ${
+                                activeTab === tab.id
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-muted-foreground'
+                            }`}
+                        >
+                            <tab.icon className="size-4" />
+                            {tab.label}
+                        </Link>
+                    ))}
+                </div>
+
                 <ReservationList
                     reservations={reservations}
                     onEdit={(reservation) => {
@@ -76,6 +106,7 @@ export default function ReservationIndex({ reservations, channels, accommodation
                     reservation={editingReservation}
                     channels={channels}
                     accommodations={accommodations}
+                    units={units}
                 />
             </section>
         </AppLayout>

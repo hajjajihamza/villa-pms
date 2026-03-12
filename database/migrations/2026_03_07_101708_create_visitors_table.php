@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('visitors', function (Blueprint $table): void {
             $table->id();
-            $table->string('full_name');
-            $table->string('phone')->nullable();
-            $table->string('country')->nullable();
-            $table->boolean('is_main')->default(false);
+            $table->text('full_name');
+            $table->text('phone')->nullable();
+            $table->text('country')->nullable();
+            $table->text('is_main');
             $table->foreignId('reservation_id')
                 ->constrained()
                 ->cascadeOnUpdate()

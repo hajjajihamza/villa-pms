@@ -28,7 +28,10 @@ class Visitor extends Model
     protected function casts(): array
     {
         return [
-            'is_main' => 'boolean',
+            'full_name' => 'encrypted',
+            'phone' => 'encrypted',
+            'country' => 'encrypted',
+            'is_main' => 'encrypted:boolean',
         ];
     }
 
