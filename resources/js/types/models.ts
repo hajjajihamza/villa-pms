@@ -65,6 +65,7 @@ export type Order = BaseModel & {
     reservation_id: number | null;
     reservation?: Reservation;
     total_amount?: number;
+    order_items?: OrderItem[];
 };
 
 export type OrderItem = BaseModel &
@@ -123,6 +124,7 @@ export type Reservation = BaseModel &
         accommodation_id: number;
         accommodation?: Accommodation;
         total_price?: number;
+        total_orders_amount?: number;
         duration?: number;
         total_guests?: number;
         amount_to_pay?: number;
@@ -130,6 +132,7 @@ export type Reservation = BaseModel &
         can_validate?: boolean;
         visitors?: Visitor[];
         main_visitor?: Visitor;
+        orders?: Order[];
     };
 
 export type Unit = BaseModel & {

@@ -30,6 +30,8 @@ class OrderItem extends Model
         'created_by',
     ];
 
+    protected $appends = ['total'];
+
     /**
      * @return array<string, string|class-string|array>
      */

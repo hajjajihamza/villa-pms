@@ -53,7 +53,7 @@ class ReservationController extends Controller
     protected function renderReservations(Builder $query, string $activeTab): Response
     {
         $reservations = $query
-            ->with(['accommodation', 'channel', 'creator', 'visitors'])
+            ->with(['accommodation.units', 'channel', 'creator', 'visitors', 'orders.orderItems'])
             ->orderBy('check_in')
             ->paginate(12)
             ->withQueryString();

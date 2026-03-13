@@ -47,6 +47,7 @@ class Reservation extends Model
     protected $appends = [
         'amount_to_pay',
         'total_price',
+        'total_orders_amount',
         'total_guests',
         'duration',
         'status',
@@ -107,8 +108,22 @@ class Reservation extends Model
     protected function amountToPay(): Attribute
     {
         return Attribute::make(
-            get: function (): float {
-                $ordersTotal = 0.0;
+            get: fn() => ((float) $this->total_price + $this->total_orders_amount) - (float) $this->advance_amount,
+        );
+    }
+
+    protected function totalPrice(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->daily_price * $this->duration,
+        );
+    }
+
+    protected function totalOrdersAmount(): Attribute
+    {
+        return Attribute::make(
+            get: function() : float {
+                 $ordersTotal = 0.0;
 
                 if ($this->relationLoaded('orders')) {
                     $ordersTotal = $this->orders->sum(fn (Order $order) => (float) $order->total_amount);
@@ -119,15 +134,8 @@ class Reservation extends Model
                         ->value('total');
                 }
 
-                return ((float) $this->total_price + $ordersTotal) - (float) $this->advance_amount;
-            },
-        );
-    }
-
-    protected function totalPrice(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->daily_price * $this->duration,
+                return $ordersTotal;
+            }
         );
     }
 

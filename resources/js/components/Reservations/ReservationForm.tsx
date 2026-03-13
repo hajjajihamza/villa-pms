@@ -146,7 +146,7 @@ export default function ReservationForm({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="rounded-[2rem] border-0 p-0 shadow-2xl sm:max-w-2xl overflow-hidden bg-background">
+            <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl sm:max-w-2xl overflow-hidden bg-background">
                 <DialogHeader className="border-b px-6 py-4 pb-1">
                     <DialogTitle className="text-xl">
                         {step === 1 ? (isEditing ? 'Modifier la réservation' : 'Nouvelle réservation') : 'Détails du visiteur'}
