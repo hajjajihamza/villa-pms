@@ -387,10 +387,10 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                 )}
                             </section>
 
-                            {/* Section: Consommations & Extras */}
+                            {/* Section: Consommations */}
                             <section className="space-y-4">
                                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                    <FileText size={12} className="text-brand-500" /> Consommations & Extras
+                                    <FileText size={12} className="text-brand-500" /> Consommations
                                 </h3>
 
                                 <div className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -401,7 +401,7 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                                 <tr>
                                                     <th className="py-3 px-2">Désignation</th>
                                                     <th className="py-3 px-2 text-center">Qté</th>
-                                                    <th className="py-3 px-2 text-right">Unit.</th>
+                                                    <th className="py-3 px-2 text-right">Prix.U</th>
                                                     <th className="py-3 px-2 text-right">Total</th>
                                                 </tr>
                                             </thead>
@@ -412,8 +412,8 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                                         <p className="text-[8px] text-gray-400 uppercase">Séjour de {reservation.duration} {Number(reservation.duration) > 1 ? 'nuits' : 'nuit'}</p>
                                                     </td>
                                                     <td className="py-4 px-2 text-center">1</td>
-                                                    <td className="py-4 px-2 text-right font-black">{formatNumber(housingTotal)}</td>
-                                                    <td className="py-4 px-2 text-right font-black">{formatNumber(housingTotal, { endWith: 'DH' })}</td>
+                                                    <td className="py-4 px-2 text-right font-black">{formatNumber(reservation.daily_price)}</td>
+                                                    <td className="py-4 px-2 text-right font-black">{formatNumber(reservation.total_price || 0, { endWith: 'DH' })}</td>
                                                 </tr>
                                                 {(reservation.orders || []).flatMap(order => (order.order_items || []).map(item => (
                                                     <tr key={item.id} className="text-sm font-bold dark:text-white">
@@ -423,6 +423,12 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                                         <td className="py-4 px-2 text-right font-black">{formatNumber((item.total || 0), { endWith: 'DH' })}</td>
                                                     </tr>
                                                 )))}
+
+                                                {reservation.orders?.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan={4} className="py-10 text-center text-gray-400 italic text-xs uppercase tracking-widest">Aucune consommation enregistrée</td>
+                                                    </tr>
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>
@@ -442,7 +448,7 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                             })}</span>
                                         </div>
                                         <div className="flex justify-between items-center text-[0.625rem] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
-                                            <span>Avance Versée</span>
+                                            <span>Avance</span>
                                             <span>- {formatNumber(reservation.advance_amount, {
                                                 endWith: 'DH',
                                             })}</span>
@@ -452,7 +458,7 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                             <div>
                                                 <span className="text-xs font-black dark:text-white uppercase tracking-tight">SOLDE RESTANT</span>
                                                 <span className="block text-[0.625rem] font-medium text-gray-400 uppercase">
-                                                    Total Facture: {formatNumber(invoiceTotal, {
+                                                    Total Brut: {formatNumber(invoiceTotal, {
                                                         endWith: 'DH',
                                                     })}
                                                 </span>
@@ -469,7 +475,7 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                         </div>
 
                         {/* Sidebar Controls */}
-                        <div className="space-y-4">
+                        <div className="space-y-4 mt-4">
                             <button
                                 onClick={() => setShowInvoice(true)}
                                 className="w-full py-5 bg-black dark:bg-white text-white dark:text-black font-black rounded-2xl flex items-center justify-center gap-3 text-xs uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
@@ -493,15 +499,13 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                     </div>
                 </ScrollArea>
 
-                {/* {showInvoice && (
+                {showInvoice && (
                     <ReservationInvoice
                         reservation={reservation}
-                        type="full"
-                        accommodations={accommodations}
-                        formatCurrency={formatCurrency}
-                        onClose={() => setShowInvoice(false)}
+                        open={showInvoice}
+                        onOpenChange={setShowInvoice}
                     />
-                )} */}
+                )}
             </DialogContent>
         </Dialog>
     );

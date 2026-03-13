@@ -96,7 +96,7 @@ class ReservationController extends Controller
             'is_main' => true,
         ]);
 
-        return to_route('reservations.index');
+        return redirect()->back()->with('success', 'Réservation créée avec succès.');
     }
 
     public function update(UpdateReservationRequest $request, Reservation $reservation): RedirectResponse
@@ -109,7 +109,7 @@ class ReservationController extends Controller
             'service_price' => (float) ($request->validated()['service_price'] ?? 0),
         ]);
 
-        return to_route('reservations.index');
+        return redirect()->back()->with('success', 'Réservation mise à jour avec succès.');
     }
 
     public function destroy(Reservation $reservation, Request $request): RedirectResponse
@@ -122,7 +122,7 @@ class ReservationController extends Controller
 
         $reservation->delete();
 
-        return to_route('reservations.index');
+        return redirect()->back()->with('success', 'Réservation supprimée avec succès.');
     }
 
     public function toggleReported(Reservation $reservation): RedirectResponse
@@ -131,7 +131,7 @@ class ReservationController extends Controller
             'reported' => ! $reservation->reported,
         ]);
 
-        return to_route('reservations.index');
+        return redirect()->back()->with('success', 'Statut de la réservation mis à jour.');
     }
 
     public function validateStay(Reservation $reservation): RedirectResponse
@@ -152,6 +152,6 @@ class ReservationController extends Controller
             'real_check_out' => $reservation->check_out,
         ]);
 
-        return to_route('reservations.index');
+        return redirect()->back()->with('success', 'Séjour validé avec succès.');
     }
 }
