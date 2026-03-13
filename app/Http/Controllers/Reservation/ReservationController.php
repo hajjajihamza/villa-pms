@@ -22,22 +22,12 @@ class ReservationController extends Controller
 {
     public function index(Request $request): Response
     {
-        return $this->renderReservations(Reservation::query(), 'all', $request);
-    }
-
-    public function arrivals(Request $request): Response
-    {
-        return $this->renderReservations(Reservation::arrivals(), 'arrivals', $request);
+        return $this->renderReservations(Reservation::arrivals(), activeTab: 'arrivals', request: $request);
     }
 
     public function departures(Request $request): Response
     {
         return $this->renderReservations(Reservation::departures(), 'departures', $request);
-    }
-
-    public function requests(Request $request): Response
-    {
-        return $this->renderReservations(Reservation::requests(), 'requests', $request);
     }
 
     public function archive(Request $request): Response

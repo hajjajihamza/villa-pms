@@ -233,7 +233,7 @@ class Reservation extends Model
     #[Scope]
     protected function arrivals(Builder $query): void
     {
-        $query->whereDate('check_in', Carbon::today())
+        $query->whereDate('check_in', '>=', Carbon::today())
             ->whereNull('real_check_in');
     }
 

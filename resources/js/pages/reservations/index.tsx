@@ -1,8 +1,8 @@
 import { router, useForm, Head, Link } from '@inertiajs/react';
-import { Archive, Bed, CalendarCheck, CalendarClock, CalendarIcon, Clock, Filter, FilterIcon, LayoutGrid, Plus, Search, X } from 'lucide-react';
+import { Archive, Bed, CalendarCheck, CalendarClock, CalendarIcon, Filter, FilterIcon, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 import Select from 'react-select';
-import { addDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
 
 import ReservationForm from '@/components/Reservations/ReservationForm';
@@ -35,18 +35,15 @@ type Props = {
 };
 
 const TABS = [
-    { label: 'Toutes', id: 'all', href: '/reservations', icon: LayoutGrid },
-    { label: 'Arrivées', id: 'arrivals', href: '/reservations/arrivals', icon: CalendarCheck },
-    { label: 'Départs', id: 'departures', href: '/reservations/departures', icon: CalendarClock },
-    { label: 'En attente', id: 'requests', href: '/reservations/requests', icon: Clock },
-    { label: 'Séjours en cours', id: 'stay-overs', href: '/reservations/stay-overs', icon: Bed },
-    { label: 'Archive', id: 'archive', href: '/reservations/archive', icon: Archive },
+    { label: 'Arrivées', id: 'arrivals', href: ReservationController.index().url, icon: CalendarCheck },
+    { label: 'Départs', id: 'departures', href: ReservationController.departures().url, icon: CalendarClock },
+    { label: 'Séjours en cours', id: 'stay-overs', href: ReservationController.stayOvers().url, icon: Bed },
+    { label: 'Archive', id: 'archive', href: ReservationController.archive().url, icon: Archive },
 ];
 
 export default function ReservationIndex({ reservations, channels, accommodations, activeTab, units }: Props) {
     const [formOpen, setFormOpen] = useState(false);
     const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
-    const [showFilters, setShowFilters] = useState(false);
 
     // Filter state using Inertia useForm
     const { data, setData, get, reset, processing } = useForm({
@@ -86,15 +83,6 @@ export default function ReservationIndex({ reservations, channels, accommodation
                     </div>
 
                 <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        onClick={() => setShowFilters(!showFilters)}
-                        className={cn(showFilters && "bg-accent text-accent-foreground")}
-                    >
-                        <Filter className="mr-2 size-4" />
-                        {showFilters ? 'Masquer filtres' : 'Filtrer'}
-                    </Button>
-
                     <Button onClick={() => {
                         setEditingReservation(null);
                         setFormOpen(true);
@@ -105,57 +93,33 @@ export default function ReservationIndex({ reservations, channels, accommodation
                 </div>
             </div>
 
-            {showFilters && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 bg-muted/30 p-4 rounded-xl border border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex flex-wrap items-end gap-3 pb-6">
+                 <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Recherche</span>
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                         <Input
                             placeholder="Nom ou téléphone..."
-                            className="pl-10 h-10 border-border/50 bg-background/50 focus:bg-background transition-colors"
+                            className="pl-9 h-11 border-zinc-200 dark:border-zinc-800 shadow-sm"
                             value={data.search}
                             onChange={(e) => setData('search', e.target.value)}
                         />
                     </div>
+                </div>
 
-                    <Select
-                        placeholder="Hébergement..."
-                        isClearable
-                        options={accommodations.map(acc => ({ value: acc.id.toString(), label: acc.name }))}
-                        value={accommodations.map(acc => ({ value: acc.id.toString(), label: acc.name })).find(o => o.value === data.accommodation_id)}
-                        onChange={(opt) => setData('accommodation_id', opt?.value || '')}
-                        classNames={{
-                            control: ({ isFocused }) => cn(
-                                "flex h-10 w-full rounded-md border border-border/50 bg-background/50 px-1 py-1 text-sm transition-colors",
-                                isFocused && "border-ring ring-[3px] ring-ring/50 bg-background"
-                            ),
-                            menu: () => "mt-2 rounded-md border border-border bg-popover text-popover-foreground shadow-md",
-                            option: ({ isFocused, isSelected }) => cn(
-                                "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
-                                isFocused && "bg-accent text-accent-foreground",
-                                isSelected && "bg-primary text-primary-foreground"
-                            ),
-                            placeholder: () => "text-muted-foreground",
-                            singleValue: () => "text-foreground",
-                            input: () => "text-foreground",
-                        }}
-                        unstyled
-                    />
-
+                <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Du</span>
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
                                 className={cn(
-                                    "h-10 justify-start text-left font-normal border-border/50 bg-background/50 hover:bg-background transition-colors",
+                                    "h-11 w-full justify-start text-left font-normal border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 shadow-sm",
                                     !data.date_from && "text-muted-foreground"
                                 )}
                             >
-                                <CalendarIcon className="mr-2 size-4" />
-                                {data.date_from ? (
-                                    formatDateDisplay(data.date_from)
-                                ) : (
-                                    <span>Arrivée...</span>
-                                )}
+                                {data.date_from ? formatDateDisplay(data.date_from) : "Choisir une date"}
+                                <CalendarIcon className="ml-auto size-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -168,22 +132,21 @@ export default function ReservationIndex({ reservations, channels, accommodation
                             />
                         </PopoverContent>
                     </Popover>
+                </div>
 
+                <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Au</span>
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
                                 className={cn(
-                                    "h-10 justify-start text-left font-normal border-border/50 bg-background/50 hover:bg-background transition-colors",
+                                    "h-11 w-full justify-start text-left font-normal border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 shadow-sm",
                                     !data.date_to && "text-muted-foreground"
                                 )}
                             >
-                                <CalendarIcon className="mr-2 size-4" />
-                                {data.date_to ? (
-                                    formatDateDisplay(data.date_to)
-                                ) : (
-                                    <span>Départ...</span>
-                                )}
+                                {data.date_to ? formatDateDisplay(data.date_to) : "Choisir une date"}
+                                <CalendarIcon className="ml-auto size-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -197,33 +160,57 @@ export default function ReservationIndex({ reservations, channels, accommodation
                             />
                         </PopoverContent>
                     </Popover>
-
-                    <div className="flex items-center gap-2">
-                        <Button
-                            className="flex-1 h-10"
-                            onClick={handleFilter}
-                            disabled={processing}
-                        >
-                            <FilterIcon className="mr-2 h-4 w-4" /> Filtrer
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            title="Effacer les filtres"
-                            className="h-10 w-10 text-muted-foreground hover:text-foreground"
-                            onClick={() => {
-                                reset();
-                                router.get(window.location.pathname, {}, {
-                                    preserveState: true,
-                                    replace: true,
-                                });
-                            }}
-                        >
-                            <X className="size-4" />
-                        </Button>
-                    </div>
                 </div>
-            )}
+
+                 <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Hébergement</span>
+                    <Select
+                        placeholder="Tous..."
+                        isClearable
+                        options={accommodations.map(acc => ({ value: acc.id.toString(), label: acc.name }))}
+                        value={accommodations.map(acc => ({ value: acc.id.toString(), label: acc.name })).find(o => o.value === data.accommodation_id)}
+                        onChange={(opt) => setData('accommodation_id', opt?.value || '')}
+                        classNames={{
+                            control: ({ isFocused }) => cn(
+                                "flex h-11 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-1 text-sm shadow-sm transition-colors",
+                                isFocused && "border-ring ring-1 ring-ring"
+                            ),
+                            menu: () => "mt-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-popover text-popover-foreground shadow-md",
+                            option: ({ isFocused, isSelected }) => cn(
+                                "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
+                                isFocused && "bg-accent text-accent-foreground",
+                                isSelected && "bg-primary text-primary-foreground"
+                            ),
+                        }}
+                        unstyled
+                    />
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Button
+                        className="h-11 px-8 text-white font-bold text-base shadow-sm"
+                        onClick={handleFilter}
+                        disabled={processing}
+                    >
+                        Afficher
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        title="Réinitialiser"
+                        className="h-11 w-11 text-muted-foreground border-zinc-200 dark:border-zinc-800"
+                        onClick={() => {
+                            reset();
+                            router.get(window.location.pathname, {}, {
+                                preserveState: true,
+                                replace: true,
+                            });
+                        }}
+                    >
+                        <X className="size-4" />
+                    </Button>
+                </div>
+            </div>
 
                 <div className="flex overflow-x-auto border-b border-border scrollbar-hide">
                     {TABS.map((tab) => (
