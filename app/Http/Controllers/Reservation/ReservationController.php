@@ -22,38 +22,55 @@ class ReservationController extends Controller
 {
     public function index(Request $request): Response
     {
-        return $this->renderReservations(Reservation::query(), 'all');
+        return $this->renderReservations(Reservation::query(), 'all', $request);
     }
 
-    public function arrivals(): Response
+    public function arrivals(Request $request): Response
     {
-        return $this->renderReservations(Reservation::arrivals(), 'arrivals');
+        return $this->renderReservations(Reservation::arrivals(), 'arrivals', $request);
     }
 
-    public function departures(): Response
+    public function departures(Request $request): Response
     {
-        return $this->renderReservations(Reservation::departures(), 'departures');
+        return $this->renderReservations(Reservation::departures(), 'departures', $request);
     }
 
-    public function requests(): Response
+    public function requests(Request $request): Response
     {
-        return $this->renderReservations(Reservation::requests(), 'requests');
+        return $this->renderReservations(Reservation::requests(), 'requests', $request);
     }
 
-    public function archive(): Response
+    public function archive(Request $request): Response
     {
-        return $this->renderReservations(Reservation::archive(), 'archive');
+        return $this->renderReservations(Reservation::archive(), 'archive', $request);
     }
 
-    public function stayOvers(): Response
+    public function stayOvers(Request $request): Response
     {
-        return $this->renderReservations(Reservation::stayOvers(), 'stay-overs');
+        return $this->renderReservations(Reservation::stayOvers(), 'stay-overs', $request);
     }
 
-    protected function renderReservations(Builder $query, string $activeTab): Response
+    protected function renderReservations(Builder $query, string $activeTab, Request $request): Response
     {
         $reservations = $query
             ->with(['accommodation.units', 'channel', 'creator', 'visitors', 'orders.orderItems'])
+            ->when($request->accommodation_id, function ($query, $accommodationId) {
+                $query->where('accommodation_id', $accommodationId);
+            })
+            ->when($request->search, function ($query, $search) {
+                $query->whereHas('visitors', function ($query) use ($search) {
+                    $query->where(function ($query) use ($search) {
+                        $query->where('full_name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
+                });
+            })
+            ->when($request->date_from, function ($query, $dateFrom) {
+                $query->whereDate('check_in', '>=', $dateFrom);
+            })
+            ->when($request->date_to, function ($query, $dateTo) {
+                $query->whereDate('check_out', '<=', $dateTo);
+            })
             ->orderBy('check_in')
             ->paginate(12)
             ->withQueryString();
