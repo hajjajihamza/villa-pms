@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('reservations/departures', [ReservationController::class, 'departures'])->name('reservations.departures');
     Route::get('reservations/archive', [ReservationController::class, 'archive'])->name('reservations.archive');
     Route::get('reservations/stay-overs', [ReservationController::class, 'stayOvers'])->name('reservations.stay-overs');
+    Route::get('reservations/all', [ReservationController::class, 'all'])->name('reservations.all');
 
     Route::patch('reservations/{reservation}/reported', [ReservationController::class, 'toggleReported'])
         ->name('reservations.reported');

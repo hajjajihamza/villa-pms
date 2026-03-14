@@ -176,7 +176,7 @@ class Reservation extends Model
                     return StatusEnum::CONFIRMED;
                 }
 
-                if ($this->real_check_out && Carbon::parse($this->real_check_out)->greaterThanOrEqualTo($today)) {
+                if ($this->real_check_out && Carbon::parse($this->real_check_out)->gt($today)) {
                     return StatusEnum::CHECKED_OUT;
                 }
 

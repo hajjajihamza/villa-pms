@@ -1,5 +1,5 @@
 import { router, useForm, Head, Link } from '@inertiajs/react';
-import { Archive, Bed, CalendarCheck, CalendarClock, CalendarIcon, Filter, FilterIcon, Plus, Search, X } from 'lucide-react';
+import { Archive, Bed, CalendarCheck, CalendarClock, CalendarIcon, List, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 import Select from 'react-select';
 import { addDays } from 'date-fns';
@@ -39,6 +39,7 @@ const TABS = [
     { label: 'Départs', id: 'departures', href: ReservationController.departures().url, icon: CalendarClock },
     { label: 'Séjours en cours', id: 'stay-overs', href: ReservationController.stayOvers().url, icon: Bed },
     { label: 'Archive', id: 'archive', href: ReservationController.archive().url, icon: Archive },
+    { label: 'Toutes', id: 'all', href: ReservationController.all().url, icon: List },
 ];
 
 export default function ReservationIndex({ reservations, channels, accommodations, activeTab, units }: Props) {

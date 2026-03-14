@@ -39,6 +39,11 @@ class ReservationController extends Controller
         return $this->renderReservations(Reservation::stayOvers(), 'stay-overs', $request);
     }
 
+    public function all(Request $request): Response
+    {
+        return $this->renderReservations(Reservation::query(), 'all', $request);
+    }
+
     protected function renderReservations(Builder $query, string $activeTab, Request $request): Response
     {
         $reservations = $query
