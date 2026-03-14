@@ -50,7 +50,7 @@ export const StatusBadge: React.FC<{ status: ReservationStatus }> = ({ status })
 export default function ReservationRowCard({ reservation, onOpenDetails, onEdit }: Props) {
     const user = usePage().props.auth.user;
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [deleteNote, setDeleteNote] = useState<string | null>(null);
+    const [deleteNote, setDeleteNote] = useState<string>('');
     const [processing, setProcessing] = useState(false);
     const status = reservation.status ?? 'PENDING';
     const amountToPay = reservation.amount_to_pay ?? reservation.total_price ?? 0;
@@ -131,16 +131,18 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
 
                 {/* 4. Desktop-only Quick Actions (Hover visible or Subtle) */}
                 <div className="flex items-center gap-1 border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto justify-end">
-                    {/* <Button
+                    {!reservation.deleted_at && (
+                        <Button
                         title="Modifier"
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-foreground text-sky-600"
                         onClick={(e) => handleAction(e, () => onEdit(reservation))}
                     >
                         <Edit3 size={14} />
-                    </Button> */}
-
+                    </Button>
+                    )}
+                    
                     {reservation.can_validate && reservation.status === 'PENDING' && (
                         <Button
                             title="Valider le séjour"
@@ -205,7 +207,7 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
                         <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={processing}>
                             Annuler
                         </Button>
-                        <Button variant="destructive" onClick={confirmDelete} disabled={processing}>
+                        <Button variant="destructive" onClick={confirmDelete} disabled={processing || !deleteNote}>
                             {processing ? 'Suppression...' : 'Supprimer'}
                         </Button>
                     </DialogFooter>

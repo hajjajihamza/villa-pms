@@ -19,15 +19,15 @@ import { Badge } from '../ui/badge';
 import StepBooking from './StepBooking';
 import StepVisitor from './StepVisitor';
 
-type ReservationFormData = {
+export type ReservationFormData = {
     check_in: string;
     check_out: string;
-    adults: string;
-    children: string;
-    advance_amount: string;
-    total: string;
-    channel_id: string;
-    accommodation_id: string;
+    adults: number;
+    children: number;
+    advance_amount: number;
+    total: number;
+    channel_id?: number;
+    accommodation_id?: number;
     // Visitor info
     full_name: string;
     phone: string;
@@ -46,12 +46,12 @@ type Props = {
 const initialData: ReservationFormData = {
     check_in: toFormDate(startOfToday()),
     check_out: toFormDate(addDays(startOfToday(), 1)),
-    adults: '1',
-    children: '0',
-    total: '0',
-    advance_amount: '0',
-    channel_id: '',
-    accommodation_id: '',
+    adults: 1,
+    children: 0,
+    total: 0,
+    advance_amount: 0,
+    channel_id: undefined,
+    accommodation_id: undefined,
     full_name: '',
     phone: '',
     country: 'ma',
@@ -65,8 +65,7 @@ export default function ReservationForm({
     reservation,
     units
 }: Props) {
-    initialData.channel_id = String(channels[0].id);
-    const form = useForm<ReservationFormData>(initialData);
+    const form = useForm<ReservationFormData>();
     const isEditing = Boolean(reservation);
 
     const [step, setStep] = useState<number>(1);
@@ -82,7 +81,6 @@ export default function ReservationForm({
     const nextStep = () => {
         if (step === 1) {
             if (!isValid()) {
-                // Optionally set errors manually or just prevent progression
                 return;
             }
         }
@@ -105,26 +103,30 @@ export default function ReservationForm({
     };
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            form.setData(initialData);
+            return;
+        }
 
         if (reservation) {
             form.setData({
                 ...initialData,
                 check_in: reservation.check_in,
                 check_out: reservation.check_out,
-                adults: String(reservation.adults),
-                children: String(reservation.children),
-                advance_amount: String(reservation.advance_amount ?? 0),
-                daily_price: String(reservation.daily_price ?? 0),
-                service_price: String(reservation.service_price ?? 0),
-                channel_id: String(reservation.channel_id),
-                accommodation_id: String(reservation.accommodation_id),
-                total: String(reservation.total_price ?? 0),
+                adults: reservation.adults,
+                children: reservation.children,
+                advance_amount: reservation.advance_amount ?? 0,
+                channel_id: reservation.channel_id,
+                accommodation_id: reservation.accommodation_id,
+                total: reservation.total_price ?? 0,
+                full_name: reservation.main_visitor?.full_name ?? '',
+                phone: reservation.main_visitor?.phone ?? '',
+                country: reservation.main_visitor?.country ?? 'ma',
             });
         } else {
             form.setData(initialData);
             if (channels.length > 0 && !form.data.channel_id) {
-                form.setData('channel_id', String(channels[0].id));
+                form.setData('channel_id', channels[0].id);
             }
         }
     }, [reservation, open]);
@@ -171,6 +173,7 @@ export default function ReservationForm({
                                 accommodations={accommodations}
                                 isEditing={isEditing}
                                 units={units}
+                                reservation={reservation}
                             />
                         ) : (
                             <StepVisitor

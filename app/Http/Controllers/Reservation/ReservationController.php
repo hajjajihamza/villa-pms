@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Reservation;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reservation\StoreReservationRequest;
-use App\Http\Requests\Reservation\UpdateReservationRequest;
 use App\Models\Accommodation;
 use App\Models\Channel;
 use App\Models\Reservation;
@@ -106,15 +105,37 @@ class ReservationController extends Controller
         return redirect()->back()->with('success', 'Réservation créée avec succès.');
     }
 
-    public function update(UpdateReservationRequest $request, Reservation $reservation): RedirectResponse
+    public function update(StoreReservationRequest $request, Reservation $reservation): RedirectResponse
     {
-        $reservation->update([
-            ...$request->validated(),
-            'children' => (int) ($request->validated()['children'] ?? 0),
-            'advance_amount' => (float) ($request->validated()['advance_amount'] ?? 0),
-            'daily_price' => (float) ($request->validated()['daily_price'] ?? 0),
-            'service_price' => (float) ($request->validated()['service_price'] ?? 0),
-        ]);
+        $validatedData = $request->validated();
+
+        $accommodation = Accommodation::query()->findOrFail($validatedData['accommodation_id']);
+
+        $duration = (int) Carbon::parse($validatedData['check_in'])->diffInDays(Carbon::parse($validatedData['check_out']));
+        $dailyPrice = (float) $validatedData['total'] / $duration;
+        $reservationData = [
+            'check_in' => $validatedData['check_in'],
+            'check_out' => $validatedData['check_out'],
+            'adults' => $validatedData['adults'],
+            'children' => $validatedData['children'],
+            'advance_amount' => $validatedData['advance_amount'],
+            'daily_price' =>  $dailyPrice,
+            'service_price' => $accommodation->service_price,
+            'channel_id' => $validatedData['channel_id'],
+            'accommodation_id' => $accommodation->id,
+            'created_by' => auth()->id(),
+        ];
+
+        $reservation->update($reservationData);
+
+        $mainVisitor = $reservation->visitors->firstWhere('is_main', true);
+        if ($mainVisitor) {
+            $mainVisitor->update([
+                'full_name' => $validatedData['full_name'],
+                'phone' => $validatedData['phone'],
+                'country' => $validatedData['country'],
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Réservation mise à jour avec succès.');
     }

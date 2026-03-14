@@ -11,17 +11,19 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { formatDateDisplay, toFormDate } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
 import { cn } from '@/lib/utils';
-import type { Accommodation, Channel, Unit } from '@/types';
+import type { Accommodation, Channel, Reservation, Unit } from '@/types';
 import { Badge } from '../ui/badge';
+import type { ReservationFormData } from './ReservationForm';
 
 type Props = {
-    data: any;
+    data: ReservationFormData;
     setData: (key: any, value?: any) => void;
     errors: any;
     channels: Channel[];
     accommodations: Accommodation[];
     isEditing: boolean;
     units: Unit[];
+    reservation?: Reservation | null;
 };
 
 const checkIsReserved = (unites: Unit[], accommodation: Accommodation, check_in: string, check_out: string) => {
@@ -37,7 +39,7 @@ const checkIsReserved = (unites: Unit[], accommodation: Accommodation, check_in:
     return isReserved;
 };
 
-export default function StepBooking({ data, setData, errors, channels, accommodations, isEditing, units }: Props) {
+export default function StepBooking({ data, setData, errors, channels, accommodations, isEditing, units, reservation }: Props) {
   const user = usePage().props.auth.user;
 
   const nights = useMemo(() => {
@@ -46,25 +48,26 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
   }, [data.check_in, data.check_out]);
 
   const selectedAccommodation = useMemo(() => {
-    return accommodations.find((a) => String(a.id) === data.accommodation_id);
+    return accommodations.find((a) => a.id === data.accommodation_id);
   }, [data.accommodation_id, accommodations]);
 
   // Auto-calculate total price
   useEffect(() => {
     if (selectedAccommodation && nights > 0) {
-      const calculatedTotal = nights * (selectedAccommodation.daily_price || 0);
-      setData('total', String(calculatedTotal));
+      const calculatedTotal = nights * (isEditing && reservation ? reservation.daily_price : selectedAccommodation.daily_price || 0);
+      setData('total', Number(formatNumber(calculatedTotal,{thousandsSeparator:''})));
+    } else {
+      setData('total', 0);
     }
   }, [selectedAccommodation, nights]);
 
   const handleAccommodationSelect = (accommodation: Accommodation) => {
     setData({
       ...data,
-      accommodation_id: String(accommodation.id),
-      daily_price: String(accommodation.daily_price ?? 0),
+      accommodation_id: accommodation.id,
       // Reset guests if they exceed new limits
-      adults: String(Math.min(Number(data.adults), accommodation.max_adults)),
-      children: String(Math.min(Number(data.children), accommodation.max_children)),
+      adults: Math.min(Number(data.adults), accommodation.max_adults),
+      children: Math.min(Number(data.children), accommodation.max_children),
     });
   };
 
@@ -76,6 +79,15 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
       ...data,
       check_in: toFormDate(date),
       check_out: isBefore(check_in, data.check_out) ? data.check_out : minCheckOutDate,
+      accommodation_id: selectedAccommodation && !isEditing && checkIsReserved(units, selectedAccommodation, check_in, data.check_out) ? null : data.accommodation_id,
+    });
+  };
+
+  const handleCheckOutSelect = (date?: Date) => {
+    setData({
+      ...data,
+      check_out: toFormDate(date),
+      accommodation_id: selectedAccommodation && !isEditing && checkIsReserved(units, selectedAccommodation, data.check_in, toFormDate(date)) ? null : data.accommodation_id,
     });
   };
 
@@ -98,7 +110,7 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                disabled={{ before: /*isEditing && user.is_admin ? undefined :*/ startOfToday() }}
+                disabled={{ before: isEditing && user.is_admin ? undefined : startOfToday() }}
                 selected={data.check_in ? new Date(data.check_in) : undefined}
                 onSelect={handleCheckInSelect}
               />
@@ -133,7 +145,7 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
                 mode="single"
                 disabled={{ before: data.check_in ? addDays(data.check_in, 1) : new Date() }}
                 selected={data.check_out ? new Date(data.check_out) : undefined}
-                onSelect={(date) => setData('check_out', toFormDate(date))}
+                onSelect={handleCheckOutSelect}
               />
             </PopoverContent>
           </Popover>
@@ -145,7 +157,7 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
         <Label>Hébergement</Label>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-1">
           {accommodations.map((accommodation) => {
-            const isSelected = data.accommodation_id === String(accommodation.id);
+            const isSelected = data.accommodation_id === accommodation.id;
             const isReserved = checkIsReserved(units, accommodation, data.check_in, data.check_out);
             return (
                 <button
@@ -195,10 +207,10 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
         />
         <InputCounter
           label={`Enfants`}
-          value={Number(data.children)}
+          value={data.children}
           min={0}
           max={selectedAccommodation?.max_children}
-          onChange={(val) => setData('children', String(val))}
+          onChange={(val) => setData('children', val)}
           error={errors.children}
         />
       </div>
@@ -207,12 +219,12 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
         <Label>Source</Label>
         <div className="flex flex-wrap gap-2 mt-1">
           {channels.map(chan => {
-            const isSelected = data.channel_id === String(chan.id);
+            const isSelected = data.channel_id === chan.id;
             return (
               <Button
                 key={chan.id}
                 type='button'
-                onClick={() => setData('channel_id', String(chan.id))}
+                onClick={() => setData('channel_id', chan.id)}
                 className={`
                   px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all
                   flex items-center gap-2 border
@@ -249,11 +261,11 @@ export default function StepBooking({ data, setData, errors, channels, accommoda
 
         <InputCounter
           label={`Montant total`}
-          value={Number(data.total)}
+          value={Number(formatNumber(data.total,{thousandsSeparator:''}))}
           min={0}
           step={50}
           unit="DH"
-          onChange={(val) => setData('total', String(val))}
+          onChange={(val) => setData('total', Number(formatNumber(val,{thousandsSeparator:''})))}
           error={errors.total}
         />
       </div>

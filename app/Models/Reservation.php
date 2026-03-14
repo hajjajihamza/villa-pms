@@ -69,6 +69,7 @@ class Reservation extends Model
             'advance_amount' => 'decimal:2',
             'total_price' => 'decimal:2',
             'service_price' => 'decimal:2',
+            'daily_price' => 'decimal:2',
         ];
     }
 
