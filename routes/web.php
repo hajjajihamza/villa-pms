@@ -30,6 +30,10 @@ Route::middleware('auth')->group(function (): void {
         ->name('reservations.validate');
     Route::post('reservations/{reservation}/visitors', [ReservationController::class, 'storeVisitor'])
         ->name('reservations.visitors.store');
+    Route::put('reservations/visitors/{visitor}', [ReservationController::class, 'updateVisitor'])
+        ->name('reservations.visitors.update');
+    Route::delete('reservations/documents/{document}', [ReservationController::class, 'destroyDocument'])
+        ->name('reservations.documents.destroy');
     Route::resource('reservations', ReservationController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 });

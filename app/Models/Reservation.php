@@ -188,7 +188,7 @@ class Reservation extends Model
     protected function mainVisitor(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->visitors()->where('is_main', true)->first(),
+            get: fn () => $this->visitors()->with('documents')->where('is_main', true)->first(),
         );
     }
 

@@ -8,7 +8,7 @@ import {
     Moon,
     HandCoins
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
 import type { FormEvent } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
 import InputError from '@/components/input-error';
@@ -24,12 +24,16 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDateDisplay } from '@/lib/format-date';
 import type { Reservation } from '@/types';
-import { GuestDocuments } from './GuestDocuments';
+import { VisitorCard } from './VisitorCard';
 import { ReservationInvoice } from './ReservationInvoice';
 import { StatusBadge } from './ReservationCard';
 import { Card, CardContent } from '../ui/card';
 import { formatNumber } from '@/lib/format-number';
-import { CircleFlag } from 'react-circle-flags';
+import { CountryDropdown } from '../ui/country-dropdown';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Upload, Camera } from 'lucide-react';
 
 type Props = {
     open: boolean;
@@ -41,12 +45,16 @@ type VisitorFormData = {
     full_name: string;
     document_number: string;
     phone: string;
+    country: string;
+    documents: { file?: File | null, type: string, url?: string }[];
 };
 
 const initialVisitorData: VisitorFormData = {
     full_name: '',
     document_number: '',
     phone: '',
+    country: 'ma',
+    documents: [],
 };
 
 export default function ReservationDetailsModal({ open, onOpenChange, reservation }: Props) {
@@ -62,6 +70,7 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
         event.preventDefault();
         if (!reservation) return;
 
+        visitorForm.transform((data) => ({ ...data, _method: 'post' }));
         visitorForm.post(ReservationController.storeVisitor(reservation.id).url, {
             preserveScroll: true,
             onSuccess: () => {
@@ -70,6 +79,43 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                 setShowAddVisitor(false);
             },
         });
+    };
+
+    const addDocument = () => {
+        visitorForm.setData('documents', [
+            ...(visitorForm.data.documents || []),
+            { type: 'ID_CARD', url: undefined, file: null }
+        ]);
+    };
+
+    const removeDocument = (idx: number) => {
+        const docs = [...visitorForm.data.documents];
+        if (docs[idx].url) URL.revokeObjectURL(docs[idx].url!);
+        docs.splice(idx, 1);
+        visitorForm.setData('documents', docs);
+    };
+
+    const updateDocument = (idx: number, key: string, value: any) => {
+        const docs = [...visitorForm.data.documents];
+        docs[idx][key as keyof typeof docs[0]] = value as never;
+        visitorForm.setData('documents', docs);
+    };
+
+    const handleFileChange = (idx: number, e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Le fichier est trop volumineux (max 5MB)");
+                return;
+            }
+            const url = URL.createObjectURL(file);
+            const docs = [...visitorForm.data.documents];
+            if (docs[idx].url) URL.revokeObjectURL(docs[idx].url!);
+
+            docs[idx].file = file;
+            docs[idx].url = url;
+            visitorForm.setData('documents', docs);
+        }
     };
 
     const selectedAcc = reservation?.accommodation;
@@ -317,15 +363,92 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                                         <InputError message={visitorForm.errors.document_number} />
                                                     </div>
                                                     <div className="space-y-2">
+                                                        <Label>Pays</Label>
+                                                        <CountryDropdown
+                                                            defaultValue={visitorForm.data.country}
+                                                            onChange={val => visitorForm.setData('country', val)}
+                                                        />
+                                                        <InputError message={visitorForm.errors.country} />
+                                                    </div>
+                                                    <div className="space-y-2">
                                                         <Label>Téléphone</Label>
-                                                        <Input
+                                                        <PhoneInput
+                                                            defaultCountry="ma"
                                                             value={visitorForm.data.phone}
-                                                            onChange={(e) => visitorForm.setData('phone', e.target.value)}
-                                                            placeholder="+212 ..."
+                                                            onChange={val => visitorForm.setData('phone', val)}
+                                                            inputClassName="w-full"
+                                                            className="h-10"
                                                         />
                                                         <InputError message={visitorForm.errors.phone} />
                                                     </div>
-                                                    <div className="sm:col-span-3 flex justify-end gap-2">
+
+                                                    <div className="sm:col-span-3 space-y-4 pt-4 border-t">
+                                                        <div className="flex items-center justify-between">
+                                                            <Label className="text-sm font-semibold">Documents & Pièces d'identité</Label>
+                                                            <Button type="button" variant="outline" size="sm" onClick={addDocument} className="gap-2">
+                                                                <Plus className="h-4 w-4" /> Ajouter Un Document
+                                                            </Button>
+                                                        </div>
+
+                                                        {visitorForm.data.documents?.map((doc: any, idx: number) => (
+                                                            <div key={`new-doc-${idx}`} className="p-4 border rounded-xl bg-gray-50/50 dark:bg-gray-900/30 space-y-4 relative">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="destructive"
+                                                                    size="icon"
+                                                                    className="absolute -top-3 right-0 h-8 w-8 rounded-full shadow-sm"
+                                                                    onClick={() => removeDocument(idx)}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+
+                                                                <div className="grid md:grid-cols-2 gap-4">
+                                                                    <div className="space-y-2">
+                                                                        <Label>Type de Document</Label>
+                                                                        <Select value={doc.type} onValueChange={(val) => updateDocument(idx, 'type', val)}>
+                                                                            <SelectTrigger className="h-10">
+                                                                                <SelectValue placeholder="Sélectionner" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                <SelectItem value="ID_CARD">Carte d'identité</SelectItem>
+                                                                                <SelectItem value="PASSPORT">Passeport</SelectItem>
+                                                                                <SelectItem value="DRIVERS_LICENSE">Permis</SelectItem>
+                                                                                <SelectItem value="RESIDENCE_CARD">Carte de séjour</SelectItem>
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    </div>
+                                                                    <div className="space-y-2">
+                                                                        <Label>Fichier / Photo</Label>
+                                                                        <div className="flex gap-2">
+                                                                            <Input type="file" accept="image/*,application/pdf" className="hidden" id={`new-file-${idx}`} onChange={(e) => handleFileChange(idx, e)} />
+                                                                            <Input type="file" accept="image/*" capture="environment" className="hidden" id={`new-camera-${idx}`} onChange={(e) => handleFileChange(idx, e)} />
+                                                                            <Button type="button" variant="outline" className="flex-1 h-10" asChild>
+                                                                                <label htmlFor={`new-file-${idx}`} className="cursor-pointer gap-2"><Upload className="h-4 w-4" /> Parcourir</label>
+                                                                            </Button>
+                                                                            <Button type="button" variant="outline" className="flex-1 h-10" asChild>
+                                                                                <label htmlFor={`new-camera-${idx}`} className="cursor-pointer gap-2"><Camera className="h-4 w-4" /> Caméra</label>
+                                                                            </Button>
+                                                                        </div>
+                                                                        {visitorForm.errors[`documents.${idx}.file` as keyof VisitorFormData] && <InputError message={visitorForm.errors[`documents.${idx}.file` as keyof VisitorFormData]} />}
+                                                                    </div>
+                                                                </div>
+                                                                {doc.url && (
+                                                                    <div className="mt-2 flex justify-center border rounded-lg overflow-hidden bg-background">
+                                                                        {doc.url.endsWith('.pdf') || (doc.file && doc.file.type === 'application/pdf') ? (
+                                                                            <div className="flex flex-col items-center justify-center p-4">
+                                                                                <FileText className="h-8 w-8 mb-2" />
+                                                                                <span className="text-xs">Document PDF</span>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <img src={doc.url} alt={`Document ${idx + 1}`} className="object-contain max-h-[150px] w-auto rounded p-2" />
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="sm:col-span-3 flex justify-end gap-2 mt-2">
                                                         <Button type="button" variant="ghost" onClick={() => setShowAddVisitor(false)}>Annuler</Button>
                                                         <Button type="submit" disabled={visitorForm.processing} className="bg-brand-500 text-white">Ajouter</Button>
                                                     </div>
@@ -333,63 +456,9 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                             </div>
                                         )}
 
-                                        <div className="grid grid-cols-1 gap-6">
+                                        <div className="grid grid-cols-1 gap-6 mt-4">
                                             {(reservation.visitors || []).map((guest, idx) => (
-                                                <div
-                                                    key={guest.id}
-                                                    className={`p-6 sm:p-8 rounded-2xl border-2 transition-all space-y-6 ${guest.is_main
-                                                        ? 'bg-brand-50/20 border-brand-500/20 dark:bg-brand-900/10 dark:border-brand-500/30'
-                                                        : 'bg-gray-50/50 dark:bg-gray-900/30 border-gray-100 dark:border-gray-800'
-                                                        }`}
-                                                >
-                                                    {/* Guest Header */}
-                                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center font-black shrink-0 ${guest.is_main
-                                                                ? 'bg-brand-500 text-white shadow-md'
-                                                                : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
-                                                                }`}>
-                                                                {idx + 1}
-                                                            </div>
-                                                            <div className="min-w-0">
-                                                                <div className="flex flex-wrap items-center gap-2">
-                                                                    <h4 className="text-lg sm:text-xl font-black dark:text-white tracking-tight truncate">
-                                                                        {guest.full_name}
-                                                                    </h4>
-                                                                    {guest.is_main && (
-                                                                        <span className="bg-brand-500 text-white px-2 py-0.5 rounded-full text-[0.5rem] font-black uppercase tracking-wider whitespace-nowrap">
-                                                                            Hôte principal
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                                {guest.country && (
-                                                                    <div className="flex items-center gap-2 mt-1 text-gray-400">
-                                                                        <CircleFlag
-                                                                            countryCode={guest.country.toLowerCase()}
-                                                                            height={5}
-                                                                        />
-                                                                    </div>
-                                                                )}
-                                                                {guest.phone && (
-                                                                    <div className="flex items-center gap-2 mt-1 text-gray-400">
-                                                                        <Phone size={12} />
-                                                                        <span className="text-[0.625rem] font-bold uppercase tracking-wider">
-                                                                            {guest.phone}
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Documents Management */}
-                                                    {guest.id && (
-                                                        <GuestDocuments
-                                                            guestId={guest.id}
-                                                            guestName={guest.full_name}
-                                                        />
-                                                    )}
-                                                </div>
+                                                <VisitorCard key={guest.id} visitor={guest} index={idx} />
                                             ))}
                                         </div>
                                     </div>

@@ -32,6 +32,7 @@ export type ReservationFormData = {
     full_name: string;
     phone: string;
     country: string;
+    documents: { file?: File | null, type: string, id?: number, url?: string }[];
 };
 
 type Props = {
@@ -55,6 +56,7 @@ const initialData: ReservationFormData = {
     full_name: '',
     phone: '',
     country: 'MA',
+    documents: [],
 };
 
 export default function ReservationForm({
@@ -122,6 +124,11 @@ export default function ReservationForm({
                 full_name: reservation.main_visitor?.full_name ?? '',
                 phone: reservation.main_visitor?.phone ?? '',
                 country: reservation.main_visitor?.country ?? 'ma',
+                documents: reservation.main_visitor?.documents?.map(doc => ({
+                    id: doc.id,
+                    type: doc.type,
+                    url: `/storage/${doc.file_path}`,
+                })) ?? [],
             });
         } else {
             form.setData(initialData);
@@ -133,7 +140,8 @@ export default function ReservationForm({
 
     const submit = () => {
         if (reservation) {
-            form.put(ReservationController.update(reservation.id).url, {
+            form.transform((data) => ({ ...data, _method: 'put' }));
+            form.post(ReservationController.update(reservation.id).url, {
                 preserveScroll: true,
                 onSuccess: () => closeAndReset(),
             });
@@ -147,7 +155,7 @@ export default function ReservationForm({
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={closeAndReset}>
             <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl sm:max-w-2xl overflow-hidden bg-background">
                 <DialogHeader className="border-b px-6 py-4 pb-1">
                     <DialogTitle className="text-xl">

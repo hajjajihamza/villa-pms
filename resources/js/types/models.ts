@@ -148,4 +148,5 @@ export type Visitor = BaseModel & {
     is_main: boolean;
     reservation_id: number;
     reservation?: Reservation;
+    documents?: Document[];
 };

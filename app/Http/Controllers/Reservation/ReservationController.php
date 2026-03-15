@@ -10,10 +10,14 @@ use App\Models\Accommodation;
 use App\Models\Channel;
 use App\Models\Reservation;
 use App\Models\Unit;
+use App\Models\Document;
+use App\Models\Visitor;
+use App\Http\Requests\StoreVisitorRequest;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -47,7 +51,7 @@ class ReservationController extends Controller
     protected function renderReservations(Builder $query, string $activeTab, Request $request): Response
     {
         $reservations = $query
-            ->with(['accommodation.units', 'channel', 'creator', 'visitors', 'orders.orderItems'])
+            ->with(['accommodation.units', 'channel', 'creator', 'visitors.documents', 'orders.orderItems'])
             ->when($request->accommodation_id, function ($query, $accommodationId) {
                 $query->where('accommodation_id', $accommodationId);
             })
@@ -100,12 +104,24 @@ class ReservationController extends Controller
         ];
 
         $reservation = Reservation::create($reservationData);
-        $reservation->visitors()->create([
+        $mainVisitor = $reservation->visitors()->create([
             'full_name' => $validatedData['full_name'],
             'phone' => $validatedData['phone'],
             'country' => $validatedData['country'],
             'is_main' => true,
         ]);
+
+        if (isset($validatedData['documents']) && is_array($validatedData['documents'])) {
+            foreach ($validatedData['documents'] as $docData) {
+                if (isset($docData['file']) && $docData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $path = $docData['file']->store('visitor-documents', 'public');
+                    $mainVisitor->documents()->create([
+                        'type' => $docData['type'],
+                        'file_path' => $path,
+                    ]);
+                }
+            }
+        }
 
         return redirect()->back()->with('success', 'Réservation créée avec succès.');
     }
@@ -140,6 +156,37 @@ class ReservationController extends Controller
                 'phone' => $validatedData['phone'],
                 'country' => $validatedData['country'],
             ]);
+
+            if (isset($validatedData['documents']) && is_array($validatedData['documents'])) {
+                foreach ($validatedData['documents'] as $docData) {
+                    if (isset($docData['file']) && $docData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                        $path = $docData['file']->store('visitor-documents', 'public');
+                        if (isset($docData['id'])) {
+                            $existingDoc = $mainVisitor->documents()->find($docData['id']);
+                            if ($existingDoc) {
+                                if (Storage::disk('public')->exists($existingDoc->file_path)) {
+                                    Storage::disk('public')->delete($existingDoc->file_path);
+                                }
+                                $existingDoc->update([
+                                    'type' => $docData['type'],
+                                    'file_path' => $path,
+                                ]);
+                                continue;
+                            }
+                        }
+                        
+                        $mainVisitor->documents()->create([
+                            'type' => $docData['type'],
+                            'file_path' => $path,
+                        ]);
+                    } elseif (isset($docData['id'])) {
+                         $existingDoc = $mainVisitor->documents()->find($docData['id']);
+                         if ($existingDoc && $existingDoc->type !== $docData['type']) {
+                             $existingDoc->update(['type' => $docData['type']]);
+                         }
+                    }
+                }
+            }
         }
 
         return redirect()->back()->with('success', 'Réservation mise à jour avec succès.');
@@ -167,6 +214,78 @@ class ReservationController extends Controller
         return redirect()->back()->with('success', 'Statut de la réservation mis à jour.');
     }
 
+    public function storeVisitor(StoreVisitorRequest $request, Reservation $reservation): RedirectResponse
+    {
+        $validatedData = $request->validated();
+        
+        $visitor = $reservation->visitors()->create([
+            'full_name' => $validatedData['full_name'],
+            'phone' => $validatedData['phone'] ?? null,
+            'country' => $validatedData['country'] ?? null,
+            'document_number' => $validatedData['document_number'] ?? null,
+            'is_main' => false,
+        ]);
+
+        if (isset($validatedData['documents']) && is_array($validatedData['documents'])) {
+            foreach ($validatedData['documents'] as $docData) {
+                if (isset($docData['file']) && $docData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $path = $docData['file']->store('visitor-documents', 'public');
+                    $visitor->documents()->create([
+                        'type' => $docData['type'],
+                        'file_path' => $path,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Visiteur ajouté avec succès.');
+    }
+
+    public function updateVisitor(StoreVisitorRequest $request, Visitor $visitor): RedirectResponse
+    {
+        $validatedData = $request->validated();
+
+        $visitor->update([
+            'full_name' => $validatedData['full_name'],
+            'phone' => $validatedData['phone'] ?? null,
+            'country' => $validatedData['country'] ?? null,
+            'document_number' => $validatedData['document_number'] ?? null,
+        ]);
+
+        if (isset($validatedData['documents']) && is_array($validatedData['documents'])) {
+            foreach ($validatedData['documents'] as $docData) {
+                if (isset($docData['file']) && $docData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $path = $docData['file']->store('visitor-documents', 'public');
+                    if (isset($docData['id'])) {
+                        $existingDoc = $visitor->documents()->find($docData['id']);
+                        if ($existingDoc) {
+                            if (Storage::disk('public')->exists($existingDoc->file_path)) {
+                                Storage::disk('public')->delete($existingDoc->file_path);
+                            }
+                            $existingDoc->update([
+                                'type' => $docData['type'],
+                                'file_path' => $path,
+                            ]);
+                            continue;
+                        }
+                    }
+                    
+                    $visitor->documents()->create([
+                        'type' => $docData['type'],
+                        'file_path' => $path,
+                    ]);
+                } elseif (isset($docData['id'])) {
+                     $existingDoc = $visitor->documents()->find($docData['id']);
+                     if ($existingDoc && $existingDoc->type !== $docData['type']) {
+                         $existingDoc->update(['type' => $docData['type']]);
+                     }
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Visiteur mis à jour avec succès.');
+    }
+
     public function validateStay(Reservation $reservation): RedirectResponse
     {
         $today = Carbon::today();
@@ -186,5 +305,15 @@ class ReservationController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Séjour validé avec succès.');
+    }
+
+    public function destroyDocument(Document $document): RedirectResponse
+    {
+        if (Storage::disk('public')->exists($document->file_path)) {
+            Storage::disk('public')->delete($document->file_path);
+        }
+        $document->delete();
+
+        return redirect()->back()->with('success', 'Document supprimé.');
     }
 }

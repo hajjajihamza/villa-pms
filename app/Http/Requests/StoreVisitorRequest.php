@@ -1,34 +1,26 @@
 <?php
-declare(strict_types=1);
 
-namespace App\Http\Requests\Reservation;
+namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreReservationRequest extends FormRequest
+class StoreVisitorRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'check_in' => ['required', 'date', 'after_or_equal:today'],
-            'check_out' => ['required', 'date', 'after:check_in'],
-            'adults' => ['required', 'integer', 'min:1'],
-            'children' => ['nullable', 'integer', 'min:0'],
-            'total' => ['required', 'numeric', 'min:0'],
-            'advance_amount' => ['nullable', 'numeric', 'min:0', 'lte:total'],
-            'channel_id' => ['required', 'exists:channels,id'],
-            'accommodation_id' => ['required', 'exists:accommodations,id'],
             'full_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'country' => ['nullable', 'string', 'max:2'],
+            'document_number' => ['nullable', 'string', 'max:255'],
             'documents' => ['nullable', 'array'],
             'documents.*.file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,pdf', 'max:5120'], // 5MB max
             'documents.*.type' => ['required_with:documents', 'string', 'in:ID_CARD,PASSPORT,DRIVERS_LICENSE,RESIDENCE_CARD'],
