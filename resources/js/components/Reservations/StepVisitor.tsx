@@ -1,8 +1,10 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
-import PhoneInput from 'react-phone-input-2';
 import { cn } from '@/lib/utils';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
+import { CountryDropdown } from '../ui/country-dropdown';
 
 type Props = {
   data: any;
@@ -29,26 +31,33 @@ export default function StepVisitor({ data, setData, errors }: Props) {
         <InputError message={errors.full_name} />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone" className="text-sm font-semibold">Téléphone (Optionnel)</Label>
+      <div className='grid lg:grid-cols-2 gap-4'>
+        <div className="space-y-2">
+          <Label htmlFor="country">Pays</Label>
+          <CountryDropdown
+            placeholder="Sélectionner un pays"
+            defaultValue={data.country}
+            onChange={(country) => setData('country', country)}
+          />
+          <InputError message={errors.country} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="phone" className="text-sm font-semibold">Téléphone (Optionnel)</Label>
 
-        <PhoneInput
-          country={data.country}
-          value={data.phone}
-          onChange={(phone, countryData: any) => {
-            setData('phone', phone);
-            setData('country', countryData.countryCode);
-          }}
-          containerClass="!w-full"
-          inputClass={cn(
-            "!w-full !h-11 !rounded-xl !bg-background/90 !border-input !shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)] !text-sm !pl-12",
-            errors.phone && "!border-destructive"
-          )}
-          buttonClass="!bg-transparent !border-none !rounded-l-xl !hover:bg-muted/50"
-          dropdownClass="!bg-popover !text-popover-foreground !rounded-xl !border-none !shadow-xl !mt-2"
-        />
-        <InputError message={errors.phone} />
+          <PhoneInput
+            defaultCountry="ma"
+            value={data.phone}
+            onChange={(phone) => setData('phone', phone)}
+            inputClassName={cn(
+              "w-full",
+              errors.phone && "border-destructive"
+            )}
+            className='h-11'
+          />
+          <InputError message={errors.phone} />
+        </div>
       </div>
+
     </div>
   );
 }

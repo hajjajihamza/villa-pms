@@ -54,7 +54,7 @@ const initialData: ReservationFormData = {
     accommodation_id: undefined,
     full_name: '',
     phone: '',
-    country: 'ma',
+    country: 'MA',
 };
 
 export default function ReservationForm({

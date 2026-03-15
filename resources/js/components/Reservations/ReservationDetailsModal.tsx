@@ -29,6 +29,7 @@ import { ReservationInvoice } from './ReservationInvoice';
 import { StatusBadge } from './ReservationCard';
 import { Card, CardContent } from '../ui/card';
 import { formatNumber } from '@/lib/format-number';
+import { CircleFlag } from 'react-circle-flags';
 
 type Props = {
     open: boolean;
@@ -361,6 +362,14 @@ export default function ReservationDetailsModal({ open, onOpenChange, reservatio
                                                                         </span>
                                                                     )}
                                                                 </div>
+                                                                {guest.country && (
+                                                                    <div className="flex items-center gap-2 mt-1 text-gray-400">
+                                                                        <CircleFlag
+                                                                            countryCode={guest.country.toLowerCase()}
+                                                                            height={5}
+                                                                        />
+                                                                    </div>
+                                                                )}
                                                                 {guest.phone && (
                                                                     <div className="flex items-center gap-2 mt-1 text-gray-400">
                                                                         <Phone size={12} />
