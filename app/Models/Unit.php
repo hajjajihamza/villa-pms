@@ -43,6 +43,19 @@ class Unit extends Model
     //  Accessors & Mutators
     // ────────────────────────────────────────────────
 
+    protected function reservations(): Attribute
+    {
+        return Attribute::get(function () {
+            return $this->accommodations()
+                ->with(['reservations.visitors.documents','reservations.channel','reservations.orders.orderItems', 'reservations.creator', 'reservations.accommodation'])
+                ->get()
+                ->pluck('reservations')
+                ->flatten()
+                ->unique('id')
+                ->values();
+        });
+    }
+
     protected function reservedPeriods(): Attribute
     {
         return Attribute::get(function () {

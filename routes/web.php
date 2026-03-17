@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Expense\ExpenseController;
 use App\Http\Controllers\Reservation\ReservationController;
+use App\Http\Controllers\Reservation\PlanningController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])
@@ -15,6 +16,12 @@ Route::middleware('auth')->group(function (): void {
     // ────────────────────────────────────────────────
     Route::resource('expenses', ExpenseController::class)
         ->only(['index', 'store', 'update', 'destroy']);
+
+    // ────────────────────────────────────────────────
+    //  Planning
+    // ────────────────────────────────────────────────
+    Route::get('planning', [PlanningController::class, 'index'])->name('planning.index');
+
 
     // ────────────────────────────────────────────────
     //  Reservations

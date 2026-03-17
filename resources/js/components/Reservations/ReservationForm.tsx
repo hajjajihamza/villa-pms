@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { startOfToday, addDays } from 'date-fns';
+import { startOfToday, addDays, parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
 import { Button } from '@/components/ui/button';
@@ -41,7 +41,8 @@ type Props = {
     channels: Channel[];
     accommodations: Accommodation[];
     reservation?: Reservation | null;
-    units: Unit[]
+    units: Unit[],
+    defaultDate?: string | null;
 };
 
 const initialData: ReservationFormData = {
@@ -65,7 +66,8 @@ export default function ReservationForm({
     channels,
     accommodations,
     reservation,
-    units
+    units,
+    defaultDate
 }: Props) {
     const form = useForm<ReservationFormData>();
     const isEditing = Boolean(reservation);
@@ -132,6 +134,10 @@ export default function ReservationForm({
             });
         } else {
             form.setData(initialData);
+            if (defaultDate) {
+                form.setData('check_in', toFormDate(parseISO(defaultDate)));
+                form.setData('check_out', toFormDate(addDays(parseISO(defaultDate), 1)));
+            }
             if (channels.length > 0 && !form.data.channel_id) {
                 form.setData('channel_id', channels[0].id);
             }

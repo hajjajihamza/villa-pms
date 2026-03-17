@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { BookOpen, CalendarDays, FolderGit2, HandCoins, LayoutGrid, Settings } from 'lucide-react';
 import DashboardController from '@/actions/App/Http/Controllers/DashboardController';
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
+import PlanningController from '@/actions/App/Http/Controllers/Reservation/PlanningController';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
 import SettingController from '@/actions/App/Http/Controllers/Settings/SettingController';
 import AppLogo from '@/components/app-logo';
@@ -40,6 +41,11 @@ export function AppSidebar() {
             title: 'Tableau de bord',
             href: DashboardController.index(),
             icon: LayoutGrid,
+        },
+        {
+            title: 'Planning',
+            href: PlanningController.index(),
+            icon: CalendarDays,
         },
         {
             title: 'Reservations',
