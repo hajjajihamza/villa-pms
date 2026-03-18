@@ -19,18 +19,24 @@ class PlanningController extends Controller
     {
         // Get the requested date, default to today
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
+        $view = $request->input('view', 'week');
 
-        // Ensure we start at the beginning of the week (e.g., Monday)
-        $startOfWeek = $date->copy()->startOfWeek();
-        $endOfWeek = $date->copy()->endOfWeek();
+        if ($view === 'month') {
+            $startDate = $date->copy()->startOfMonth();
+            $endDate = $date->copy()->endOfMonth();
+        } else {
+            // Ensure we start at the beginning of the week (e.g., Monday)
+            $startDate = $date->copy()->startOfWeek();
+            $endDate = $date->copy()->endOfWeek();
+        }
 
-        // Fetch units with their accommodations and reservations that overlap with the week
-        $units = Unit::with(['accommodations.reservations' => function ($query) use ($startOfWeek, $endOfWeek) {
-            $query->where(function ($q) use ($startOfWeek, $endOfWeek) {
-                // Reservation overlaps with the week if:
-                // Check-in is before the week ends AND check-out is after the week starts
-                $q->where('check_in', '<=', $endOfWeek)
-                    ->where('check_out', '>=', $startOfWeek);
+        // Fetch units with their accommodations and reservations that overlap with the range
+        $units = Unit::with(['accommodations.reservations' => function ($query) use ($startDate, $endDate) {
+            $query->where(function ($q) use ($startDate, $endDate) {
+                // Reservation overlaps with the range if:
+                // Check-in is before the range ends AND check-out is after the range starts
+                $q->where('check_in', '<=', $endDate)
+                    ->where('check_out', '>=', $startDate);
             })->with(['accommodation.units', 'channel', 'creator', 'visitors.documents', 'orders.orderItems']); // Eager load for full reservation details
         }])->get();
 
@@ -49,7 +55,8 @@ class PlanningController extends Controller
         $accommodations = Accommodation::with('units:id')->get();
 
         return Inertia::render('planning/index', [
-            'date' => $startOfWeek->toDateString(), // start of the current displayed week
+            'date' => $date->toDateString(), // Original requested date
+            'view' => $view,
             'units' => $unitsData,
             'channels' => $channels,
             'accommodations' => $accommodations,
