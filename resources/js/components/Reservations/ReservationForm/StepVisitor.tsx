@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import 'react-international-phone/style.css';
-import { CountryDropdown } from '../ui/country-dropdown';
+import { CountryDropdown } from '../../ui/country-dropdown';
 
 type Props = {
     data: any;

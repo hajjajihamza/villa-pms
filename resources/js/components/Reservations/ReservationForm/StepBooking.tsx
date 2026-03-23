@@ -14,7 +14,7 @@ import { formatDateDisplay, toFormDate } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
 import { cn } from '@/lib/utils';
 import type { Accommodation, Reservation, Unit } from '@/types';
-import { Badge } from '../ui/badge';
+import { Badge } from '../../ui/badge';
 import type { ReservationFormData } from './ReservationForm';
 
 type Props = {

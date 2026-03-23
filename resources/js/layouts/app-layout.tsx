@@ -1,11 +1,11 @@
 import { usePage } from '@inertiajs/react';
-import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import { queryClient } from '@/lib/query-client';
 import type { AppLayoutProps } from '@/types';
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
-    const queryClient = new QueryClient();
     const { flash } = usePage().props as any;
 
     return (

@@ -7,22 +7,24 @@ namespace App\Http\Controllers\Reservation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reservation\DocumentRequest;
 use App\Http\Requests\Reservation\VisitorRequest;
-use App\Http\Resources\DocumentResource;
-use App\Http\Resources\VisitorResource;
 use App\Models\Document;
 use App\Models\Reservation;
 use App\Models\Visitor;
+use App\Services\Reservation\VisitorService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Storage;
 
 class VisitorController extends Controller
 {
+    public function __construct(
+        protected VisitorService $visitorService
+    ) {}
+
     /**
      * Store a newly created visitor in storage.
      */
     public function storeVisitor(VisitorRequest $request, Reservation $reservation): RedirectResponse
     {
-        $reservation->visitors()->create($request->validated());
+        $this->visitorService->storeVisitor($request->validated(), $reservation);
 
         return redirect()->back()->with('success', 'Visiteur ajouté avec succès.');
     }
@@ -32,7 +34,7 @@ class VisitorController extends Controller
      */
     public function updateVisitor(VisitorRequest $request, Visitor $visitor): RedirectResponse
     {
-        $visitor->update($request->validated());
+        $this->visitorService->updateVisitor($request->validated(), $visitor);
 
         return redirect()->back()->with('success', 'Visiteur mis à jour avec succès.');
     }
@@ -46,15 +48,7 @@ class VisitorController extends Controller
             return redirect()->back()->with('error', 'Le visiteur principal ne peut pas être supprimé.');
         }
 
-        // Delete associated documents and their files
-        foreach ($visitor->documents as $document) {
-            if ($document->file_path) {
-                Storage::disk('public')->delete($document->file_path);
-            }
-            $document->delete();
-        }
-
-        $visitor->delete();
+        $this->visitorService->destroyVisitor($visitor);
 
         return redirect()->back()->with('success', 'Visiteur supprimé avec succès.');
     }
@@ -64,12 +58,11 @@ class VisitorController extends Controller
      */
     public function storeDocument(DocumentRequest $request, Visitor $visitor): RedirectResponse
     {
-        $path = $request->file('file')->store('visitor-documents', 'public');
-
-        $visitor->documents()->create([
-            'type' => $request->type,
-            'file_path' => $path,
-        ]);
+        $this->visitorService->storeDocument(
+            $request->validated(),
+            $visitor,
+            $request->file('file')
+        );
 
         return redirect()->back()->with('success', 'Document ajouté avec succès.');
     }
@@ -79,17 +72,11 @@ class VisitorController extends Controller
      */
     public function updateDocument(DocumentRequest $request, Document $document): RedirectResponse
     {
-        $data = ['type' => $request->type];
-
-        if ($request->hasFile('file')) {
-            // Delete old file
-            if ($document->file_path) {
-                Storage::disk('public')->delete($document->file_path);
-            }
-            $data['file_path'] = $request->file('file')->store('visitor-documents', 'public');
-        }
-
-        $document->update($data);
+        $this->visitorService->updateDocument(
+            $request->validated(),
+            $document,
+            $request->file('file')
+        );
 
         return redirect()->back()->with('success', 'Document mis à jour avec succès.');
     }
@@ -99,11 +86,7 @@ class VisitorController extends Controller
      */
     public function destroyDocument(Document $document): RedirectResponse
     {
-        if ($document->file_path) {
-            Storage::disk('public')->delete($document->file_path);
-        }
-
-        $document->delete();
+        $this->visitorService->destroyDocument($document);
 
         return redirect()->back()->with('success', 'Document supprimé avec succès.');
     }

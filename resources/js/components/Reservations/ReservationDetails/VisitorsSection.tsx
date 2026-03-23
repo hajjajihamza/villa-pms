@@ -1,11 +1,11 @@
-import { Users, UserPlus, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, UserPlus, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import type { Visitor } from '@/types/models';
+import { VisitorForm } from '../ReservationForm/VisitorForm';
 import { VisitorCard } from './VisitorCard';
-import { VisitorForm } from './VisitorForm';
 
 interface Props {
   reservationId: number;
@@ -28,15 +28,13 @@ export function VisitorsSection({ reservationId, visitors }: Props) {
               )}>
                 <Users size={10} className={isOpen ? "stroke-[2.5]" : ""} />
               </div>
-              <span>Voyageurs ({visitors.length})</span>
+              <span>Visiteurs ({visitors.length})</span>
               {isOpen ? <ChevronUp size={10} className={cn("transition-transform duration-300", isOpen ? "" : "rotate-180")} /> : <ChevronDown size={10} className="transition-transform duration-300" />}
             </h3>
           </CollapsibleTrigger>
 
           <Button
             variant="outline"
-            size="sm"
-            className="h-7 px-2 rounded-lg border-slate-200 dark:border-white/10 bg-white dark:bg-transparent text-brand-600 dark:text-brand-400 hover:bg-brand-50 hover:border-brand-200 transition-all font-bold text-[9px] uppercase tracking-wider shadow-sm"
             onClick={() => {
               setIsOpen(true);
               setShowAddForm(true);

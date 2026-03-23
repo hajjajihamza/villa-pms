@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import PlanningController from '@/actions/App/Http/Controllers/Reservation/PlanningController';
 import ReservationModal from '@/components/Reservations/ReservationDetails/ReservationModal';
-import ReservationForm from '@/components/Reservations/ReservationForm';
+import ReservationForm from '@/components/Reservations/ReservationForm/ReservationForm';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';

@@ -12,7 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Reservation } from '@/types';
 import { formatNumber } from '@/lib/format-number';
-import Logo from '../logo';
+import Logo from '../../logo';
 import { formatDateDisplay } from '@/lib/format-date';
 
 interface ReservationInvoiceProps {

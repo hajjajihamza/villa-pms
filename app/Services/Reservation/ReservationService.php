@@ -102,7 +102,7 @@ class ReservationService
 
             $reservation->update($reservationData);
 
-            $reservation->mainVisitor()?->update([
+            $reservation->mainVisitor()->first()->update([
                 'full_name' => $data['full_name'],
                 'phone' => $data['phone'],
                 'country' => $data['country'],

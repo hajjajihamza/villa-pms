@@ -16,7 +16,7 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toFormDate } from '@/lib/format-date';
 import type { Reservation } from '@/types';
-import { Badge } from '../ui/badge';
+import { Badge } from '../../ui/badge';
 import StepBooking from './StepBooking';
 import StepVisitor from './StepVisitor';
 

@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import {
     Calendar, MapPin, Users, Globe, ShieldCheck,
     FileText, CheckCircle2,
-    Printer, Info, Briefcase, Trash2,
+    Printer, Info, Trash2,
     Moon,
     HandCoins,
     Clock,
@@ -24,8 +24,8 @@ import { formatNumber } from '@/lib/format-number';
 import { cn } from '@/lib/utils';
 import type { Reservation } from '@/types';
 import { Card } from '../../ui/card';
-import { ReservationInvoice } from '../ReservationInvoice';
 import { StatusBadge } from '../ReservationList/ReservationCard';
+import { ReservationInvoice } from './ReservationInvoice';
 import { VisitorsSection } from './VisitorsSection';
 
 type Props = {

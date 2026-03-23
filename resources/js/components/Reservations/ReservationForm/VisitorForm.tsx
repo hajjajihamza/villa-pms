@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, Save, X } from 'lucide-react';
 import { PhoneInput } from 'react-international-phone';
 import VisitorController from '@/actions/App/Http/Controllers/Reservation/VisitorController';
@@ -22,6 +23,7 @@ interface Props {
 
 export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Props) {
     const isEditing = !!visitor;
+    const queryClient = useQueryClient();
 
     const { data, setData, post, put, processing, errors, reset } = useForm({
         full_name: visitor?.full_name || '',
@@ -37,6 +39,7 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
             put(VisitorController.updateVisitor.url(visitor.id), {
                 preserveScroll: true,
                 onSuccess: () => {
+                    queryClient.resetQueries({ queryKey: ['reservation', reservationId] });
                     onSuccess?.();
                 },
             });
@@ -44,6 +47,7 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
             post(VisitorController.storeVisitor.url(reservationId), {
                 preserveScroll: true,
                 onSuccess: () => {
+                    queryClient.resetQueries({ queryKey: ['reservation', reservationId] });
                     reset();
                     onSuccess?.();
                 },
