@@ -7,79 +7,29 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useBookingData } from '@/hooks/use-booking-data';
+import type { BookingData} from '@/hooks/use-booking-data';
 import { formatDateDisplay, toFormDate } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
 import { cn } from '@/lib/utils';
-import type { Accommodation, Unit } from '@/types';
+import type { Accommodation, Reservation, Unit } from '@/types';
 import { Badge } from '../ui/badge';
-import { useReservation } from './ReservationContext';
+import type { ReservationFormData } from './ReservationForm';
 
-export function StepBookingSkeleton() {
-    return (
-        <div className="space-y-3">
-            <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-10 w-full rounded-md" />
-                </div>
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-10 w-full rounded-md" />
-                </div>
-            </div>
+type Props = {
+    data: ReservationFormData;
+    setData: (key: any, value?: any) => void;
+    errors: any;
+    isEditing: boolean;
+    reservation?: Reservation | null;
+};
 
-            <div className="space-y-3">
-                <Skeleton className="h-4 w-32" />
-                <div className="mt-1 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-20 w-full rounded-xl" />
-                    ))}
-                </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2">
-                <Skeleton className="h-12 w-full rounded-lg" />
-                <Skeleton className="h-12 w-full rounded-lg" />
-            </div>
-
-            <div className="space-y-3">
-                <Skeleton className="h-4 w-20" />
-                <div className="mt-1 flex flex-wrap gap-2">
-                    {[1, 2, 3, 4].map((i) => (
-                        <Skeleton key={i} className="h-8 w-24 rounded-lg" />
-                    ))}
-                </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2">
-                <Skeleton className="h-12 w-full rounded-lg" />
-                <Skeleton className="h-12 w-full rounded-lg" />
-            </div>
-        </div>
-    );
-}
-
-const checkIsReserved = (
-    unites: Unit[],
-    accommodation: Accommodation,
-    check_in: string,
-    check_out: string,
-) => {
+const checkIsReserved = (unites: Unit[], accommodation: Accommodation, check_in: string, check_out: string) => {
     let isReserved = false;
-    unites.forEach((unit) => {
-        if (accommodation.units?.some((u: Unit) => u.id === unit.id)) {
-            if (
-                unit.reserved_periods?.some(
-                    (r: any) => r.check_in < check_out && r.check_out > check_in,
-                )
-            ) {
+    unites.map((unit) => {
+        if (accommodation.units?.some((u) => u.id === unit.id)) {
+            if (unit.reserved_periods?.some((r) => r.check_in < check_out && r.check_out > check_in)) {
                 isReserved = true;
             }
         }
@@ -88,25 +38,14 @@ const checkIsReserved = (
     return isReserved;
 };
 
-export default function StepBooking() {
-    const {
-        form: { data, setData, errors },
-        isEditing,
-        reservation,
-    } = useReservation();
-
-    const { data: bookingData } = useBookingData();
-
-    if (!bookingData) return null; // Fallback for TS, though Suspense handles this
+export default function StepBooking({ data, setData, errors, isEditing, reservation }: Props) {
+    const bookingData = useBookingData().data as BookingData;
 
     const user = usePage().props.auth.user;
 
     const nights = useMemo(() => {
         if (!data.check_in || !data.check_out) return 0;
-        return Math.max(
-            0,
-            differenceInDays(new Date(data.check_out), new Date(data.check_in)),
-        );
+        return Math.max(0, differenceInDays(new Date(data.check_out), new Date(data.check_in)));
     }, [data.check_in, data.check_out]);
 
     const selectedAccommodation = useMemo(() => {
@@ -118,19 +57,10 @@ export default function StepBooking() {
     // Auto-calculate total price
     useEffect(() => {
         if (selectedAccommodation && nights > 0) {
-            const calculatedTotal =
-                nights *
-                (isEditing && reservation
-                    ? reservation.daily_price
-                    : selectedAccommodation.daily_price || 0);
-            setData(
-                'total' as any,
-                Number(
-                    formatNumber(calculatedTotal, { thousandsSeparator: '' }),
-                ) as any,
-            );
+            const calculatedTotal = nights * (isEditing && reservation ? reservation.daily_price : selectedAccommodation.daily_price || 0);
+            setData('total', Number(formatNumber(calculatedTotal,{thousandsSeparator:''})));
         } else {
-            setData('total' as any, 0 as any);
+            setData('total', 0);
         }
     }, [selectedAccommodation, nights]);
 
@@ -140,10 +70,7 @@ export default function StepBooking() {
             accommodation_id: accommodation.id,
             // Reset guests if they exceed new limits
             adults: Math.min(Number(data.adults), accommodation.max_adults),
-            children: Math.min(
-                Number(data.children),
-                accommodation.max_children,
-            ),
+            children: Math.min(Number(data.children), accommodation.max_children),
         });
     };
 
@@ -168,8 +95,14 @@ export default function StepBooking() {
                 )
                     ? null
                     : data.accommodation_id,
-        } as any);
+        });
     };
+
+    useEffect(() => {
+        if (bookingData.channels.length > 0 && !data.channel_id) {
+            setData('channel_id', bookingData.channels[0].id);
+        }
+    }, []);
 
     const handleCheckOutSelect = (date?: Date) => {
         setData({
@@ -186,9 +119,10 @@ export default function StepBooking() {
                 )
                     ? null
                     : data.accommodation_id,
-        } as any);
+        });
     };
 
+    // @ts-ignore
     return (
         <div className="space-y-3">
             <div className="grid gap-4 md:grid-cols-2">
@@ -209,11 +143,12 @@ export default function StepBooking() {
                         <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                                 mode="single"
-                                disabled={
-                                    isEditing && user.is_admin
-                                        ? undefined
-                                        : { before: startOfToday() }
-                                }
+                                disabled={{
+                                    before:
+                                        isEditing && user.is_admin
+                                            ? undefined
+                                            : startOfToday(),
+                                }}
                                 selected={
                                     data.check_in
                                         ? new Date(data.check_in)
@@ -249,11 +184,11 @@ export default function StepBooking() {
                         <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                                 mode="single"
-                                disabled={
-                                    data.check_in
-                                        ? { before: addDays(data.check_in, 1) }
-                                        : { before: new Date() }
-                                }
+                                disabled={{
+                                    before: data.check_in
+                                        ? addDays(data.check_in, 1)
+                                        : new Date(),
+                                }}
                                 selected={
                                     data.check_out
                                         ? new Date(data.check_out)
@@ -327,7 +262,7 @@ export default function StepBooking() {
                     value={Number(data.adults)}
                     min={1}
                     max={selectedAccommodation?.max_adults}
-                    onChange={(val) => setData('adults', val)}
+                    onChange={(val) => setData('adults', String(val))}
                     error={errors.adults}
                 />
                 <InputCounter
@@ -385,7 +320,7 @@ export default function StepBooking() {
                     step={50}
                     unit="DH"
                     max={Number(data.total)}
-                    onChange={(val) => setData('advance_amount', val)}
+                    onChange={(val) => setData('advance_amount', String(val))}
                     error={errors.advance_amount}
                 />
 

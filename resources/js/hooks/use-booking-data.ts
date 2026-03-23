@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReservationApiController from '@/actions/App/Http/Controllers/Api/Reservation/ReservationApiController';
 import type { Accommodation, Channel, Unit } from '@/types';
 
-type BookingData = {
+export type BookingData = {
     channels: Channel[];
     units: Unit[];
     accommodations: Accommodation[];

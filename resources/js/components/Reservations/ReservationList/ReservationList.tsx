@@ -5,10 +5,11 @@ import ReservationModal from '@/components/Reservations/ReservationDetails/Reser
 import ReservationCard from '@/components/Reservations/ReservationList/ReservationCard';
 import { Button } from '@/components/ui/button';
 import type { PaginatedReservations } from '@/pages/reservations';
+import type { Reservation } from '@/types';
 
 type Props = {
     reservations: PaginatedReservations;
-    onEdit: (id: number) => void;
+    onEdit: (reservation: Reservation) => void;
 };
 
 export default function ReservationList({ reservations, onEdit }: Props) {

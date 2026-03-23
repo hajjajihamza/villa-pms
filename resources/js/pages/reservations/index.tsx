@@ -34,7 +34,7 @@ const TABS = [
 
 export default function ReservationIndex({ reservations, accommodations, activeTab }: Props) {
     const [formOpen, setFormOpen] = useState(false);
-    const [editingReservationId, setEditingReservationId] = useState<number | null>(null);
+    const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -60,7 +60,7 @@ export default function ReservationIndex({ reservations, accommodations, activeT
                     <div className="flex items-center gap-2">
                         <Button
                             onClick={() => {
-                                setEditingReservationId(null);
+                                setEditingReservation(null);
                                 setFormOpen(true);
                             }}
                         >
@@ -91,22 +91,22 @@ export default function ReservationIndex({ reservations, accommodations, activeT
 
                 <ReservationList
                     reservations={reservations}
-                    onEdit={(id) => {
-                        setEditingReservationId(id);
+                    onEdit={(reservation) => {
+                        setEditingReservation(reservation);
                         setFormOpen(true);
                     }}
                 />
 
-                {/* <ReservationForm
+                <ReservationForm
                     open={formOpen}
                     onOpenChange={(open) => {
                         setFormOpen(open);
                         if (!open) {
-                            setEditingReservationId(null);
+                            setEditingReservation(null);
                         }
                     }}
-                    reservationId={editingReservationId}
-                /> */}
+                    reservation={editingReservation}
+                />
             </section>
         </AppLayout>
     );

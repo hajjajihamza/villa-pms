@@ -2,15 +2,15 @@ import { useForm } from '@inertiajs/react';
 import { Loader2, Save, X } from 'lucide-react';
 import { PhoneInput } from 'react-international-phone';
 import VisitorController from '@/actions/App/Http/Controllers/Reservation/VisitorController';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
 import { CountryDropdown } from '@/components/ui/country-dropdown';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import 'react-international-phone/style.css';
-import type { Visitor } from '@/types/models';
 import { cn } from '@/lib/utils';
-import InputError from '@/components/input-error';
+import type { Visitor } from '@/types/models';
 
 
 interface Props {
@@ -26,7 +26,7 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
     const { data, setData, post, put, processing, errors, reset } = useForm({
         full_name: visitor?.full_name || '',
         phone: visitor?.phone || '',
-        country: visitor?.country?.toLowerCase() || 'ma',
+        country: visitor?.country || 'MA',
         is_main: visitor?.is_main || false,
     });
 
@@ -74,15 +74,13 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {/* Full Name */}
                     <div className="space-y-1 sm:col-span-2">
-                        <Label
-                            htmlFor="full_name"
-                        >
-                            Nom complet
-                        </Label>
+                        <Label htmlFor="full_name">Nom complet</Label>
                         <Input
                             id="full_name"
                             value={data.full_name}
-                            onChange={(e) => setData('full_name', e.target.value)}
+                            onChange={(e) =>
+                                setData('full_name', e.target.value)
+                            }
                             placeholder="Nom de visiteur"
                             className={cn(
                                 'h-9 rounded-xl bg-background/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]',
@@ -96,14 +94,10 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
 
                     {/* Country */}
                     <div className="space-y-1">
-                        <Label
-                            htmlFor="country"
-                        >
-                            Pays / Nationalité
-                        </Label>
+                        <Label htmlFor="country">Pays / Nationalité</Label>
                         <CountryDropdown
                             placeholder="Sélectionner un pays"
-                            defaultValue={data.country}
+                            defaultValue={data.country.toUpperCase()}
                             onChange={(country) => setData('country', country)}
                         />
                         <InputError message={errors.country} />
@@ -111,21 +105,20 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
 
                     {/* Phone */}
                     <div className="space-y-1">
-                        <Label
-                            htmlFor="phone"
-                        >
-                            Téléphone (Optionnel)
-                        </Label>
+                        <Label htmlFor="phone">Téléphone (Optionnel)</Label>
 
                         <PhoneInput
                             defaultCountry="ma"
                             value={data.phone}
-                            onChange={(val, { inputValue }) => inputValue.trim() !== val.trim() && setData('phone', val)}
+                            onChange={(val, { inputValue }) =>
+                                inputValue.trim() !== val.trim() &&
+                                setData('phone', val)
+                            }
                             inputClassName={cn(
-                                "w-full",
-                                errors.phone && "border-destructive"
+                                'w-full',
+                                errors.phone && 'border-destructive',
                             )}
-                            className='h-11'
+                            className="h-11"
                         />
                         <InputError message={errors.phone} />
                     </div>
@@ -141,12 +134,12 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
                             Annuler
                         </Button>
                     )}
-                    <Button
-                        type="submit"
-                        disabled={processing}
-                    >
+                    <Button type="submit" disabled={processing}>
                         {processing ? (
-                            <Loader2 size={12} className="mr-1.5 animate-spin" />
+                            <Loader2
+                                size={12}
+                                className="mr-1.5 animate-spin"
+                            />
                         ) : (
                             <Save size={12} className="mr-1.5" />
                         )}

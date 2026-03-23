@@ -26,7 +26,7 @@ import type { Reservation, ReservationStatus } from '@/types';
 type Props = {
     reservation: Reservation;
     onOpenDetails: () => void;
-    onEdit: (id: number) => void;
+    onEdit: (reservation: Reservation) => void;
 };
 
 export const StatusBadge: React.FC<{ status: ReservationStatus }> = ({ status }) => {
@@ -136,7 +136,7 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
                         variant="outline"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-foreground text-sky-600"
-                        onClick={(e) => handleAction(e, () => onEdit(reservation.id))}
+                        onClick={(e) => handleAction(e, () => onEdit(reservation))}
                     >
                         <Edit3 size={14} />
                     </Button>
