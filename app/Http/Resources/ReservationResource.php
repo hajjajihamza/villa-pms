@@ -50,8 +50,8 @@ class ReservationResource extends JsonResource
             // Relationships
             'accommodation' => $this->whenLoaded('accommodation'),
             'channel' => $this->whenLoaded('channel'),
-            'main_visitor' => $this->whenLoaded('mainVisitor'),
-            'visitors' => $this->whenLoaded('visitors'),
+            'main_visitor' => new VisitorResource($this->whenLoaded('mainVisitor')),
+            'visitors' => VisitorResource::collection($this->whenLoaded('visitors')),
             'orders' => $this->whenLoaded('orders'),
             'creator' => $this->whenLoaded('creator'),
         ];

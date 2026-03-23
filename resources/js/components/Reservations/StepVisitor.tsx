@@ -7,7 +7,7 @@ import 'react-international-phone/style.css';
 import { CountryDropdown } from '../ui/country-dropdown';
 import { router } from '@inertiajs/react';
 import { ChangeEvent, useRef } from 'react';
-import VisitorController from '@/actions/App/Http/Controllers/VisitorController';
+import VisitorController from '@/actions/App/Http/Controllers/Reservation/VisitorController';
 import { useReservation } from './ReservationContext';
 import { VisitorDocumentSection } from './ReservationDetails/VisitorDocumentSection';
 

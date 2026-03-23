@@ -4,7 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Expense\ExpenseController;
 use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Reservation\PlanningController;
-use App\Http\Controllers\VisitorController;
+use App\Http\Controllers\Reservation\VisitorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])
@@ -42,6 +42,11 @@ Route::middleware('auth')->group(function (): void {
         ->name('reservations.visitors.update');
     Route::delete('reservations/visitors/{visitor}', [VisitorController::class, 'destroyVisitor'])
         ->name('reservations.visitors.destroy');
+
+    Route::post('reservations/visitors/{visitor}/documents', [VisitorController::class, 'storeDocument'])
+        ->name('reservations.documents.store');
+    Route::put('reservations/documents/{document}', [VisitorController::class, 'updateDocument'])
+        ->name('reservations.documents.update');
     Route::delete('reservations/documents/{document}', [VisitorController::class, 'destroyDocument'])
         ->name('reservations.documents.destroy');
     Route::resource('reservations', ReservationController::class)

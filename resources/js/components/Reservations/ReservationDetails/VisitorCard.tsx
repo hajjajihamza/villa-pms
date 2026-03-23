@@ -1,172 +1,172 @@
-import countries from 'i18n-iso-countries';
-import frLocale from 'i18n-iso-countries/langs/fr.json';
-import {
-    Phone, Trash2,
-} from 'lucide-react';
 import { useState } from 'react';
 import { CircleFlag } from 'react-circle-flags';
+import getName from 'i18n-iso-countries';
+import frLocale from 'i18n-iso-countries/langs/fr.json';
+import { Pencil, Trash2, Phone, User, Plus, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Visitor } from '@/types/models';
-import 'react-international-phone/style.css';
-import { VisitorDocumentSection } from './VisitorDocumentSection';
-import { VisitorForm } from '../ReservationForm/VisitorForm';
-import { router } from '@inertiajs/react';
-import VisitorController from '@/actions/App/Http/Controllers/VisitorController';
+import { visitorService } from '@/services/visitorService';
+import { VisitorForm } from './VisitorForm';
+import { DocumentCard } from './DocumentCard';
+import { DocumentForm } from './DocumentForm';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-interface VisitorCardProps {
-    visitor: Visitor;
-    index: number;
+getName.registerLocale(frLocale);
+
+interface Props {
+  visitor: Visitor;
 }
 
-countries.registerLocale(frLocale);
+export function VisitorCard({ visitor }: Props) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [showDocForm, setShowDocForm] = useState(false);
+  const [isDocsOpen, setIsDocsOpen] = useState(false);
 
-export function VisitorCard({ visitor, index }: VisitorCardProps) {
-    const [isEditing, setIsEditing] = useState(false);
-    const [isInitialAdd, setIsInitialAdd] = useState(false);
-    const isMain = Boolean(Number(visitor.is_main));
+  const countryName = visitor.country ? getName.getName(visitor.country, 'fr') : 'Inconnu';
 
-    const handleSuccess = () => {
-        setIsEditing(false);
-        setIsInitialAdd(false);
-    };
+  const handleDelete = () => {
+    visitorService.destroy(visitor.id);
+  };
 
-    const handleCancel = () => {
-        setIsEditing(false);
-        setIsInitialAdd(false);
-    };
-
-    const handleDelete = () => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer ce visiteur ?')) {
-            router.delete(VisitorController.destroyVisitor(visitor.id).url, {
-                preserveScroll: true,
-            });
-        }
-    };
-
+  if (isEditing) {
     return (
-        <div
-            className={cn(
-                "group/card relative space-y-6 rounded-2xl border-2 p-6 transition-all sm:p-8",
-                isMain
-                    ? 'bg-brand-50/20 dark:bg-brand-900/10 border-brand-500/20 dark:border-brand-500/30'
-                    : 'border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-900/30'
-            )}
-        >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex w-full items-center gap-4">
-                    <div
-                        className={cn(
-                            "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-black sm:h-14 sm:w-14 sm:rounded-2xl",
-                            isMain
-                                ? 'bg-brand-500 text-white shadow-md'
-                                : 'bg-gray-200 text-gray-500 dark:bg-gray-800'
-                        )}
-                    >
-                        {index + 1}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        {!isEditing ? (
-                            <>
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="truncate text-base font-medium tracking-tight text-foreground">
-                                        {visitor.full_name}
-                                    </h4>
-                                    {isMain && (
-                                        <span className="bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-800 inline-flex items-center rounded-full border px-2 py-0.5 text-[0.55rem] font-medium tracking-wider whitespace-nowrap uppercase">
-                                            Hôte principal
-                                        </span>
-                                    )}
-                                </div>
+      <VisitorForm
+        reservationId={visitor.reservation_id}
+        visitor={visitor}
+        onCancel={() => setIsEditing(false)}
+        onSuccess={() => setIsEditing(false)}
+      />
+    );
+  }
 
-                                <div className="mt-1.5 flex flex-wrap gap-3">
-                                    {visitor.country && (
-                                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                                            <CircleFlag
-                                                countryCode={visitor.country.toLowerCase()}
-                                                height={14}
-                                                width={14}
-                                                className="shrink-0 rounded-full"
-                                            />
-                                            <span className="text-[0.7rem] font-medium">
-                                                {countries.getName(
-                                                    visitor.country.toUpperCase(),
-                                                    'fr',
-                                                ) || visitor.country}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {visitor.phone && (
-                                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                                            <Phone
-                                                size={11}
-                                                className="shrink-0"
-                                            />
-                                            <span className="text-[0.7rem] font-medium tracking-wide">
-                                                {visitor.phone}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        ) : (
-                            <VisitorForm
-                                reservationId={visitor.reservation_id}
-                                visitor={visitor}
-                                onSuccess={handleSuccess}
-                                onCancel={handleCancel}
-                                initialAddDocument={isInitialAdd}
-                                showTitle={false}
-                                className="p-0 bg-transparent border-0"
-                            />
-                        )}
-                    </div>
-                    {!isEditing && (
-                        <div className="flex items-center gap-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsEditing(true)}
-                            >
-                                Modifier
-                            </Button>
-                            {!isMain && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-9 w-9 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-100 dark:border-red-900/50"
-                                    onClick={handleDelete}
-                                >
-                                    <Trash2 size={15} />
-                                </Button>
-                            )}
-                        </div>
-                    )}
-                </div>
+  return (
+    <Card className={cn(
+      "overflow-hidden border-slate-200 dark:border-white/5 transition-all duration-300",
+      visitor.is_main 
+        ? "bg-gradient-to-br from-brand-50/50 to-white dark:from-brand-500/10 dark:to-dark-surface border-brand-200 dark:border-brand-500/20 shadow-brand-500/5 ring-1 ring-brand-500/5 shadow-md" 
+        : "bg-white dark:bg-dark-surface"
+    )}>
+      <div className="p-2 sm:p-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            {/* Avatar / Icon */}
+            <div className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center shadow-sm shrink-0",
+              visitor.is_main 
+                ? "bg-brand-500 text-white" 
+                : "bg-slate-100 dark:bg-white/5 text-slate-500"
+            )}>
+              <User size={16} className={visitor.is_main ? "stroke-[2.5]" : ""} />
             </div>
 
-            {!isEditing && (
-            <VisitorDocumentSection
-                documents={visitor.documents?.map(doc => ({
-                    id: doc.id,
-                    type: doc.type,
-                    url: `/storage/${doc.file_path}`,
-                })) || []}
-                onAdd={() => {
-                    setIsInitialAdd(true);
-                    setIsEditing(true);
-                }}
-                onRemove={() => setIsEditing(true)}
-                onUpdate={() => setIsEditing(true)}
-                onFileChange={() => setIsEditing(true)}
-                errors={{}}
-                baseId={`visitor-${visitor.id}`}
-                isEditing={false}
-            />
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-bold text-slate-900 dark:text-white tracking-tight truncate">
+                  {visitor.full_name}
+                </span>
+                {visitor.is_main && (
+                  <Badge className="bg-brand-500/10 text-brand-600 dark:text-brand-400 border-brand-500/20 text-[8px] uppercase tracking-tighter font-black px-1.5 py-0">
+                    Responsable
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                {visitor.country && (
+                  <div className="flex items-center gap-1 py-0 px-1.5 bg-slate-100 dark:bg-white/5 rounded-full border border-slate-200/50 dark:border-white/10">
+                    <CircleFlag countryCode={visitor.country.toLowerCase()} height={10} width={10} className="rounded-full shadow-sm" />
+                    <span className="text-[9px] font-bold text-slate-600 dark:text-slate-400">{countryName}</span>
+                  </div>
+                )}
+                {visitor.phone && (
+                  <div className="flex items-center gap-1 text-[9px] font-bold text-slate-500 dark:text-slate-400">
+                    <Phone size={8} className="text-brand-500" />
+                    <span>{visitor.phone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 self-end sm:self-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 px-2 rounded-md border-slate-200 dark:border-white/10 bg-white dark:bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-50 hover:text-brand-600 transition-all font-bold text-[9px] uppercase tracking-tighter"
+              onClick={() => setIsEditing(true)}
+            >
+              <Pencil size={12} className="mr-1" /> Modifier
+            </Button>
+            {!visitor.is_main && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 rounded-md border-slate-200 dark:border-white/10 bg-white dark:bg-transparent text-slate-700 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 transition-all font-bold text-[9px] uppercase tracking-tighter"
+                onClick={handleDelete}
+              >
+                <Trash2 size={12} className="mr-1" /> Supprimer
+              </Button>
             )}
+          </div>
         </div>
-    );
+
+        {/* Documents Section */}
+        <div className="mt-3 pt-2 border-t border-slate-100 dark:border-white/5">
+          <Collapsible open={isDocsOpen} onOpenChange={setIsDocsOpen}>
+            <div className="flex items-center justify-between mb-2">
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-pointer group">
+                  <div className={cn(
+                    "w-6 h-6 rounded-md flex items-center justify-center transition-all",
+                    (visitor.documents?.length || 0) > 0 
+                      ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" 
+                      : "bg-slate-50 text-slate-400 dark:bg-white/5"
+                  )}>
+                    <FileText size={12} />
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-tight text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                    Docs ({visitor.documents?.length || 0})
+                  </span>
+                  {isDocsOpen ? <ChevronUp size={10} className="text-slate-400" /> : <ChevronDown size={10} className="text-slate-400" />}
+                </div>
+              </CollapsibleTrigger>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-1.5 text-[8px] font-black uppercase tracking-tighter text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-all rounded-md"
+                onClick={(e) => {
+                   e.stopPropagation();
+                   setIsDocsOpen(true);
+                   setShowDocForm(true);
+                }}
+                disabled={showDocForm}
+              >
+                <Plus size={10} className="mr-0.5" /> Ajouter Doc
+              </Button>
+            </div>
+
+            <CollapsibleContent className="space-y-2">
+              {showDocForm && (
+                <DocumentForm
+                  visitorId={visitor.id}
+                  onCancel={() => setShowDocForm(false)}
+                  onSuccess={() => setShowDocForm(false)}
+                />
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {visitor.documents?.map((doc) => (
+                  <DocumentCard key={doc.id} document={doc} />
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      </div>
+    </Card>
+  );
 }

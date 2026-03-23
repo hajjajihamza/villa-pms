@@ -97,7 +97,7 @@ export default function ReservationIndex({ reservations, accommodations, activeT
                     }}
                 />
 
-                <ReservationForm
+                {/* <ReservationForm
                     open={formOpen}
                     onOpenChange={(open) => {
                         setFormOpen(open);
@@ -106,7 +106,7 @@ export default function ReservationIndex({ reservations, accommodations, activeT
                         }
                     }}
                     reservationId={editingReservationId}
-                />
+                /> */}
             </section>
         </AppLayout>
     );

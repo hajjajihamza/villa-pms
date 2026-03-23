@@ -26,7 +26,7 @@ import type { Reservation } from '@/types';
 import { Card } from '../../ui/card';
 import { ReservationInvoice } from '../ReservationInvoice';
 import { StatusBadge } from '../ReservationList/ReservationCard';
-import { ReservationVisitorsSection } from './ReservationVisitorsSection';
+import { VisitorsSection } from './VisitorsSection';
 
 type Props = {
     open: boolean;
@@ -116,8 +116,8 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
                 <div className="p-2 space-y-3 pb-5">
                     {/* Main Content Area */}
                     <div className="space-y-4">
-                        {/* Guest Profiles Section */}
-                        <ReservationVisitorsSection reservation={reservation} />
+                        {/* Section: Visiteurs */}
+                        <VisitorsSection reservationId={reservationId} visitors={reservation.visitors ?? []} />
 
                         {/* Section: Détails du Séjour */}
                         <section className="space-y-2">
