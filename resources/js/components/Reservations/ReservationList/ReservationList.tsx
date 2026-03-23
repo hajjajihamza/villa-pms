@@ -1,23 +1,22 @@
 import { Link } from '@inertiajs/react';
 import { CalendarX } from 'lucide-react';
 import { useState } from 'react';
-import ReservationCard from '@/components/Reservations/ReservationCard';
-import ReservationDetailsModal from '@/components/Reservations/ReservationDetailsModal';
+import ReservationModal from '@/components/Reservations/ReservationDetails/ReservationModal';
+import ReservationCard from '@/components/Reservations/ReservationList/ReservationCard';
 import { Button } from '@/components/ui/button';
-import type { Reservation } from '@/types';
 import type { PaginatedReservations } from '@/pages/reservations';
 
 type Props = {
     reservations: PaginatedReservations;
-    onEdit: (reservation: Reservation) => void;
+    onEdit: (id: number) => void;
 };
 
 export default function ReservationList({ reservations, onEdit }: Props) {
     const [open, setOpen] = useState(false);
-    const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+    const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
 
-    const openDetails = (reservation: Reservation) => {
-        setSelectedReservation(reservation);
+    const openDetails = (id: number) => {
+        setSelectedReservationId(id);
         setOpen(true);
     }
 
@@ -30,7 +29,7 @@ export default function ReservationList({ reservations, onEdit }: Props) {
                             <ReservationCard
                                 key={reservation.id}
                                 reservation={reservation}
-                                onOpenDetails={() => openDetails(reservation)}
+                                onOpenDetails={() => openDetails(reservation.id)}
                                 onEdit={onEdit}
                             />
                         ))}
@@ -90,10 +89,10 @@ export default function ReservationList({ reservations, onEdit }: Props) {
                 )}
             </div>
 
-            <ReservationDetailsModal
+            <ReservationModal
                 open={open}
                 onOpenChange={setOpen}
-                reservation={selectedReservation}
+                reservationId={selectedReservationId as number}
             />
         </>
     );

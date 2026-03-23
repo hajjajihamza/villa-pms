@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Expense\ExpenseController;
 use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Reservation\PlanningController;
+use App\Http\Controllers\VisitorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])
@@ -35,11 +36,13 @@ Route::middleware('auth')->group(function (): void {
         ->name('reservations.reported');
     Route::patch('reservations/{reservation}/validate', [ReservationController::class, 'validateStay'])
         ->name('reservations.validate');
-    Route::post('reservations/{reservation}/visitors', [ReservationController::class, 'storeVisitor'])
+    Route::post('reservations/{reservation}/visitors', [VisitorController::class, 'storeVisitor'])
         ->name('reservations.visitors.store');
-    Route::put('reservations/visitors/{visitor}', [ReservationController::class, 'updateVisitor'])
+    Route::put('reservations/visitors/{visitor}', [VisitorController::class, 'updateVisitor'])
         ->name('reservations.visitors.update');
-    Route::delete('reservations/documents/{document}', [ReservationController::class, 'destroyDocument'])
+    Route::delete('reservations/visitors/{visitor}', [VisitorController::class, 'destroyVisitor'])
+        ->name('reservations.visitors.destroy');
+    Route::delete('reservations/documents/{document}', [VisitorController::class, 'destroyDocument'])
         ->name('reservations.documents.destroy');
     Route::resource('reservations', ReservationController::class)
         ->only(['index', 'store', 'update', 'destroy']);

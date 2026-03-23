@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Reservation extends Model
@@ -44,16 +45,6 @@ class Reservation extends Model
         'accommodation_id',
     ];
 
-    protected $appends = [
-        'amount_to_pay',
-        'total_price',
-        'total_orders_amount',
-        'total_guests',
-        'duration',
-        'status',
-        'main_visitor',
-        'can_validate',
-    ];
 
     /**
      * @return array<string, string|class-string|array>
@@ -80,6 +71,12 @@ class Reservation extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function mainVisitor(): HasOne
+    {
+        return $this->hasOne(Visitor::class, 'reservation_id', 'id')
+            ->where('is_main', true);
     }
 
     public function channel(): BelongsTo
@@ -140,7 +137,7 @@ class Reservation extends Model
         );
     }
 
-    protected function totalGuests(): Attribute
+    protected function guestsCount(): Attribute
     {
         return Attribute::get(
             fn (): int => (int) $this->adults + (int) $this->children
@@ -182,13 +179,6 @@ class Reservation extends Model
 
                 return StatusEnum::PENDING;
             }
-        );
-    }
-
-    protected function mainVisitor(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->visitors()->with('documents')->where('is_main', true)->first(),
         );
     }
 

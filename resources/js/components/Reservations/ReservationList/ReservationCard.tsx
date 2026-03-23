@@ -3,7 +3,7 @@ import {
     CheckCheck, Clock, Edit3, Flag, Shield,
     ShieldCheck, Trash2, Calendar, User2
 } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { MouseEvent } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ import type { Reservation, ReservationStatus } from '@/types';
 type Props = {
     reservation: Reservation;
     onOpenDetails: () => void;
-    onEdit: (reservation: Reservation) => void;
+    onEdit: (id: number) => void;
 };
 
 export const StatusBadge: React.FC<{ status: ReservationStatus }> = ({ status }) => {
@@ -53,7 +53,6 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
     const [deleteNote, setDeleteNote] = useState<string>('');
     const [processing, setProcessing] = useState(false);
     const status = reservation.status ?? 'PENDING';
-    const amountToPay = reservation.amount_to_pay ?? reservation.total_price ?? 0;
 
     const handleAction = (e: MouseEvent, action: () => void) => {
         e.stopPropagation();
@@ -124,7 +123,7 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
                     <StatusBadge status={status} />
                     <div className="text-right">
                         <p className="text-sm font-black text-primary">
-                            {formatNumber(amountToPay)} <span className="text-[10px]">DH</span>
+                            {formatNumber(reservation.amount_to_pay as number)} <span className="text-[10px]">DH</span>
                         </p>
                     </div>
                 </div>
@@ -137,12 +136,12 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
                         variant="outline"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-foreground text-sky-600"
-                        onClick={(e) => handleAction(e, () => onEdit(reservation))}
+                        onClick={(e) => handleAction(e, () => onEdit(reservation.id))}
                     >
                         <Edit3 size={14} />
                     </Button>
                     )}
-                    
+
                     {reservation.can_validate && reservation.status === 'PENDING' && (
                         <Button
                             title="Valider le séjour"

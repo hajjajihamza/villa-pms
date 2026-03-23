@@ -126,7 +126,7 @@ export type Reservation = BaseModel &
         total_price?: number;
         total_orders_amount?: number;
         duration?: number;
-        total_guests?: number;
+        guests_count?: number;
         amount_to_pay?: number;
         status?: ReservationStatus;
         can_validate?: boolean;
@@ -142,7 +142,6 @@ export type Unit = BaseModel & {
 
 export type Visitor = BaseModel & {
     full_name: string;
-    document_number: string | null;
     phone: string | null;
     country: string | null;
     is_main: boolean;

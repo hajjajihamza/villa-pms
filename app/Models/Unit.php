@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\DB;
 
 class Unit extends Model
 {
@@ -19,10 +20,6 @@ class Unit extends Model
     /** @var array<int, string> */
     protected $fillable = [
         'name',
-    ];
-
-    protected $appends = [
-        'reserved_periods',
     ];
 
     // ────────────────────────────────────────────────
@@ -43,39 +40,20 @@ class Unit extends Model
     //  Accessors & Mutators
     // ────────────────────────────────────────────────
 
-    protected function reservations(): Attribute
-    {
-        return Attribute::get(function () {
-            return $this->accommodations()
-                ->with(['reservations.visitors.documents','reservations.channel','reservations.orders.orderItems', 'reservations.creator', 'reservations.accommodation'])
-                ->get()
-                ->pluck('reservations')
-                ->flatten()
-                ->unique('id')
-                ->values();
-        });
-    }
-
     protected function reservedPeriods(): Attribute
     {
         return Attribute::get(function () {
-            $today = Carbon::today();
+            $date = Carbon::today()->subWeek();
 
-            return $this->accommodations()
-                ->with(['reservations' => function ($query) use ($today) {
-                    $query->where('check_in', '>=', $today)
-                        ->select(['id', 'accommodation_id', 'check_in', 'check_out']);
-                }])
+            return DB::table('reservations')
+                ->select('reservations.check_in', 'reservations.check_out')
+                ->join('accommodations', 'accommodations.id', '=', 'reservations.accommodation_id')
+                ->join('accommodation_unit', 'accommodation_unit.accommodation_id', '=', 'accommodations.id')
+                ->where('check_in', '>=', $date)
+                ->where('accommodation_unit.unit_id', $this->id)
+                ->whereNull('reservations.deleted_at')
                 ->get()
-                ->pluck('reservations')
-                ->flatten()
-                ->map(fn ($reservation) => [
-                    'check_in' => $reservation->check_in->toDateString(),
-                    'check_out' => $reservation->check_out->toDateString(),
-                ])
-                ->values()
                 ->toArray();
         });
     }
-
 }
