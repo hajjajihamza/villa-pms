@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Reservation;
 
 use App\Models\Accommodation;
-use App\Models\Document;
 use App\Models\Reservation;
-use App\Models\Visitor;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ReservationService
 {
@@ -69,24 +66,12 @@ class ReservationService
 
             $reservation = Reservation::create($reservationData);
 
-            $mainVisitor = $reservation->visitors()->create([
+             $reservation->visitors()->create([
                 'full_name' => $data['full_name'],
                 'phone' => $data['phone'],
                 'country' => $data['country'],
                 'is_main' => true,
             ]);
-
-            if (isset($data['documents']) && is_array($data['documents'])) {
-                foreach ($data['documents'] as $docData) {
-                    if (isset($docData['file']) && $docData['file'] instanceof \Illuminate\Http\UploadedFile) {
-                        $path = $docData['file']->store('visitor-documents', 'public');
-                        $mainVisitor->documents()->create([
-                            'type' => $docData['type'],
-                            'file_path' => $path,
-                        ]);
-                    }
-                }
-            }
 
             return $reservation;
         });
@@ -117,45 +102,11 @@ class ReservationService
 
             $reservation->update($reservationData);
 
-            $mainVisitor = $reservation->visitors()->where('is_main', true)->first();
-            if ($mainVisitor) {
-                $mainVisitor->update([
-                    'full_name' => $data['full_name'],
-                    'phone' => $data['phone'],
-                    'country' => $data['country'],
-                ]);
-
-                if (isset($data['documents']) && is_array($data['documents'])) {
-                    foreach ($data['documents'] as $docData) {
-                        if (isset($docData['file']) && $docData['file'] instanceof \Illuminate\Http\UploadedFile) {
-                            $path = $docData['file']->store('visitor-documents', 'public');
-                            if (isset($docData['id'])) {
-                                $existingDoc = $mainVisitor->documents()->find($docData['id']);
-                                if ($existingDoc) {
-                                    if (Storage::disk('public')->exists($existingDoc->file_path)) {
-                                        Storage::disk('public')->delete($existingDoc->file_path);
-                                    }
-                                    $existingDoc->update([
-                                        'type' => $docData['type'],
-                                        'file_path' => $path,
-                                    ]);
-                                    continue;
-                                }
-                            }
-
-                            $mainVisitor->documents()->create([
-                                'type' => $docData['type'],
-                                'file_path' => $path,
-                            ]);
-                        } elseif (isset($docData['id'])) {
-                            $existingDoc = $mainVisitor->documents()->find($docData['id']);
-                            if ($existingDoc && $existingDoc->type !== $docData['type']) {
-                                $existingDoc->update(['type' => $docData['type']]);
-                            }
-                        }
-                    }
-                }
-            }
+            $reservation->mainVisitor()?->update([
+                'full_name' => $data['full_name'],
+                'phone' => $data['phone'],
+                'country' => $data['country'],
+            ]);
 
             return $reservation;
         });

@@ -127,7 +127,7 @@ export default function ReservationForm({
                 total: reservation.total_price ?? 0,
                 full_name: reservation.main_visitor?.full_name ?? '',
                 phone: reservation.main_visitor?.phone ?? '',
-                country: reservation.main_visitor?.country ?? 'ma',
+                country: reservation.main_visitor?.country ?? 'MA',
             });
         } else {
             form.setData(initialData);

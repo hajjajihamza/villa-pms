@@ -29,10 +29,6 @@ class StoreReservationRequest extends FormRequest
             'full_name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'country' => ['nullable', 'string', 'max:2'],
-            'documents' => ['nullable', 'array'],
-            'documents.*.file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,pdf', 'max:5120'], // 5MB max
-            'documents.*.type' => ['required_with:documents', 'string', 'in:ID_CARD,PASSPORT,DRIVERS_LICENSE,RESIDENCE_CARD'],
-            'documents.*.id' => ['nullable', 'integer', 'exists:documents,id'],
         ];
     }
 }

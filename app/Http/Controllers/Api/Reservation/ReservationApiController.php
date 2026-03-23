@@ -18,7 +18,7 @@ class ReservationApiController extends Controller
      *
      * @return JsonResponse
      */
-    public function bookingData()
+    public function bookingData(): JsonResponse
     {
         return response()->json([
             'channels' => Channel::all(),
