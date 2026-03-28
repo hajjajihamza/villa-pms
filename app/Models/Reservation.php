@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\StatusEnum;
 use Carbon\Carbon;
+use Fruitcake\LaravelDebugbar\Facades\Debugbar;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -172,7 +173,11 @@ class Reservation extends Model
                     return StatusEnum::CONFIRMED;
                 }
 
-                if ($this->real_check_out && Carbon::parse($this->real_check_out)->gt($today)) {
+                if ($this->id === 10) {
+                    Debugbar::debug($this->real_check_out, $today ,$today->gt(Carbon::parse($this->real_check_out)));
+                }
+
+                if ($this->real_check_out && $today->gt(Carbon::parse($this->real_check_out))) {
                     return StatusEnum::CHECKED_OUT;
                 }
 
