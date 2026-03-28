@@ -1,9 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, CalendarDays, FolderGit2, HandCoins, LayoutGrid, Settings } from 'lucide-react';
+import { BookOpen, CalendarClock, CalendarDays, FolderGit2, HandCoins, LayoutGrid, Settings, ShoppingCart } from 'lucide-react';
 import DashboardController from '@/actions/App/Http/Controllers/DashboardController';
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
 import PlanningController from '@/actions/App/Http/Controllers/Reservation/PlanningController';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
+import SaleController from '@/actions/App/Http/Controllers/Sale/SaleController';
 import SettingController from '@/actions/App/Http/Controllers/Settings/SettingController';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -50,7 +51,12 @@ export function AppSidebar() {
         {
             title: 'Reservations',
             href: ReservationController.index(),
-            icon: CalendarDays,
+            icon: CalendarClock
+        },
+        {
+            title: 'Point de Vente',
+            href: SaleController.index(),
+            icon: ShoppingCart,
         },
         {
             title: 'Depenses',

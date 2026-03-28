@@ -2,9 +2,10 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Expense\ExpenseController;
-use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Reservation\PlanningController;
+use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Reservation\VisitorController;
+use App\Http\Controllers\Sale\SaleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])
@@ -22,7 +23,6 @@ Route::middleware('auth')->group(function (): void {
     //  Planning
     // ────────────────────────────────────────────────
     Route::get('planning', [PlanningController::class, 'index'])->name('planning.index');
-
 
     // ────────────────────────────────────────────────
     //  Reservations
@@ -51,7 +51,19 @@ Route::middleware('auth')->group(function (): void {
         ->name('reservations.documents.destroy');
     Route::resource('reservations', ReservationController::class)
         ->only(['index', 'store', 'update', 'destroy']);
+
+    // ────────────────────────────────────────────────
+    //  Sale
+    // ────────────────────────────────────────────────
+    Route::get('sale', [SaleController::class, 'index'])->name('sale.index');
+    Route::resource('products', \App\Http\Controllers\Product\ProductController::class)
+        ->only(['store', 'update', 'destroy']);
+    // ────────────────────────────────────────────────
+    //  Order
+    // ────────────────────────────────────────────────
+    Route::post('orders', [\App\Http\Controllers\Order\OrderController::class, 'store'])->name('orders.store');
 });
+
 
 require __DIR__.'/auth.php';
 require __DIR__.'/settings.php';

@@ -52,9 +52,10 @@ class ReservationController extends Controller
         $reservations = $this->reservationService->getReservationsQuery($query, $request)
             ->paginate(12)
             ->withQueryString()
-            ->through(fn(Reservation $item) => $item->append(['duration', 'amount_to_pay']))
+            ->through(fn(Reservation $item) => $item->append(['duration', 'amount_to_pay', 'status', 'can_validate']))
         ;
 
+//        dd($reservations);
         return Inertia::render('reservations/index', [
             'reservations' => $reservations,
             'accommodations' => Accommodation::get(['id', 'name']),

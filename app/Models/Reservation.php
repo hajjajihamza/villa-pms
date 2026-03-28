@@ -45,7 +45,6 @@ class Reservation extends Model
         'accommodation_id',
     ];
 
-
     /**
      * @return array<string, string|class-string|array>
      */
@@ -106,7 +105,7 @@ class Reservation extends Model
     protected function amountToPay(): Attribute
     {
         return Attribute::make(
-            get: fn() => ((float) $this->total_price + $this->total_orders_amount) - (float) $this->advance_amount,
+            get: fn () => ((float) $this->total_price + $this->total_orders_amount) - (float) $this->advance_amount,
         );
     }
 
@@ -120,8 +119,8 @@ class Reservation extends Model
     protected function totalOrdersAmount(): Attribute
     {
         return Attribute::make(
-            get: function() : float {
-                 $ordersTotal = 0.0;
+            get: function (): float {
+                $ordersTotal = 0.0;
 
                 if ($this->relationLoaded('orders')) {
                     $ordersTotal = $this->orders->sum(fn (Order $order) => (float) $order->total_amount);
@@ -169,7 +168,7 @@ class Reservation extends Model
                     return StatusEnum::CANCELLED;
                 }
 
-                if ($this->real_check_in && $today->lt($this->real_check_out)) {
+                if ($this->real_check_in && $today->lte($this->real_check_out)) {
                     return StatusEnum::CONFIRMED;
                 }
 
@@ -207,12 +206,6 @@ class Reservation extends Model
         $query
             ->whereNotNull('real_check_in')
             ->where('real_check_out', '>=', now()->toDateString());
-    }
-
-    #[Scope]
-    protected function pending(Builder $query): void
-    {
-        $query->whereNot(fn (Builder $q) => $q->confirmed()->checkedOut());
     }
 
     #[Scope]
