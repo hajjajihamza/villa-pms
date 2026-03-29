@@ -1,17 +1,25 @@
 import { Head } from '@inertiajs/react';
-import { Building2, RadioTower } from 'lucide-react';
+import { Building2, RadioTower, User, ShieldCheck } from 'lucide-react';
 import SettingController from '@/actions/App/Http/Controllers/Settings/SettingController';
-import AccommodationTable from '@/components/settings/AccommodationTable';
-import ChannelTable from '@/components/settings/ChannelTable';
+import AccommodationTable from '@/components/settings/Accommodation/AccommodationTable';
+import PasswordForm from '@/components/settings/Account/PasswordForm';
+import ProfileForm from '@/components/settings/Account/ProfileForm';
+import ChannelTable from '@/components/settings/Channel/ChannelTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import type { Accommodation, BreadcrumbItem, Channel } from '@/types';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type SettingsPageProps = {
     accommodations: Accommodation[];
     channels: Channel[];
 };
 
+// ────────────────────────────────────────────────
+//  Tools
+// ────────────────────────────────────────────────
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Parametres',
@@ -19,41 +27,72 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function SettingsIndex({ accommodations, channels }: SettingsPageProps) {
+    // ────────────────────────────────────────────────
+    // Render
+    // ────────────────────────────────────────────────
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs} title="Parametres" description="Gere les hebergements et les canaux de reservation depuis un seul espace.">
             <Head title="Parametres" />
 
-            <section className="space-y-6">
-                <div>
-                    <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">Parametres</p>
-                    <h1 className="text-2xl font-semibold">Configuration</h1>
-                    <p className="text-muted-foreground text-sm">
-                        Gere les hebergements et les canaux de reservation depuis un seul espace.
-                    </p>
-                </div>
+            <Tabs defaultValue="accommodations" className="space-y-6">
+                <TabsList className="h-auto w-full p-1 flex flex-nowrap justify-start overflow-x-auto overflow-y-hidden scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] bg-muted/50 border rounded-xl">
+                    <TabsTrigger
+                        value="accommodations"
+                        className="rounded-lg py-2 px-4 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                        <Building2 className="size-4 mr-2" />
+                        Hébergements
+                    </TabsTrigger>
 
-                <Tabs defaultValue="accommodations" className="w-full">
-                    <TabsList className="inline-flex w-fit">
-                        <TabsTrigger value="accommodations" className="w-auto">
-                            <Building2 className="size-4 mr-2" />
-                            Hebergements
-                        </TabsTrigger>
-                        <TabsTrigger value="channels" className="w-auto">
-                            <RadioTower className="size-4 mr-2" />
-                            Canaux
-                        </TabsTrigger>
-                    </TabsList>
+                    <TabsTrigger
+                        value="channels"
+                        className="rounded-lg py-2 px-4 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                        <RadioTower className="size-4 mr-2" />
+                        Canaux
+                    </TabsTrigger>
 
-                    <TabsContent value="accommodations">
-                        <AccommodationTable accommodations={accommodations} />
-                    </TabsContent>
+                    <TabsTrigger
+                        value="profile"
+                        className="rounded-lg py-2 px-4 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                        <User className="size-4 mr-2" />
+                        Profil
+                    </TabsTrigger>
 
-                    <TabsContent value="channels">
-                        <ChannelTable channels={channels} />
-                    </TabsContent>
-                </Tabs>
-            </section>
+                    <TabsTrigger
+                        value="security"
+                        className="rounded-lg py-2 px-4 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                        <ShieldCheck className="size-4 mr-2" />
+                        Sécurité
+                    </TabsTrigger>
+                </TabsList>
+
+                {/* Accommodations Tab Content */}
+                <TabsContent value="accommodations" className="mt-0 outline-none">
+                    <AccommodationTable accommodations={accommodations} />
+                </TabsContent>
+
+                {/* Channels Tab Content */}
+                <TabsContent value="channels" className="mt-0 outline-none">
+                    <ChannelTable channels={channels} />
+                </TabsContent>
+
+                {/* Profile Tab Content */}
+                <TabsContent value="profile" className="mt-0 outline-none">
+                    <ProfileForm />
+                </TabsContent>
+
+                {/* Security Tab Content */}
+                <TabsContent value="security" className="mt-0 outline-none">
+                    <PasswordForm />
+                </TabsContent>
+            </Tabs>
         </AppLayout>
     );
 }

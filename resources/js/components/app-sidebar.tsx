@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, CalendarClock, CalendarDays, FolderGit2, HandCoins, LayoutGrid, Settings, ShoppingCart } from 'lucide-react';
+import { CalendarClock, CalendarDays, HandCoins, LayoutDashboard, LayoutGrid, Settings, ShoppingCart } from 'lucide-react';
 import DashboardController from '@/actions/App/Http/Controllers/DashboardController';
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
 import PlanningController from '@/actions/App/Http/Controllers/Reservation/PlanningController';
@@ -24,14 +24,9 @@ import type { NavItem } from '@/types';
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Depot',
+        title: 'POS Caisse',
         href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        icon: ShoppingCart,
     },
 ];
 
@@ -54,9 +49,9 @@ export function AppSidebar() {
             icon: CalendarClock
         },
         {
-            title: 'Point de Vente',
+            title: 'POS Complet',
             href: SaleController.index(),
-            icon: ShoppingCart,
+            icon: LayoutDashboard,
         },
         {
             title: 'Depenses',

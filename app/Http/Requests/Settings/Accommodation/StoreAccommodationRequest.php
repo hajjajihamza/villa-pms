@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Requests\Accommodation;
+namespace App\Http\Requests\Settings\Accommodation;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAccommodationRequest extends FormRequest

@@ -11,14 +11,36 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+        primary:
+          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
-        outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        success:
+          "bg-emerald-600 text-white shadow-xs hover:bg-emerald-600/90 focus-visible:ring-emerald-600/20 dark:focus-visible:ring-emerald-600/40",
+        warning:
+          "bg-amber-500 text-amber-950 shadow-xs hover:bg-amber-500/90 focus-visible:ring-amber-500/20 dark:focus-visible:ring-amber-500/40",
+        info:
+          "bg-sky-500 text-white shadow-xs hover:bg-sky-500/90 focus-visible:ring-sky-500/20 dark:focus-visible:ring-sky-500/40",
+        outline:
+          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
+        "outline-success":
+          "border border-emerald-600 bg-background text-emerald-600 shadow-xs hover:bg-emerald-600 hover:text-white",
+        "outline-warning":
+          "border border-amber-500 bg-background text-amber-600 shadow-xs hover:bg-amber-500 hover:text-amber-950",
+        "outline-info":
+          "border border-sky-500 bg-background text-sky-600 shadow-xs hover:bg-sky-500 hover:text-white",
+        "outline-destructive":
+          "border border-destructive bg-background text-destructive shadow-xs hover:bg-destructive hover:text-white",
+        "outline-secondary":
+          "border border-secondary bg-background text-secondary-foreground shadow-xs hover:bg-secondary hover:text-secondary-foreground",
+        "outline-ghost":
+          "border border-transparent bg-background shadow-xs hover:border-accent hover:bg-accent hover:text-accent-foreground",
+        "outline-primary":
+          "border border-primary bg-background text-primary shadow-xs hover:bg-primary hover:text-primary-foreground",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

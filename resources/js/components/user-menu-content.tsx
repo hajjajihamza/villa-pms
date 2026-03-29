@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Settings } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { edit } from '@/routes/profile';
+import { logout } from '@/routes';
 import type { User } from '@/types';
 
 type Props = {
@@ -27,15 +27,16 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild variant="destructive">
                     <Link
                         className="block w-full cursor-pointer"
-                        href={edit()}
-                        prefetch
+                        href={logout()}
+                        method="post"
+                        as="button"
                         onClick={cleanup}
                     >
-                        <Settings className="mr-2" />
-                        Parametres
+                        <LogOut className='mr-2'/>
+                        Se deconnecter
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>

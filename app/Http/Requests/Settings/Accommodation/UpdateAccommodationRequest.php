@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Requests\Accommodation;
+namespace App\Http\Requests\Settings\Accommodation;
 
 use App\Models\Accommodation;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

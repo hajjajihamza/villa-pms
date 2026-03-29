@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Channel;
+namespace App\Http\Requests\Settings\Channel;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreChannelRequest extends FormRequest
+class UpdateChannelRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -14,8 +14,11 @@ class StoreChannelRequest extends FormRequest
      */
     public function rules(): array
     {
+        /** @var Channel $channel */
+        $channel = $this->route('channel');
+
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:channels,name'],
+            'name' => ['required', 'string', 'max:255', Rule::unique('channels', 'name')->ignore($channel->id)],
             'commission' => ['required', 'numeric', 'min:0', 'max:100'],
             'color' => ['nullable', 'string', 'max:20'],
         ];

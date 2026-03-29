@@ -1,11 +1,18 @@
 import { usePage } from '@inertiajs/react';
 import { QueryClientProvider } from '@tanstack/react-query';
+import type { PropsWithChildren } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { queryClient } from '@/lib/query-client';
-import type { AppLayoutProps } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 
-export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
+export type Props = PropsWithChildren & {
+    breadcrumbs?: BreadcrumbItem[];
+    title?: string;
+    description?: string;
+};
+
+export default ({ children, breadcrumbs, ...props }: Props) => {
     const { flash } = usePage().props as any;
 
     return (
@@ -22,6 +29,18 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
                             <AlertDescription>{flash.error}</AlertDescription>
                         </Alert>
                     )}
+
+                    {props.title && (
+                        <div className='mb-2'>
+                            <h1 className="text-2xl font-semibold">{props.title}</h1>
+                            {props.description && (
+                                <p className="text-muted-foreground text-sm">
+                                    {props.description}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                    
                     {children}
                 </div>
             </AppLayoutTemplate>
