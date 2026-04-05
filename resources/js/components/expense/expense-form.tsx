@@ -23,7 +23,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toFormDate } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
 import type { Expense, ExpenseCategory, Unit } from '@/types';
-import { DatePickerInput } from '@/components/inputs/date-picker_input';
+import { DatePickerInput } from '@/components/date-picker_input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 

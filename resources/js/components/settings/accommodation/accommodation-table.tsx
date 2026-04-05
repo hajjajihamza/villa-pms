@@ -2,7 +2,7 @@ import { router } from '@inertiajs/react';
 import { Baby, Home, Pencil, Plus, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
 import AccommodationController from '@/actions/App/Http/Controllers/Settings/AccommodationController';
-import AccommodationForm from '@/components/settings/Accommodation/AccommodationForm';
+import AccommodationForm from '@/components/settings/accommodation/accommodation-form';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

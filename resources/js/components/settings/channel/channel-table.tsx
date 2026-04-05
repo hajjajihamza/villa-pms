@@ -2,7 +2,7 @@ import { router } from '@inertiajs/react';
 import { Pencil, Plus, Trash2, Percent } from 'lucide-react';
 import { useState } from 'react';
 import ChannelController from '@/actions/App/Http/Controllers/Settings/ChannelController';
-import ChannelForm from '@/components/settings/Channel/ChannelForm';
+import ChannelForm from '@/components/settings/channel/channel-form';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {

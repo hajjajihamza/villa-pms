@@ -13,7 +13,7 @@ import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ExpenseCategory, Unit } from '@/types';
-import { DatePickerInput } from '../inputs/date-picker_input';
+import { DatePickerInput } from '../date-picker_input';
 
 // ────────────────────────────────────────────────
 //  Types

@@ -1,10 +1,10 @@
 import { Head } from '@inertiajs/react';
 import { Building2, RadioTower, User, ShieldCheck } from 'lucide-react';
 import SettingController from '@/actions/App/Http/Controllers/Settings/SettingController';
-import AccommodationTable from '@/components/settings/Accommodation/AccommodationTable';
-import PasswordForm from '@/components/settings/Account/PasswordForm';
-import ProfileForm from '@/components/settings/Account/ProfileForm';
-import ChannelTable from '@/components/settings/Channel/ChannelTable';
+import AccommodationTable from '@/components/settings/accommodation/accommodation-table';
+import PasswordForm from '@/components/settings/account/password-form';
+import ProfileForm from '@/components/settings/account/Profile-form';
+import ChannelTable from '@/components/settings/channel/channel-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import type { Accommodation, BreadcrumbItem, Channel } from '@/types';
