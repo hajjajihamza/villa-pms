@@ -4,7 +4,7 @@ import DashboardController from '@/actions/App/Http/Controllers/DashboardControl
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
 import PlanningController from '@/actions/App/Http/Controllers/Reservation/PlanningController';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
-import SaleController from '@/actions/App/Http/Controllers/Sale/SaleController';
+import PosController from '@/actions/App/Http/Controllers/Pos/PosController';
 import SettingController from '@/actions/App/Http/Controllers/Settings/SettingController';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -25,7 +25,7 @@ import type { NavItem } from '@/types';
 const footerNavItems: NavItem[] = [
     {
         title: 'POS Caisse',
-        href: 'https://github.com/laravel/react-starter-kit',
+        href: PosController.indexV2(),
         icon: ShoppingCart,
     },
 ];
@@ -50,7 +50,7 @@ export function AppSidebar() {
         },
         {
             title: 'POS Complet',
-            href: SaleController.index(),
+            href: PosController.index(),
             icon: LayoutDashboard,
         },
         {

@@ -5,7 +5,7 @@ use App\Http\Controllers\Expense\ExpenseController;
 use App\Http\Controllers\Reservation\PlanningController;
 use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Reservation\VisitorController;
-use App\Http\Controllers\Sale\SaleController;
+use App\Http\Controllers\Pos\PosController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])
@@ -53,9 +53,10 @@ Route::middleware('auth')->group(function (): void {
         ->only(['index', 'store', 'update', 'destroy']);
 
     // ────────────────────────────────────────────────
-    //  Sale
+    //  Pos
     // ────────────────────────────────────────────────
-    Route::get('sale', [SaleController::class, 'index'])->name('sale.index');
+    Route::get('pos', [PosController::class, 'index'])->name('pos.index');
+    Route::get('pos-v2', [PosController::class, 'indexV2'])->name('pos.indexV2');
     Route::resource('products', \App\Http\Controllers\Product\ProductController::class)
         ->only(['store', 'update', 'destroy']);
     // ────────────────────────────────────────────────

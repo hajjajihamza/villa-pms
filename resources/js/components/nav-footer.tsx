@@ -6,7 +6,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { toUrl } from '@/lib/utils';
+import { cn, toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
 export function NavFooter({
@@ -27,7 +27,7 @@ export function NavFooter({
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton
                                 asChild
-                                className="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
+                                className={cn('text-neutral-800 bg-sidebar-accent')}
                             >
                                 <a
                                     href={toUrl(item.href)}

@@ -1,22 +1,23 @@
 <?php
 
-namespace App\Http\Controllers\Sale;
+namespace App\Http\Controllers\Pos;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\ProductCategory;
-use App\Models\Reservation;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Carbon\Carbon;
+use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Models\Reservation;
 
-class SaleController extends Controller
+class PosController extends Controller
 {
     public function index(): Response
     {
         $today = Carbon::today()->toDateTimeString();
         $products = Product::all();
-        $categories = ProductCategory::all();
+        $categories = ProductCategory::query()->orderBy('name', 'asc')->get();
         $reservations = Reservation::where('real_check_in', '<=', $today)
                     ->orWhere('real_check_out', '>', $today)
                     ->orWhere('check_in', '>=', $today)
@@ -25,10 +26,22 @@ class SaleController extends Controller
                     ->get(['id', 'check_in', 'check_out', 'real_check_in', 'real_check_out'])
                     ->append(['status']);
 
-        return Inertia::render('sale/index', [
+        return Inertia::render('pos/index', [
             'products' => $products,
             'categories' => $categories,
             'reservations' => $reservations,
         ]);
     }
+
+    public function indexV2(): Response
+    {
+        $products = Product::all();
+        $categories = ProductCategory::query()->orderBy('name', 'asc')->get();
+
+        return Inertia::render('pos/index-v2', [
+            'products' => $products,
+            'categories' => $categories,
+        ]);
+    }
+
 }

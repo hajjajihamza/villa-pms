@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { LayoutGrid, List, Plus, Settings, Search, Send, Loader2 } from 'lucide-react';
 import { useState, useRef } from 'react';
-import SaleController from '@/actions/App/Http/Controllers/Sale/SaleController';
+import PosController from '@/actions/App/Http/Controllers/Pos/PosController';
 import PosContainer from '@/components/Pos/pos-container';
 import { OrdersTab, OrdersTabHandle } from '@/components/Pos/orders-tab';
 import { ProductForm } from '@/components/Pos/product-form';
@@ -11,20 +11,32 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Product, ProductCategory, Reservation } from '@/types';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type Props = {
     products: Product[],
     categories: ProductCategory[],
     reservations?: Reservation[]
 }
 
+// ────────────────────────────────────────────────
+//  Tools
+// ────────────────────────────────────────────────
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Point de Vente',
-        href: SaleController.index().url,
+        href: PosController.index().url,
     },
 ];
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function Index({ products, categories, reservations }: Props) {
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
     const { auth } = usePage().props as any;
     const isAdmin = auth.user.is_admin;
     const [activeTab, setActiveTab] = useState<'pos' | 'order'>('pos');
@@ -35,6 +47,9 @@ export default function Index({ products, categories, reservations }: Props) {
 
     const ordersTabRef = useRef<OrdersTabHandle>(null);
 
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const handleNewProduct = () => {
         setEditingProduct(null);
         setIsProductFormOpen(true);
@@ -45,6 +60,9 @@ export default function Index({ products, categories, reservations }: Props) {
         setIsProductFormOpen(true);
     };
 
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Tabs

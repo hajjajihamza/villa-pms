@@ -5,6 +5,7 @@ import { CategoryTabs } from './category-tabs';
 import { ReservationTabs } from './reservation-tabs';
 import { CartPanel, CartItem } from './cart-panel';
 import { formatNumber } from '@/lib/format-number';
+import { cn } from '@/lib/utils';
 
 type Props = {
     products: Product[];
@@ -12,9 +13,10 @@ type Props = {
     reservations?: Reservation[];
     isEditingCatalog?: boolean;
     onEditProduct?: (product: Product) => void;
+    className?: string;
 };
 
-export default function PosContainer({ products, categories, reservations, isEditingCatalog, onEditProduct }: Props) {
+export default function PosContainer({ products, categories, reservations, isEditingCatalog, onEditProduct, className }: Props) {
     const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
     const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export default function PosContainer({ products, categories, reservations, isEdi
     };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)] min-h-[500px]">
+        <div className={cn("flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)] min-h-[500px]", className)}>
             {/* Left side: Categories & Products */}
             <div className="flex-1 flex flex-col gap-4 overflow-hidden shadow-soft rounded-xl bg-white p-4 dark:bg-dark-card">
                 {/* Reservation tabs */}
