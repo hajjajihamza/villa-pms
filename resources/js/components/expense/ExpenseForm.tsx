@@ -1,6 +1,6 @@
 import { useForm } from '@inertiajs/react';
-import { CalendarIcon, HandCoins } from 'lucide-react';
-import type { FormEvent } from 'react';
+import { CalendarIcon, HandCoins, Save, X } from 'lucide-react';
+import type { SubmitEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
@@ -25,9 +25,21 @@ import { formatDateDisplay, toFormDate } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
 import type { Expense, ExpenseCategory, Unit } from '@/types';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type Option = {
     value: number;
     label: string;
+};
+
+type ExpenseFormData = {
+    name: string;
+    amount: number;
+    date: string;
+    description: string;
+    category_id?: number;
+    unit_id?: number;
 };
 
 type Props = {
@@ -38,30 +50,24 @@ type Props = {
     expense?: Expense | null;
 };
 
-type ExpenseFormData = {
-    name: string;
-    amount: string;
-    date: string;
-    description: string;
-    category_id: string;
-    unit_id: string;
-};
-
+// ────────────────────────────────────────────────
+//  Tools
+// ────────────────────────────────────────────────
 const initialData: ExpenseFormData = {
     name: '',
-    amount: '0',
-    date: '',
+    amount: 0,
+    date: toFormDate(new Date()),
     description: '',
-    category_id: '',
-    unit_id: '',
 };
 
-function parseNumber(value: string) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-}
-
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function ExpenseForm({ open, onOpenChange, categories, units, expense }: Props) {
+    // ────────────────────────────────────────────────
+    //  State & Variables
+    // ────────────────────────────────────────────────
+    const isEditing = !!expense;
     const [categoryApiError, setCategoryApiError] = useState('');
     const [creatingCategory, setCreatingCategory] = useState(false);
 
@@ -81,51 +87,32 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
         [units],
     );
 
-    const isEditing = Boolean(expense);
+    const { data, setData, put, post, processing, errors, reset, clearErrors } = useForm<ExpenseFormData>(initialData);
+    const selectedCategory = categoryOptions.find((option) => option.value === data.category_id) ?? null;
+    const selectedUnit = unitOptions.find((option) => option.value === data.unit_id) ?? null;
 
-    const form = useForm<ExpenseFormData>(initialData);
-
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        setCategoryApiError('');
-
-        if (expense) {
-            form.setData({
-                name: expense.name,
-                amount: String(expense.amount ?? 0),
-                date: expense.date ?? '',
-                description: expense.description ?? '',
-                category_id: String(expense.category_id ?? ''),
-                unit_id: expense.unit_id ? String(expense.unit_id) : '',
-            });
-            return;
-        }
-
-        form.setData(initialData);
-    }, [open, expense]);
-
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const closeAndReset = () => {
-        form.reset();
-        form.clearErrors();
+        reset();
+        clearErrors();
         setCategoryApiError('');
         onOpenChange(false);
     };
 
-    const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const onSubmit = (event: SubmitEvent) => {
         event.preventDefault();
 
         if (isEditing && expense) {
-            form.put(ExpenseController.update(expense.id).url, {
+            put(ExpenseController.update(expense.id).url, {
                 preserveScroll: true,
                 onSuccess: closeAndReset,
             });
             return;
         }
 
-        form.post(ExpenseController.store().url, {
+        post(ExpenseController.store().url, {
             preserveScroll: true,
             onSuccess: closeAndReset,
         });
@@ -167,7 +154,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                 return exists ? previous : [...previous, newOption];
             });
 
-            form.setData('category_id', String(newOption.value));
+            setData('category_id', newOption.value);
         } catch {
             setCategoryApiError('Erreur reseau lors de la creation de categorie.');
         } finally {
@@ -175,9 +162,31 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
         }
     };
 
-    const selectedCategory = categoryOptions.find((option) => String(option.value) === form.data.category_id) ?? null;
-    const selectedUnit = unitOptions.find((option) => String(option.value) === form.data.unit_id) ?? null;
+    // ────────────────────────────────────────────────
+    //  Hooks
+    // ────────────────────────────────────────────────
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
 
+        setCategoryApiError('');
+
+        if (isEditing && expense) {
+            setData({
+                name: expense.name,
+                amount: expense.amount ?? 0,
+                date: expense.date ?? toFormDate(new Date()),
+                description: expense.description ?? '',
+                category_id: expense.category_id ?? undefined,
+                unit_id: expense.unit_id ?? undefined,
+            });
+        }
+    }, [open, expense]);
+
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl sm:max-w-2xl overflow-hidden bg-background">
@@ -194,38 +203,40 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                     </DialogDescription>
                 </DialogHeader>
 
+                {/* form */}
                 <form onSubmit={onSubmit} className="flex flex-col">
+                    {/* scroll area */}
                     <ScrollArea className="px-8 max-h-[60vh] overflow-y-auto">
                         <div className="grid gap-4 pb-2 md:grid-cols-2">
                             <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="expense-name">Name</Label>
+                                <Label htmlFor="expense-name">Nom</Label>
                                 <Input
                                     id="expense-name"
-                                    value={form.data.name}
+                                    value={data.name}
                                     onChange={(event) =>
-                                        form.setData('name', event.target.value)
+                                        setData('name', event.target.value)
                                     }
                                     placeholder="Nom de la depense"
                                     className={cn(
                                         'h-11 rounded-xl bg-background/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]',
-                                        form.errors.name &&
-                                            'border-destructive',
+                                        errors.name &&
+                                        'border-destructive',
                                     )}
                                 />
-                                <InputError message={form.errors.name} />
+                                <InputError message={errors.name} />
                             </div>
 
                             <InputCounter
                                 id="expense-amount"
-                                label="Amount"
+                                label="Montant"
                                 icon={<HandCoins className="size-4" />}
-                                value={parseNumber(form.data.amount)}
+                                value={data.amount}
                                 min={0}
                                 step={10}
                                 unit="DH"
-                                error={form.errors.amount}
+                                error={errors.amount}
                                 onChange={(value) =>
-                                    form.setData('amount', String(value))
+                                    setData('amount', value)
                                 }
                             />
 
@@ -241,7 +252,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                         >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {formatDateDisplay(
-                                                form.data.date,
+                                                data.date,
                                             ) || 'Choisir une date'}
                                         </Button>
                                     </PopoverTrigger>
@@ -252,14 +263,14 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                         <Calendar
                                             mode="single"
                                             selected={
-                                                form.data.date
+                                                data.date
                                                     ? new Date(
-                                                          `${form.data.date}T00:00:00`,
-                                                      )
+                                                        `${data.date}T00:00:00`,
+                                                    )
                                                     : undefined
                                             }
                                             onSelect={(date) => {
-                                                form.setData(
+                                                setData(
                                                     'date',
                                                     toFormDate(date),
                                                 );
@@ -267,12 +278,12 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                         />
                                     </PopoverContent>
                                 </Popover>
-                                <InputError message={form.errors.date} />
+                                <InputError message={errors.date} />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="expense-category">
-                                    Category
+                                    Categorie
                                 </Label>
                                 <CreatableSelect
                                     inputId="expense-category"
@@ -280,41 +291,41 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                     options={categoryOptions}
                                     value={selectedCategory}
                                     onChange={(option) =>
-                                        form.setData(
+                                        setData(
                                             'category_id',
-                                            option ? String(option.value) : '',
+                                            option ? option.value : undefined
                                         )
                                     }
                                     onCreateOption={handleCreateCategory}
                                     isDisabled={
-                                        form.processing || creatingCategory
+                                        processing || creatingCategory
                                     }
                                     placeholder="Choisir ou creer une categorie"
                                 />
                                 <InputError
                                     message={
-                                        form.errors.category_id ||
+                                        errors.category_id ||
                                         categoryApiError
                                     }
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="expense-unit">Unit</Label>
+                                <Label htmlFor="expense-unit">Unite</Label>
                                 <Select
                                     inputId="expense-unit"
                                     isClearable
                                     options={unitOptions}
                                     value={selectedUnit}
                                     onChange={(option) =>
-                                        form.setData(
+                                        setData(
                                             'unit_id',
-                                            option ? String(option.value) : '',
+                                            option ? option.value : undefined,
                                         )
                                     }
                                     placeholder="Choisir une unite (optionnel)"
                                 />
-                                <InputError message={form.errors.unit_id} />
+                                <InputError message={errors.unit_id} />
                             </div>
 
                             <div className="space-y-2 md:col-span-2">
@@ -323,9 +334,9 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                 </Label>
                                 <textarea
                                     id="expense-description"
-                                    value={form.data.description}
+                                    value={data.description}
                                     onChange={(event) =>
-                                        form.setData(
+                                        setData(
                                             'description',
                                             event.target.value,
                                         )
@@ -334,26 +345,30 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                                     placeholder="Details complementaires"
                                 />
-                                <InputError message={form.errors.description} />
+                                <InputError message={errors.description} />
                             </div>
                         </div>
                     </ScrollArea>
 
-                    <DialogFooter className="border-t bg-muted/30 px-8 py-6 grid sm:grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* footer */}
+                    <DialogFooter className="border-t mt-1 bg-muted/30 px-8 py-6 grid sm:grid-cols-1 md:grid-cols-2 gap-4">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={closeAndReset}
                             size="lg"
                         >
+                            <X className="size-4 mr-2" />
                             Annuler
                         </Button>
                         <Button
                             type="submit"
-                            disabled={form.processing || creatingCategory}
+                            variant="primary"
+                            disabled={processing}
                             size="lg"
                         >
-                            {form.processing ? 'Enregistrement...' : (isEditing ? 'Mettre à jour' : 'Creer')}
+                            <Save className="size-4 mr-2" />
+                            {processing ? 'Enregistrement...' : (isEditing ? 'Mettre à jour' : 'Creer')}
                         </Button>
                     </DialogFooter>
                 </form>
