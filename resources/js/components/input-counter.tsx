@@ -1,9 +1,13 @@
 import { Minus, Plus } from 'lucide-react';
-import {  useEffect, useMemo, useState } from 'react';
-import type {ReactNode} from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { NumericFormat } from 'react-number-format';
 import InputError from '@/components/input-error';
 import { cn } from '@/lib/utils';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type CounterInputProps = {
     id?: string;
     label?: string;
@@ -19,6 +23,9 @@ type CounterInputProps = {
     onChange: (value: number) => void;
 };
 
+// ────────────────────────────────────────────────
+//  Utils
+// ────────────────────────────────────────────────
 function clampValue(value: number, min?: number, max?: number) {
     let nextValue = value;
 
@@ -33,6 +40,9 @@ function clampValue(value: number, min?: number, max?: number) {
     return nextValue;
 }
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function InputCounter({
     id,
     label,
@@ -47,15 +57,14 @@ export default function InputCounter({
     maxIndicator = true,
     onChange,
 }: CounterInputProps) {
-    const [inputValue, setInputValue] = useState(String(value));
+    // ────────────────────────────────────────────────
+    //  State & Variables
+    // ────────────────────────────────────────────────
+    const isInvalid = !!error;
 
-    useEffect(() => {
-        setInputValue(String(value));
-    }, [value]);
-
-    const isAtMin = useMemo(() => typeof min === 'number' && value <= min, [min, value]);
-    const isAtMax = useMemo(() => typeof max === 'number' && value >= max, [max, value]);
-
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const updateValue = (nextValue: number) => {
         const clampedValue = clampValue(nextValue, min, max);
         onChange(clampedValue);
@@ -77,27 +86,32 @@ export default function InputCounter({
         updateValue(value + step);
     };
 
-    const onBlur = () => {
-        if (inputValue.trim() === '') {
-            const fallback = typeof min === 'number' ? min : 0;
-            updateValue(fallback);
-            return;
+    const handleValueChange = (values: { floatValue?: number }) => {
+        const { floatValue } = values;
+
+        // If the input is empty or invalid, floatValue will be undefined.
+        // We only want to update if we have a valid number.
+        if (typeof floatValue === 'number') {
+            updateValue(floatValue);
         }
-
-        const parsedValue = Number(inputValue);
-
-        if (Number.isNaN(parsedValue)) {
-            setInputValue(String(value));
-            return;
-        }
-
-        updateValue(parsedValue);
     };
 
-    const isInvalid = Boolean(error);
+    const onBlur = () => {
+        // Ensure the final value is within bounds when the user leaves the input
+        updateValue(value);
+    };
 
+    // ────────────────────────────────────────────────
+    //  Memo
+    // ────────────────────────────────────────────────
+    const isAtMin = useMemo(() => typeof min === 'number' && value <= min, [min, value]);
+    const isAtMax = useMemo(() => typeof max === 'number' && value >= max, [max, value]);
+
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
-        <div className="space-y-2">
+        <div className="space-y-3">
             {(label || maxIndicator) && (
                 <div className="flex items-center justify-between gap-2">
                     {label ? (
@@ -147,17 +161,20 @@ export default function InputCounter({
                 </button>
 
                 <div className="flex min-w-0 flex-1 items-center justify-center px-2">
-                    <input
+                    <NumericFormat
                         id={id}
-                        type="number"
-                        inputMode="decimal"
-                        value={inputValue}
-                        min={min}
-                        max={max}
-                        step={step}
-                        disabled={disabled}
-                        onChange={(event) => setInputValue(event.target.value)}
+                        value={value}
+                        onValueChange={handleValueChange}
                         onBlur={onBlur}
+                        disabled={disabled}
+                        allowNegative={typeof min === 'number' ? min < 0 : true}
+                        isAllowed={(values) => {
+                            const { floatValue } = values;
+                            if (floatValue === undefined) return true; // allow empty
+                            if (typeof max === 'number' && floatValue > max) return false;
+                            // We don't block min here to allow typing (e.g. typing "1" when min is "10")
+                            return true;
+                        }}
                         className="text-foreground w-full bg-transparent text-center text-lg font-semibold outline-none"
                     />
 
@@ -187,3 +204,4 @@ export default function InputCounter({
         </div>
     );
 }
+

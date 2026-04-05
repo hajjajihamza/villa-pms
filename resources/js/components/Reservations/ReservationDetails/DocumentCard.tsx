@@ -3,7 +3,7 @@ import { fr } from 'date-fns/locale';
 import { Pencil, Trash2, ExternalLink, FileText, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { documentService } from '@/services/documentService';
+import { documentService } from '@/api/documentService';
 import type { Document } from '@/types/models';
 import { useState } from 'react';
 import { DocumentForm } from '../ReservationForm/DocumentForm';

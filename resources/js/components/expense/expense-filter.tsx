@@ -1,11 +1,10 @@
 import { useForm } from '@inertiajs/react';
-import { CalendarIcon, X } from 'lucide-react';
-import React, { useMemo } from 'react';
-import type {FormEvent} from 'react';
+import { X } from 'lucide-react';
+import { useMemo } from 'react';
+import type { SubmitEvent } from 'react';
 import Select from 'react-select';
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
     Card,
     CardContent,
@@ -13,14 +12,12 @@ import {
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { formatDateDisplay, toFormDate } from '@/lib/format-date';
 import type { ExpenseCategory, Unit } from '@/types';
+import { DatePickerInput } from '../inputs/date-picker_input';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 export type Filters = {
     name: string;
     category_id: string;
@@ -41,7 +38,13 @@ type Props = {
     onOpenChange: (open: boolean) => void;
 };
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props) {
+    // ────────────────────────────────────────────────
+    //  State & Variables
+    // ────────────────────────────────────────────────
     const { data, setData, get, processing } = useForm<Filters>({
         name: filters.name ?? '',
         category_id: filters.category_id ?? '',
@@ -66,7 +69,19 @@ function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props
         [units],
     );
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const selectedCategory =
+        categoryOptions.find(
+            (option) => String(option.value) === data.category_id,
+        ) ?? null;
+    const selectedUnit =
+        unitOptions.find(
+            (option) => String(option.value) === data.unit_id,
+        ) ?? null;
+
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
+    const submit = (event: SubmitEvent) => {
         event.preventDefault();
 
         get(ExpenseController.index().url, {
@@ -93,20 +108,14 @@ function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props
         });
     };
 
-    const selectedCategory =
-        categoryOptions.find(
-            (option) => String(option.value) === data.category_id,
-        ) ?? null;
-    const selectedUnit =
-        unitOptions.find(
-            (option) => String(option.value) === data.unit_id,
-        ) ?? null;
-
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <Collapsible open={open} onOpenChange={onOpenChange} className="w-full">
             <CollapsibleContent className="space-y-4">
-                <Card className="border-dashed bg-muted/30">
-                    <CardContent className="pt-2">
+                <Card className="border-dashed bg-muted/30 my-2">
+                    <CardContent>
                         <form
                             onSubmit={submit}
                             className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
@@ -160,46 +169,21 @@ function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props
 
                             {/* Date Filter */}
                             <div className="grid gap-2">
-                                <Label>Date</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full justify-start bg-background text-left font-normal"
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {data.date
-                                                ? formatDateDisplay(data.date)
-                                                : 'Choisir une date'}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent
-                                        className="w-auto p-0"
-                                        align="start"
-                                    >
-                                        <Calendar
-                                            mode="single"
-                                            selected={
-                                                data.date
-                                                    ? new Date(data.date)
-                                                    : undefined
-                                            }
-                                            onSelect={(date) =>
-                                                setData(
-                                                    'date',
-                                                    toFormDate(date),
-                                                )
-                                            }
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                <DatePickerInput
+                                    id="expense-date"
+                                    label="Date"
+                                    defaultValue={data.date}
+                                    onChange={(date) => setData('date', date)}
+                                    placeholder="Choisir une date"
+                                    className='h-10'
+                                />
                             </div>
 
                             {/* Actions */}
                             <div className="flex items-center justify-end gap-2 pt-2 md:col-span-2 lg:col-span-4">
                                 <Button
                                     type="button"
-                                    variant="ghost"
+                                    variant="outline"
                                     size="sm"
                                     onClick={resetFilters}
                                     className="text-muted-foreground"

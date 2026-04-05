@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { logout } from '@/routes';
 import type { User } from '@/types';
+import AuthController from '@/actions/App/Http/Controllers/Auth/AuthController';
 
 type Props = {
     user: User;
@@ -30,7 +30,7 @@ export function UserMenuContent({ user }: Props) {
                 <DropdownMenuItem asChild variant="destructive">
                     <Link
                         className="block w-full cursor-pointer"
-                        href={logout()}
+                        href={AuthController.logout().url}
                         method="post"
                         as="button"
                         onClick={cleanup}

@@ -1,14 +1,15 @@
 import { useForm } from '@inertiajs/react';
-import { CalendarIcon, HandCoins, Save, X } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { Save, X } from 'lucide-react';
 import type { SubmitEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
+import { createExpenseCategory } from '@/api/expense-category';
 import InputCounter from '@/components/input-counter';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
     Dialog,
     DialogContent,
@@ -18,12 +19,13 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { formatDateDisplay, toFormDate } from '@/lib/format-date';
+import { toFormDate } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
 import type { Expense, ExpenseCategory, Unit } from '@/types';
+import { DatePickerInput } from '@/components/inputs/date-picker_input';
+import { Textarea } from '../ui/textarea';
+import { Label } from '../ui/label';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -31,6 +33,14 @@ import type { Expense, ExpenseCategory, Unit } from '@/types';
 type Option = {
     value: number;
     label: string;
+};
+
+type Props = {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    categories: ExpenseCategory[];
+    units: Unit[];
+    expense?: Expense | null;
 };
 
 type ExpenseFormData = {
@@ -42,14 +52,6 @@ type ExpenseFormData = {
     unit_id?: number;
 };
 
-type Props = {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    categories: ExpenseCategory[];
-    units: Unit[];
-    expense?: Expense | null;
-};
-
 // ────────────────────────────────────────────────
 //  Tools
 // ────────────────────────────────────────────────
@@ -58,6 +60,8 @@ const initialData: ExpenseFormData = {
     amount: 0,
     date: toFormDate(new Date()),
     description: '',
+    category_id: undefined,
+    unit_id: undefined,
 };
 
 // ────────────────────────────────────────────────
@@ -68,9 +72,8 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
     //  State & Variables
     // ────────────────────────────────────────────────
     const isEditing = !!expense;
-    const [categoryApiError, setCategoryApiError] = useState('');
-    const [creatingCategory, setCreatingCategory] = useState(false);
 
+    // Categories options
     const [categoryOptions, setCategoryOptions] = useState<Option[]>(
         categories.map((category) => ({
             value: category.id,
@@ -78,6 +81,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
         })),
     );
 
+    // Units options
     const unitOptions = useMemo<Option[]>(
         () =>
             units.map((unit) => ({
@@ -87,9 +91,22 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
         [units],
     );
 
+    // Form data
     const { data, setData, put, post, processing, errors, reset, clearErrors } = useForm<ExpenseFormData>(initialData);
-    const selectedCategory = categoryOptions.find((option) => option.value === data.category_id) ?? null;
-    const selectedUnit = unitOptions.find((option) => option.value === data.unit_id) ?? null;
+
+    const selectedCategory = categoryOptions.find((option) => option.value === data.category_id);
+    const selectedUnit = unitOptions.find((option) => option.value === data.unit_id);
+
+    // ────────────────────────────────────────────────
+    //  Mutation
+    // ────────────────────────────────────────────────
+    const createCategoryMutation = useMutation({
+        mutationFn: createExpenseCategory,
+        onSuccess: (category) => {
+            setCategoryOptions((previous) => [...previous, { value: category.id, label: category.name }]);
+            setData('category_id', category.id);
+        },
+    });
 
     // ────────────────────────────────────────────────
     //  Handlers
@@ -97,7 +114,6 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
     const closeAndReset = () => {
         reset();
         clearErrors();
-        setCategoryApiError('');
         onOpenChange(false);
     };
 
@@ -122,44 +138,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
         const name = rawName.trim();
         if (!name) return;
 
-        setCreatingCategory(true);
-        setCategoryApiError('');
-
-        try {
-            const response = await fetch('/api/expense-categories', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify({ name }),
-            });
-
-            const payload = await response.json();
-
-            if (!response.ok) {
-                const message = payload?.errors?.name?.[0] ?? 'Impossible de creer cette categorie.';
-                setCategoryApiError(message);
-                return;
-            }
-
-            const newOption: Option = {
-                value: payload.id,
-                label: payload.name,
-            };
-
-            setCategoryOptions((previous) => {
-                const exists = previous.some((option) => option.value === newOption.value);
-                return exists ? previous : [...previous, newOption];
-            });
-
-            setData('category_id', newOption.value);
-        } catch {
-            setCategoryApiError('Erreur reseau lors de la creation de categorie.');
-        } finally {
-            setCreatingCategory(false);
-        }
+        await createCategoryMutation.mutateAsync({ name });
     };
 
     // ────────────────────────────────────────────────
@@ -169,8 +148,6 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
         if (!open) {
             return;
         }
-
-        setCategoryApiError('');
 
         if (isEditing && expense) {
             setData({
@@ -188,7 +165,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
     //  Render
     // ────────────────────────────────────────────────
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={closeAndReset}>
             <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl sm:max-w-2xl overflow-hidden bg-background">
                 <DialogHeader className="border-b px-6 py-4">
                     <DialogTitle>
@@ -206,12 +183,13 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                 {/* form */}
                 <form onSubmit={onSubmit} className="flex flex-col">
                     {/* scroll area */}
-                    <ScrollArea className="px-8 max-h-[60vh] overflow-y-auto">
-                        <div className="grid gap-4 pb-2 md:grid-cols-2">
-                            <div className="space-y-2 md:col-span-2">
+                    <ScrollArea className="px-4 lg:px-8 max-h-[60vh] overflow-y-auto">
+                        <div className="grid grid-cols-1 gap-4 pb-2 sm:grid-cols-12 sm:gap-x-6 sm:gap-y-5">
+                            <div className="space-y-2 sm:col-span-12">
                                 <Label htmlFor="expense-name">Nom</Label>
                                 <Input
                                     id="expense-name"
+                                    autoFocus
                                     value={data.name}
                                     onChange={(event) =>
                                         setData('name', event.target.value)
@@ -226,113 +204,77 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                 <InputError message={errors.name} />
                             </div>
 
-                            <InputCounter
-                                id="expense-amount"
-                                label="Montant"
-                                icon={<HandCoins className="size-4" />}
-                                value={data.amount}
-                                min={0}
-                                step={10}
-                                unit="DH"
-                                error={errors.amount}
-                                onChange={(value) =>
-                                    setData('amount', value)
-                                }
-                            />
-
-                            <div className="space-y-2">
-                                <Label htmlFor="expense-date">Date</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            id="expense-date"
-                                            type="button"
-                                            variant="outline"
-                                            className="h-11 w-full justify-start rounded-xl bg-background/90 text-left font-normal shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]"
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {formatDateDisplay(
-                                                data.date,
-                                            ) || 'Choisir une date'}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent
-                                        className="w-auto p-0"
-                                        align="start"
-                                    >
-                                        <Calendar
-                                            mode="single"
-                                            selected={
-                                                data.date
-                                                    ? new Date(
-                                                        `${data.date}T00:00:00`,
-                                                    )
-                                                    : undefined
-                                            }
-                                            onSelect={(date) => {
-                                                setData(
-                                                    'date',
-                                                    toFormDate(date),
-                                                );
-                                            }}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                                <InputError message={errors.date} />
+                            <div className="sm:col-span-6">
+                                <InputCounter
+                                    id="expense-amount"
+                                    label="Montant"
+                                    value={data.amount}
+                                    min={0}
+                                    step={10}
+                                    unit="DH"
+                                    error={errors.amount}
+                                    onChange={(value) =>
+                                        setData('amount', value)
+                                    }
+                                />
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="sm:col-span-6">
+                                <DatePickerInput
+                                    id="expense-date"
+                                    label="Date"
+                                    defaultValue={data.date}
+                                    onChange={(date) => setData('date', date)}
+                                    error={errors.date}
+                                    placeholder="Choisir une date"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-7">
                                 <Label htmlFor="expense-category">
                                     Categorie
                                 </Label>
                                 <CreatableSelect
                                     inputId="expense-category"
                                     isClearable
+                                    className="mt-1"
                                     options={categoryOptions}
                                     value={selectedCategory}
-                                    onChange={(option) =>
-                                        setData(
-                                            'category_id',
-                                            option ? option.value : undefined
-                                        )
-                                    }
+                                    onChange={(option) => setData('category_id', option?.value)}
                                     onCreateOption={handleCreateCategory}
                                     isDisabled={
-                                        processing || creatingCategory
+                                        processing || createCategoryMutation.isPending
                                     }
                                     placeholder="Choisir ou creer une categorie"
                                 />
                                 <InputError
                                     message={
-                                        errors.category_id ||
-                                        categoryApiError
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-expect-error
+                                        errors.category_id || createCategoryMutation.error?.message
                                     }
                                 />
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="sm:col-span-5">
                                 <Label htmlFor="expense-unit">Unite</Label>
                                 <Select
                                     inputId="expense-unit"
                                     isClearable
+                                    className="mt-1"
                                     options={unitOptions}
                                     value={selectedUnit}
-                                    onChange={(option) =>
-                                        setData(
-                                            'unit_id',
-                                            option ? option.value : undefined,
-                                        )
-                                    }
-                                    placeholder="Choisir une unite (optionnel)"
+                                    onChange={(option) => setData('unit_id', option?.value)}
+                                    placeholder="Choisir une unite"
                                 />
                                 <InputError message={errors.unit_id} />
                             </div>
 
-                            <div className="space-y-2 md:col-span-2">
+                            <div className="sm:col-span-12">
                                 <Label htmlFor="expense-description">
                                     Description
                                 </Label>
-                                <textarea
+                                <Textarea
                                     id="expense-description"
                                     value={data.description}
                                     onChange={(event) =>
@@ -342,7 +284,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                         )
                                     }
                                     rows={4}
-                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                                     placeholder="Details complementaires"
                                 />
                                 <InputError message={errors.description} />
@@ -351,12 +293,13 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                     </ScrollArea>
 
                     {/* footer */}
-                    <DialogFooter className="border-t mt-1 bg-muted/30 px-8 py-6 grid sm:grid-cols-1 md:grid-cols-2 gap-4">
+                    <DialogFooter className="grid grid-cols-1 gap-3 border-t bg-muted/30 px-8 py-6 sm:grid-cols-2">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={closeAndReset}
                             size="lg"
+                            className="w-full"
                         >
                             <X className="size-4 mr-2" />
                             Annuler
@@ -364,8 +307,9 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                         <Button
                             type="submit"
                             variant="primary"
-                            disabled={processing}
+                            disabled={processing || createCategoryMutation.isPending}
                             size="lg"
+                            className="w-full"
                         >
                             <Save className="size-4 mr-2" />
                             {processing ? 'Enregistrement...' : (isEditing ? 'Mettre à jour' : 'Creer')}

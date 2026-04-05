@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { queryClient } from '@/lib/query-client';
@@ -10,9 +10,10 @@ export type Props = PropsWithChildren & {
     breadcrumbs?: BreadcrumbItem[];
     title?: string;
     description?: string;
+    action?: ReactNode
 };
 
-export default ({ children, breadcrumbs, ...props }: Props) => {
+export default ({ children, breadcrumbs, title, description, action, ...props }: Props) => {
     const { flash } = usePage().props as any;
 
     return (
@@ -30,13 +31,20 @@ export default ({ children, breadcrumbs, ...props }: Props) => {
                         </Alert>
                     )}
 
-                    {props.title && (
-                        <div className='mb-2'>
-                            <h1 className="text-2xl font-semibold">{props.title}</h1>
-                            {props.description && (
-                                <p className="text-muted-foreground text-sm">
-                                    {props.description}
-                                </p>
+                    {(title || action) && (
+                        <div className='mb-2 flex flex-wrap items-start justify-between gap-2'>
+                            <div>
+                                <h1 className="text-2xl font-semibold">{title}</h1>
+                                {description && (
+                                    <p className="text-muted-foreground text-sm">
+                                        {description}
+                                    </p>
+                                )}
+                            </div>
+                            {action && (
+                                <div className="flex shrink-0 items-center gap-2">
+                                    {action}
+                                </div>
                             )}
                         </div>
                     )}

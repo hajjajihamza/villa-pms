@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Visitor } from '@/types/models';
-import { visitorService } from '@/services/visitorService';
+import { visitorService } from '@/api/visitorService';
 import { VisitorForm } from '../ReservationForm/VisitorForm';
 import { DocumentCard } from './DocumentCard';
 import { DocumentForm } from '../ReservationForm/DocumentForm';
@@ -48,24 +48,24 @@ export function VisitorCard({ visitor }: Props) {
         "overflow-hidden transition-all duration-200 border",
         visitor.is_main
           ? [
-              "bg-gradient-to-br from-indigo-50/60 via-white to-white",
-              "dark:from-indigo-500/[0.07] dark:via-dark-surface dark:to-dark-surface",
-              "border-indigo-200/70 dark:border-indigo-500/20",
-              "shadow-[0_2px_12px_-2px_rgba(99,102,241,0.15)]",
-              "ring-1 ring-indigo-500/10 dark:ring-indigo-500/10",
-            ].join(" ")
+            "bg-gradient-to-br from-indigo-50/60 via-white to-white",
+            "dark:from-indigo-500/[0.07] dark:via-dark-surface dark:to-dark-surface",
+            "border-indigo-200/70 dark:border-indigo-500/20",
+            "shadow-[0_2px_12px_-2px_rgba(99,102,241,0.15)]",
+            "ring-1 ring-indigo-500/10 dark:ring-indigo-500/10",
+          ].join(" ")
           : [
-              "bg-white dark:bg-dark-surface",
-              "border-slate-200/80 dark:border-white/[0.06]",
-              "shadow-[0_1px_4px_rgba(0,0,0,0.04)]",
-            ].join(" ")
+            "bg-white dark:bg-dark-surface",
+            "border-slate-200/80 dark:border-white/[0.06]",
+            "shadow-[0_1px_4px_rgba(0,0,0,0.04)]",
+          ].join(" ")
       )}
     >
       <div className="p-3">
- 
+
         {/* ── Header Row ── */}
         <div className="flex items-center gap-2.5">
- 
+
           {/* Avatar */}
           <div
             className={cn(
@@ -77,7 +77,7 @@ export function VisitorCard({ visitor }: Props) {
           >
             <User size={14} strokeWidth={visitor.is_main ? 2.5 : 2} />
           </div>
- 
+
           {/* Name + meta */}
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5 leading-none mb-1">
@@ -91,7 +91,7 @@ export function VisitorCard({ visitor }: Props) {
                 </span>
               )}
             </div>
- 
+
             <div className="flex flex-wrap items-center gap-1.5">
               {visitor.country && (
                 <div className="inline-flex items-center gap-1 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.08] rounded-full px-1.5 py-0.5">
@@ -115,7 +115,7 @@ export function VisitorCard({ visitor }: Props) {
               )}
             </div>
           </div>
- 
+
           {/* Action Buttons */}
           <div className="flex items-center gap-1 shrink-0 self-start">
             <Button
@@ -140,11 +140,11 @@ export function VisitorCard({ visitor }: Props) {
             )}
           </div>
         </div>
- 
+
         {/* ── Documents Section ── */}
         <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/[0.05]">
           <Collapsible open={isDocsOpen} onOpenChange={setIsDocsOpen}>
- 
+
             <div className="flex items-center justify-between">
               {/* Trigger */}
               <CollapsibleTrigger asChild>
@@ -168,7 +168,7 @@ export function VisitorCard({ visitor }: Props) {
                   }
                 </button>
               </CollapsibleTrigger>
- 
+
               {/* Add Doc */}
               <Button
                 onClick={(e) => {
@@ -191,7 +191,7 @@ export function VisitorCard({ visitor }: Props) {
                 Ajouter
               </Button>
             </div>
- 
+
             <CollapsibleContent className="mt-2 space-y-2">
               {showDocForm && (
                 <DocumentForm
@@ -207,12 +207,12 @@ export function VisitorCard({ visitor }: Props) {
                 ))}
               </div>
               {visitor.documents?.length === 0 && (
-                  <p className="text-[8.5px] font-semibold text-center uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Aucun document trouvé</p>
-                )}
+                <p className="text-[8.5px] font-semibold text-center uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Aucun document trouvé</p>
+              )}
             </CollapsibleContent>
           </Collapsible>
         </div>
- 
+
       </div>
     </Card>
   );

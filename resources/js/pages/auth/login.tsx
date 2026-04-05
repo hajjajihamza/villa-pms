@@ -76,7 +76,7 @@ export default function Login() {
                         <Logo size="xl" showText={true} />
                     
                         {/* shadcn Separator styled as brand divider */}
-                        <Separator className="w-16 bg-gradient-to-r from-transparent via-[#3d5a3e]/40 to-transparent" />
+                        <Separator className="w-16 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
                     </CardHeader>
 
                     {/* ── Card Content (shadcn) ── */}
@@ -98,9 +98,8 @@ export default function Login() {
                                             absolute top-1/2 left-5 -translate-y-1/2
                                             text-[#b0a898]
                                             transition-colors duration-200
-                                            group-focus-within:text-[#3d5a3e]
+                                            group-focus-within:text-primary
                                             dark:text-[#6a6a6a]
-                                            dark:group-focus-within:text-[#8ab88a]
                                         "
                                     />
                                     <Input
@@ -124,18 +123,17 @@ export default function Login() {
                                             outline-none ring-0
                                             transition-all duration-200
                                             hover:border-[#c8c0b8]
-                                            focus-visible:border-[#3d5a3e]
+                                            focus-visible:border-primary
                                             focus-visible:bg-white
                                             focus-visible:ring-3
-                                            focus-visible:ring-[#3d5a3e]/15
-                                            focus-visible:shadow-[0_0_0_4px_rgba(61,90,62,.08)]
+                                            focus-visible:ring-primary/15
+                                            focus-visible:shadow-[0_0_0_4px_var(--color-primary)/8%]
                                             aria-[invalid=true]:border-rose-400
                                             dark:border-white/[.08]
                                             dark:bg-white/5
                                             dark:text-white
                                             dark:placeholder:text-white/20
-                                            dark:focus-visible:border-[#8ab88a]/60
-                                            dark:focus-visible:ring-[#8ab88a]/15
+                                            dark:focus-visible:border-primary/60
                                         "
                                     />
                                 </div>
@@ -156,9 +154,8 @@ export default function Login() {
                                             absolute top-1/2 left-5 -translate-y-1/2
                                             text-[#b0a898]
                                             transition-colors duration-200
-                                            group-focus-within:text-[#3d5a3e]
+                                            group-focus-within:text-primary
                                             dark:text-[#6a6a6a]
-                                            dark:group-focus-within:text-[#8ab88a]
                                         "
                                     />
                                     <Input
@@ -181,18 +178,17 @@ export default function Login() {
                                             outline-none ring-0
                                             transition-all duration-200
                                             hover:border-[#c8c0b8]
-                                            focus-visible:border-[#3d5a3e]
+                                            focus-visible:border-primary
                                             focus-visible:bg-white
                                             focus-visible:ring-3
-                                            focus-visible:ring-[#3d5a3e]/15
-                                            focus-visible:shadow-[0_0_0_4px_rgba(61,90,62,.08)]
+                                            focus-visible:ring-primary/15
+                                            focus-visible:shadow-[0_0_0_4px_var(--color-primary)/8%]
                                             aria-[invalid=true]:border-rose-400
                                             dark:border-white/[.08]
                                             dark:bg-white/5
                                             dark:text-white
                                             dark:placeholder:text-white/20
-                                            dark:focus-visible:border-[#8ab88a]/60
-                                            dark:focus-visible:ring-[#8ab88a]/15
+                                            dark:focus-visible:border-primary/60
                                         "
                                     />
                                 </div>
@@ -207,12 +203,10 @@ export default function Login() {
                                     className="
                                         h-4 w-4 rounded-[5px]
                                         border-[#d0c8be]
-                                        data-[state=checked]:border-[#3d5a3e]
-                                        data-[state=checked]:bg-[#3d5a3e]
-                                        data-[state=checked]:text-white
+                                        data-[state=checked]:border-primary
+                                        data-[state=checked]:bg-primary
+                                        data-[state=checked]:text-primary-foreground
                                         dark:border-white/[.15]
-                                        dark:data-[state=checked]:border-[#8ab88a]
-                                        dark:data-[state=checked]:bg-[#8ab88a]
                                     "
                                 />
                                 <Label
@@ -251,18 +245,15 @@ export default function Login() {
                                     group mt-1
                                     h-[54px] w-full
                                     rounded-2xl
-                                    bg-[#2b3f2c]
-                                    text-[13px] font-black tracking-widest text-white uppercase
-                                    shadow-[0_4px_20px_rgba(43,63,44,.35)]
+                                    bg-primary
+                                    text-[13px] font-black tracking-widest text-primary-foreground uppercase
+                                    shadow-[0_4px_20px_var(--color-primary)/35%]
                                     transition-all duration-200
                                     hover:scale-[1.015]
-                                    hover:bg-[#3d5a3e]
-                                    hover:shadow-[0_8px_28px_rgba(43,63,44,.45)]
+                                    hover:bg-primary/90
+                                    hover:shadow-[0_8px_28px_var(--color-primary)/45%]
                                     active:scale-[.985]
                                     disabled:cursor-not-allowed disabled:opacity-60
-                                    dark:bg-[#8ab88a]
-                                    dark:text-[#1a1a1a]
-                                    dark:hover:bg-[#9ecb9e]
                                 "
                             >
                                 {processing ? (
