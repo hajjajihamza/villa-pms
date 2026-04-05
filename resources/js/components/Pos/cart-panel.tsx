@@ -1,18 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ShoppingBag, X, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useForm } from '@inertiajs/react';
 import { formatNumber } from '@/lib/format-number';
 import OrderController from '@/actions/App/Http/Controllers/Order/OrderController';
+import type { CartItem } from '@/hooks/use-pos-cart';
 
-export type CartItem = {
-    product_id: number;
-    product_name: string;
-    price: number;
-    quantity: number;
-};
-
-interface CartPanelProps {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type Props = {
     cart: CartItem[];
     cartTotal: number;
     updateCartQuantity: (productId: number, delta: number) => void;
@@ -23,7 +20,10 @@ interface CartPanelProps {
     onOrderSuccess: () => void;
 }
 
-export const CartPanel: React.FC<CartPanelProps> = ({
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
+export default function CartPanel({
     cart,
     cartTotal,
     updateCartQuantity,
@@ -32,9 +32,11 @@ export const CartPanel: React.FC<CartPanelProps> = ({
     showMobileCart,
     setShowMobileCart,
     onOrderSuccess,
-}) => {
-    // Setup Inertia Form for ordering
-    const { data, setData, post, processing, reset } = useForm({
+}: Props) {
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
+    const { setData, post, processing, reset } = useForm({
         reservation_id: selectedReservationId,
         order_items: cart.map(item => ({
             product_id: item.product_id,
@@ -42,24 +44,27 @@ export const CartPanel: React.FC<CartPanelProps> = ({
             quantity: item.quantity,
             price: item.price
         })),
-        total_amount: cartTotal
     });
 
-    // Update form data when cart changes
-    React.useEffect(() => {
+    // ────────────────────────────────────────────────
+    //  Effects
+    // ────────────────────────────────────────────────
+    useEffect(() => {
         setData('order_items', cart.map(item => ({
             product_id: item.product_id,
             product_name: item.product_name,
             quantity: item.quantity,
             price: item.price
         })));
-        setData('total_amount', cartTotal);
-    }, [cart, cartTotal]);
+    }, [cart]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setData('reservation_id', selectedReservationId);
     }, [selectedReservationId]);
 
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const handleValidateOrder = () => {
         post(OrderController.store().url, {
             preserveScroll: true,
@@ -70,6 +75,9 @@ export const CartPanel: React.FC<CartPanelProps> = ({
         });
     };
 
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <div className={`w-full lg:w-[400px] bg-white rounded-2xl flex flex-col border border-gray-100 dark:border-white/5 shadow-inner transition-all duration-300 shrink-0 ${showMobileCart ? 'fixed inset-0 z-50 rounded-none' : 'hidden lg:flex'}`}>
             <div className="p-4 flex justify-between items-center bg-white dark:bg-dark-card lg:bg-transparent lg:dark:bg-transparent shrink-0 border-b border-gray-200">
@@ -106,13 +114,13 @@ export const CartPanel: React.FC<CartPanelProps> = ({
                                     </button>
                                 </div>
                                 <p className="text-xs font-black text-brand-600">
-                                    {formatNumber((item.price || 0) * (item.quantity || 1), {endWith: 'DH'})}
+                                    {formatNumber((item.price || 0) * (item.quantity || 1), { endWith: 'DH' })}
                                 </p>
                             </div>
                         </div>
                     </div>
                 ))}
-                
+
                 {cart.length === 0 && (
                     <div className="h-64 flex flex-col items-center justify-center text-gray-600 opacity-20">
                         <Plus size={48} className="mb-2" />
@@ -124,9 +132,9 @@ export const CartPanel: React.FC<CartPanelProps> = ({
             <div className="p-3 bg-white dark:bg-dark-card border-t lg:border-t-0 space-y-2 shrink-0 rounded-b-[2.5rem]">
                 <div className="flex justify-between items-center bg-gray-50 dark:bg-dark-surface p-2 rounded-xl">
                     <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Total à imputer</span>
-                    <span className="text-2xl font-black tabular-nums dark:text-white">{formatNumber(cartTotal, {endWith: 'DH'})}</span>
+                    <span className="text-2xl font-black tabular-nums dark:text-white">{formatNumber(cartTotal, { endWith: 'DH' })}</span>
                 </div>
-                
+
                 <Button
                     onClick={handleValidateOrder}
                     disabled={cart.length === 0 || processing}

@@ -177,6 +177,7 @@ export default function Index({ products, categories, reservations }: Props) {
                 </div>
             </Tabs>
 
+            {/* Product Form */}
             <ProductForm
                 open={isProductFormOpen}
                 onOpenChange={setIsProductFormOpen}

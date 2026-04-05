@@ -1,10 +1,12 @@
-import React from 'react';
 import { Edit2 } from 'lucide-react';
 import type { Product } from '@/types';
 import { Card } from '@/components/ui/card';
 import { formatNumber } from '@/lib/format-number';
 
-interface ProductGridProps {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type ProductGridProps = {
     products: Product[];
     activeCategoryId: number | null;
     addToCart: (product: Product) => void;
@@ -12,18 +14,20 @@ interface ProductGridProps {
     onEditProduct?: (product: Product) => void;
 }
 
-export const ProductGrid: React.FC<ProductGridProps> = ({
-    products,
-    activeCategoryId,
-    addToCart,
-    isEditingCatalog,
-    onEditProduct,
-}) => {
-    // Client-side filtering
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
+export default function ProductGrid({ products, activeCategoryId, addToCart, isEditingCatalog, onEditProduct }: ProductGridProps) {
+    // ────────────────────────────────────────────────
+    //  States & Variables
+    // ────────────────────────────────────────────────
     const filteredProducts = products.filter(
         (p) => activeCategoryId === null || p.category_id === activeCategoryId
     );
 
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <div className="grid grid-cols-2 xs:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 pb-32 lg:pb-6 content-start">
             {filteredProducts.map((prod) => (

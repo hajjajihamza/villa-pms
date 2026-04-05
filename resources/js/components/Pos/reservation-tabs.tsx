@@ -1,23 +1,31 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { Reservation } from '@/types';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Clock, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { formatDateDisplay } from '@/lib/format-date';
 
-interface ReservationTabsProps {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type ReservationTabsProps = {
     reservations?: Reservation[];
     selectedReservationId: string | null;
     onSelectReservation: (id: string | null) => void;
 }
 
-export const ReservationTabs: React.FC<ReservationTabsProps> = ({
-    reservations,
-    selectedReservationId,
-    onSelectReservation,
-}) => {
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
+export default function ReservationTabs({ reservations, selectedReservationId, onSelectReservation }: ReservationTabsProps) {
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState('');
 
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const filteredReservations = useMemo(() => {
         if (!reservations) return [];
         if (!searchQuery.trim()) return reservations;
@@ -34,6 +42,9 @@ export const ReservationTabs: React.FC<ReservationTabsProps> = ({
         return null;
     }
 
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <div className="flex flex-row items-center gap-2 w-full pt-1 px-1 border-b border-gray-200 pb-2">
             <div className="relative shrink-0 w-[140px] sm:w-[220px]">

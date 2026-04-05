@@ -1,18 +1,22 @@
-import React from 'react';
 import type { ProductCategory } from '@/types';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
-interface CategoryTabsProps {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type CategoryTabsProps = {
     categories: ProductCategory[];
     activeCategoryId: number | null;
     onSelectCategory: (id: number | null) => void;
 }
 
-export const CategoryTabs: React.FC<CategoryTabsProps> = ({
-    categories,
-    activeCategoryId,
-    onSelectCategory,
-}) => {
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
+export default function CategoryTabs({ categories, activeCategoryId, onSelectCategory }: CategoryTabsProps) {
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <ScrollArea className="w-full whitespace-nowrap rounded-lg border-b border-gray-200 pb-2">
             <div className="flex w-max space-x-2 p-1">
