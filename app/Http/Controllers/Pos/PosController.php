@@ -18,9 +18,8 @@ class PosController extends Controller
         $today = Carbon::today()->toDateTimeString();
         $products = Product::all();
         $categories = ProductCategory::query()->orderBy('name', 'asc')->get();
-        $reservations = Reservation::where('real_check_in', '<=', $today)
-                    ->orWhere('real_check_out', '>', $today)
-                    ->orWhere('check_in', '>=', $today)
+        $reservations = Reservation::where('check_out', '>', $today)
+                    ->where('check_in', '>=', $today)
                     ->with('mainVisitor')
                     ->orderBy('check_in')
                     ->get(['id', 'check_in', 'check_out', 'real_check_in', 'real_check_out'])

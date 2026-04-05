@@ -1,4 +1,4 @@
-import PosContainer from '@/components/Pos/pos-container';
+import PosContainer from '@/components/pos/pos-container';
 import type { Product, ProductCategory } from '@/types';
 
 // ────────────────────────────────────────────────

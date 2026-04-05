@@ -2,9 +2,9 @@ import { usePage } from '@inertiajs/react';
 import { LayoutGrid, List, Plus, Settings, Search, Send, Loader2 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import PosController from '@/actions/App/Http/Controllers/Pos/PosController';
-import PosContainer from '@/components/Pos/pos-container';
-import { OrdersTab, OrdersTabHandle } from '@/components/Pos/orders-tab';
-import { ProductForm } from '@/components/Pos/product-form';
+import PosContainer from '@/components/pos/pos-container';
+import { OrdersTab, OrdersTabHandle } from '@/components/pos/orders-tab';
+import ProductForm from '@/components/pos/product-form';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -37,8 +37,7 @@ export default function Index({ products, categories, reservations }: Props) {
     // ────────────────────────────────────────────────
     //  States & variables
     // ────────────────────────────────────────────────
-    const { auth } = usePage().props as any;
-    const isAdmin = auth.user.is_admin;
+    const isAdmin = usePage().props.auth.user.is_admin;
     const [activeTab, setActiveTab] = useState<'pos' | 'order'>('pos');
     const [isEditingCatalog, setIsEditingCatalog] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
@@ -97,14 +96,14 @@ export default function Index({ products, categories, reservations }: Props) {
                             <div className="flex items-center gap-2 flex-1 sm:flex-none">
                                 <div className="relative flex-1 sm:w-64">
                                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                    <Input 
-                                        placeholder="Rechercher..." 
+                                    <Input
+                                        placeholder="Rechercher..."
                                         className="pl-10 h-10 rounded-xl border-gray-100 bg-gray-50/50 dark:bg-dark-surface dark:border-white/5"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                     />
                                 </div>
-                                <Button 
+                                <Button
                                     size="icon"
                                     onClick={() => {
                                         ordersTabRef.current?.sendSearch();
@@ -139,11 +138,10 @@ export default function Index({ products, categories, reservations }: Props) {
                                     onClick={() =>
                                         setIsEditingCatalog(!isEditingCatalog)
                                     }
-                                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[10px] font-black uppercase transition-all ${
-                                        isEditingCatalog
+                                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[10px] font-black uppercase transition-all ${isEditingCatalog
                                             ? 'bg-brand-500 text-white shadow-glow'
                                             : 'bg-gray-100 text-gray-400 hover:text-gray-600 dark:bg-dark-surface'
-                                    }`}
+                                        }`}
                                 >
                                     <Settings size={14} />
                                     <span className="xs:inline hidden">
@@ -160,16 +158,16 @@ export default function Index({ products, categories, reservations }: Props) {
                 {/* CONTENTS */}
                 <div className="mt-2">
                     <TabsContent value="pos" className="mt-0 ">
-                        <PosContainer 
-                            products={products} 
-                            categories={categories} 
-                            reservations={reservations} 
+                        <PosContainer
+                            products={products}
+                            categories={categories}
+                            reservations={reservations}
                             isEditingCatalog={isEditingCatalog}
                             onEditProduct={handleEditProduct}
                         />
                     </TabsContent>
                     <TabsContent value="order" className="mt-0 shadow-soft rounded-xl bg-white p-4 dark:bg-dark-card">
-                        <OrdersTab 
+                        <OrdersTab
                             ref={ordersTabRef}
                             search={search}
                             reservations={reservations}
@@ -179,8 +177,8 @@ export default function Index({ products, categories, reservations }: Props) {
                 </div>
             </Tabs>
 
-            <ProductForm 
-                open={isProductFormOpen} 
+            <ProductForm
+                open={isProductFormOpen}
                 onOpenChange={setIsProductFormOpen}
                 product={editingProduct}
                 categories={categories}
