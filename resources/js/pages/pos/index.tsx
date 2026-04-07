@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
-import { LayoutGrid, List, Plus, Settings, Search, Send, Loader2 } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { LayoutGrid, List, Plus, Settings, Search, Send, Loader2, X } from 'lucide-react';
+import { useState, useRef, Suspense } from 'react';
 import PosController from '@/actions/App/Http/Controllers/Pos/PosController';
 import PosContainer from '@/components/pos/pos-container';
 import { OrdersTab, OrdersTabHandle } from '@/components/pos/orders-tab';
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Product, ProductCategory, Reservation } from '@/types';
+import OrderCardSkeleton from '@/components/order/order-card-skeleton';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -52,6 +53,11 @@ export default function Index({ products, categories, reservations }: Props) {
     const handleNewProduct = () => {
         setEditingProduct(null);
         setIsProductFormOpen(true);
+    };
+
+    const handleResetSearch = () => {
+        setSearch('');
+        ordersTabRef.current?.sendSearch('');
     };
 
     const handleEditProduct = (product: Product) => {
@@ -98,24 +104,33 @@ export default function Index({ products, categories, reservations }: Props) {
                                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                     <Input
                                         placeholder="Rechercher..."
-                                        className="pl-10 h-10 rounded-xl border-gray-100 bg-gray-50/50 dark:bg-dark-surface dark:border-white/5"
+                                        className="pl-10 h-10 pr-10 rounded-xl border-gray-100 bg-gray-50/50 dark:bg-dark-surface dark:border-white/5"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                ordersTabRef.current?.sendSearch();
+                                            }
+                                        }}
                                     />
+                                    {search && (
+                                        <button
+                                            onClick={handleResetSearch}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    )}
                                 </div>
                                 <Button
                                     size="icon"
                                     onClick={() => {
                                         ordersTabRef.current?.sendSearch();
                                     }}
-                                    disabled={ordersTabRef.current?.isLoading || !search.trim()}
+                                    disabled={!search.trim()}
                                     className="h-10 w-10 rounded-xl shadow-glow"
                                 >
-                                    {ordersTabRef.current?.isLoading ? (
-                                        <Loader2 size={16} className="animate-spin" />
-                                    ) : (
-                                        <Send size={16} />
-                                    )}
+                                    <Send size={16} />
                                 </Button>
                             </div>
                         )}
@@ -166,13 +181,15 @@ export default function Index({ products, categories, reservations }: Props) {
                             onEditProduct={handleEditProduct}
                         />
                     </TabsContent>
-                    <TabsContent value="order" className="mt-0 shadow-soft rounded-xl bg-white p-4 dark:bg-dark-card">
-                        <OrdersTab
-                            ref={ordersTabRef}
-                            search={search}
-                            reservations={reservations}
-                            onEditOrders={(res) => console.log('Edit orders for', res.id)}
-                        />
+                    <TabsContent value="order" className="mt-0">
+                        <Suspense fallback={<OrderCardSkeleton />}>
+                            <OrdersTab
+                                ref={ordersTabRef}
+                                search={search}
+                                reservations={reservations}
+                                onEditOrders={(res) => console.log('Edit orders for', res.id)}
+                            />
+                        </Suspense>
                     </TabsContent>
                 </div>
             </Tabs>

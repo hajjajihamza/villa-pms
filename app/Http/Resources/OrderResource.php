@@ -21,10 +21,14 @@ class OrderResource extends JsonResource
             'total_amount' => $this->total_amount,
             'reservation' => [
                 'id' => $this->reservation_id,
-                'customer_name' => $this->reservation?->main_visitor?->full_name,
-                'accommodation_name' => $this->reservation?->accommodation?->name,
+                'main_visitor' => [
+                    'full_name' => $this->reservation?->mainVisitor?->full_name
+                ],
+                'accommodation' => [
+                    'name' => $this->reservation?->accommodation?->name
+                ],
             ],
-            'items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
+            'order_items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
         ];
     }
 }

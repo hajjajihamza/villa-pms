@@ -55,7 +55,6 @@ class ReservationController extends Controller
             ->through(fn(Reservation $item) => $item->append(['duration', 'amount_to_pay', 'status', 'can_validate']))
         ;
 
-//        dd($reservations);
         return Inertia::render('reservations/index', [
             'reservations' => $reservations,
             'accommodations' => Accommodation::get(['id', 'name']),

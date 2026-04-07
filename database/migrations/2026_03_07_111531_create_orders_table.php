@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table): void {
             $table->id();
-            $table->date('date');
+            $table->dateTime('date');
             $table->foreignId('reservation_id')
                 ->nullable()
                 ->constrained()

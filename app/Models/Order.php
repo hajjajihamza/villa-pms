@@ -22,12 +22,19 @@ class Order extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = ['total_amount'];
+
+    /**
      * @return array<string, string|class-string|array>
      */
     protected function casts(): array
     {
         return [
-            'date' => 'date',
+            'date' => 'datetime',
         ];
     }
 
