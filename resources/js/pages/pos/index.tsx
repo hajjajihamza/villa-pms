@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { LayoutGrid, List, Plus, Settings, Search, Send, Loader2, X } from 'lucide-react';
+import { LayoutGrid, List, Plus, Settings, Search, Send, X } from 'lucide-react';
 import { useState, useRef, Suspense } from 'react';
 import PosController from '@/actions/App/Http/Controllers/Pos/PosController';
 import PosContainer from '@/components/pos/pos-container';
@@ -9,8 +9,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Product, ProductCategory, Reservation } from '@/types';
+import type { BreadcrumbItem, Product, ProductCategory, Reservation, Accommodation } from '@/types';
 import OrderCardSkeleton from '@/components/order/order-card-skeleton';
+import Select from 'react-select';
+import { useMemo } from 'react';
+import { toFormDate } from '@/lib/format-date';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -18,7 +21,8 @@ import OrderCardSkeleton from '@/components/order/order-card-skeleton';
 type Props = {
     products: Product[],
     categories: ProductCategory[],
-    reservations?: Reservation[]
+    reservations?: Reservation[],
+    accommodations?: Accommodation[]
 }
 
 // ────────────────────────────────────────────────
@@ -34,7 +38,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function Index({ products, categories, reservations }: Props) {
+export default function Index({ products, categories, reservations, accommodations }: Props) {
     // ────────────────────────────────────────────────
     //  States & variables
     // ────────────────────────────────────────────────
@@ -44,8 +48,17 @@ export default function Index({ products, categories, reservations }: Props) {
     const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
     const [isProductFormOpen, setIsProductFormOpen] = useState(false);
     const [search, setSearch] = useState('');
+    const [date, setDate] = useState<Date | string>('');
+    const [accommodationId, setAccommodationId] = useState<number | string>('');
 
     const ordersTabRef = useRef<OrdersTabHandle>(null);
+
+    const accommodationOptions = useMemo(() => {
+        return [
+            { value: '', label: 'Tous les hébergements' },
+            ...(accommodations ?? []).map((a) => ({ value: a.id, label: a.name })),
+        ];
+    }, [accommodations]);
 
     // ────────────────────────────────────────────────
     //  Handlers
@@ -55,9 +68,19 @@ export default function Index({ products, categories, reservations }: Props) {
         setIsProductFormOpen(true);
     };
 
-    const handleResetSearch = () => {
+    const handleResetFilters = () => {
         setSearch('');
-        ordersTabRef.current?.sendSearch('');
+        setDate('');
+        setAccommodationId('');
+        ordersTabRef.current?.sendFilters({ search: '', date: '', accommodation_id: '' });
+    };
+
+    const handleApplyFilters = () => {
+        ordersTabRef.current?.sendFilters({ 
+            search, 
+            date: toFormDate(new Date(date)), 
+            accommodation_id: accommodationId 
+        });
     };
 
     const handleEditProduct = (product: Product) => {
@@ -99,39 +122,99 @@ export default function Index({ products, categories, reservations }: Props) {
                     {/* RIGHT: Actions */}
                     <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
                         {activeTab === 'order' && (
-                            <div className="flex items-center gap-2 flex-1 sm:flex-none">
-                                <div className="relative flex-1 sm:w-64">
+                            <div className="flex flex-wrap items-center gap-2 flex-1 sm:flex-none">
+                                {/* Search */}
+                                <div className="relative flex-1 sm:w-64 min-w-[200px]">
                                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                     <Input
-                                        placeholder="Rechercher..."
-                                        className="pl-10 h-10 pr-10 rounded-xl border-gray-100 bg-gray-50/50 dark:bg-dark-surface dark:border-white/5"
+                                        placeholder="Rechercher par nom or tél..."
+                                        className="pl-10 h-10 pr-10 rounded-xl border-gray-100 bg-gray-50/50 dark:bg-dark-surface dark:border-white/5 w-full"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
-                                                ordersTabRef.current?.sendSearch();
+                                                handleApplyFilters();
                                             }
                                         }}
                                     />
                                     {search && (
                                         <button
-                                            onClick={handleResetSearch}
+                                            onClick={() => {
+                                                setSearch('');
+                                                handleApplyFilters();
+                                            }}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
                                         >
                                             <X size={16} />
                                         </button>
                                     )}
                                 </div>
-                                <Button
-                                    size="icon"
-                                    onClick={() => {
-                                        ordersTabRef.current?.sendSearch();
-                                    }}
-                                    disabled={!search.trim()}
-                                    className="h-10 w-10 rounded-xl shadow-glow"
-                                >
-                                    <Send size={16} />
-                                </Button>
+
+                                {/* Date */}
+                                <div className="relative">
+                                    <Input
+                                        type="date"
+                                        className="h-10 rounded-xl border-gray-100 bg-gray-50/50 dark:bg-dark-surface dark:border-white/5 w-full sm:w-auto"
+                                        value={date.toLocaleString()}
+                                        onChange={(e) => {
+                                            setDate(e.target.value);
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Accommodation Select */}
+                                <div className="min-w-[200px] flex-1 sm:flex-none">
+                                    <Select
+                                        options={accommodationOptions}
+                                        value={accommodationOptions.find(opt => opt.value === accommodationId)}
+                                        onChange={(opt) => {
+                                            setAccommodationId(opt?.value ?? '');
+                                        }}
+                                        placeholder="Hébergement..."
+                                        className="react-select-container"
+                                        classNamePrefix="react-select"
+                                        isSearchable
+                                        styles={{
+                                            control: (base) => ({
+                                                ...base,
+                                                minHeight: '40px',
+                                                borderRadius: '0.75rem',
+                                                borderColor: 'rgb(243 244 246)',
+                                                backgroundColor: 'rgba(249, 250, 251, 0.5)',
+                                                boxShadow: 'none',
+                                                '&:hover': {
+                                                    borderColor: 'rgb(243 244 246)',
+                                                }
+                                            }),
+                                            menu: (base) => ({
+                                                ...base,
+                                                borderRadius: '0.75rem',
+                                                overflow: 'hidden',
+                                                zIndex: 50
+                                            })
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        size="icon"
+                                        onClick={handleApplyFilters}
+                                        className="h-10 w-10 rounded-xl shadow-glow"
+                                    >
+                                        <Send size={16} />
+                                    </Button>
+                                    {(search || date || accommodationId) && (
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={handleResetFilters}
+                                            className="h-10 w-10 rounded-xl text-gray-400 hover:text-red-500"
+                                        >
+                                            <X size={16} />
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         )}
 
@@ -185,7 +268,7 @@ export default function Index({ products, categories, reservations }: Props) {
                         <Suspense fallback={<OrderCardSkeleton />}>
                             <OrdersTab
                                 ref={ordersTabRef}
-                                search={search}
+                                filters={{ search, date, accommodation_id: accommodationId }}
                                 reservations={reservations}
                                 onEditOrders={(res) => console.log('Edit orders for', res.id)}
                             />

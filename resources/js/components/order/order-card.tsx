@@ -15,7 +15,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 type Props = {
     order: Order;
     onEditItem: (item: OrderItem) => void;
-    onDeleteItem: (id: number) => void;
 }
 
 // ────────────────────────────────────────────────
@@ -24,11 +23,16 @@ type Props = {
 export default function OrderCard({
     order,
     onEditItem,
-    onDeleteItem
 }: Props) {
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
     const [isOpen, setIsOpen] = useState(false);
     const isMobile = useIsMobile();
 
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
             <Card className="overflow-hidden border-gray-100 shadow-sm transition-all hover:shadow-md dark:border-white/5 py-3">
@@ -92,7 +96,6 @@ export default function OrderCard({
                         <OrderItemsTable
                             items={order.order_items || []}
                             onEdit={onEditItem}
-                            onDelete={onDeleteItem}
                         />
                     </div>
                 </CollapsibleContent>

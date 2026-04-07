@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Reservation;
+use App\Models\Accommodation;
 
 class PosController extends Controller
 {
@@ -18,6 +19,7 @@ class PosController extends Controller
         $today = Carbon::today()->toDateTimeString();
         $products = Product::all();
         $categories = ProductCategory::query()->orderBy('name', 'asc')->get();
+        $accommodations = Accommodation::all();
         $reservations = Reservation::where('check_out', '>', $today)
                     ->where('check_in', '>=', $today)
                     ->with('mainVisitor')
@@ -29,6 +31,7 @@ class PosController extends Controller
             'products' => $products,
             'categories' => $categories,
             'reservations' => $reservations,
+            'accommodations' => $accommodations,
         ]);
     }
 

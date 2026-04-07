@@ -1,6 +1,5 @@
 import { useState, forwardRef, useImperativeHandle } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
 import {
     Search,
 } from 'lucide-react';
@@ -16,70 +15,64 @@ import { getOrders, type OrderResponse } from '@/api/order';
 //  Types
 // ────────────────────────────────────────────────
 
-type Props = {
+type Filters = {
     search?: string;
+    date?: Date | string;
+    accommodation_id?: number | string;
+}
+
+type Props = {
+    filters?: Filters;
     reservations?: Reservation[];
     onEditOrders?: (res: any) => void;
 }
 
 export type OrdersTabHandle = {
-    sendSearch: (value?: string) => void;
+    sendFilters: (filters: Filters) => void;
 }
 
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export const OrdersTab = forwardRef<OrdersTabHandle, Props>(({ search = '' }, ref) => {
+export const OrdersTab = forwardRef<OrdersTabHandle, Props>(({ filters: initialFilters = {} }, ref) => {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
     const [page, setPage] = useState(1);
-    const [appliedSearch, setAppliedSearch] = useState(search);
+    const [appliedFilters, setAppliedFilters] = useState<Filters>(initialFilters);
     const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
 
     // ────────────────────────────────────────────────
     //  Queries
     // ────────────────────────────────────────────────
     const { data: ordersData, refetch } = useQuery<OrderResponse>({
-        queryKey: ['orders', page, appliedSearch],
+        queryKey: ['orders', page, appliedFilters],
         queryFn: async () => {
-            return getOrders({ page, search: appliedSearch });
+            return getOrders({ 
+                page, 
+                search: appliedFilters.search,
+                date: appliedFilters.date?.toLocaleString(),
+                accommodation_id: appliedFilters.accommodation_id
+            });
         },
         suspense: true,
     });
 
+    // ────────────────────────────────────────────────
+    //  Imperative Handle
+    // ────────────────────────────────────────────────
     useImperativeHandle(ref, () => ({
-        sendSearch: (value?: string) => {
+        sendFilters: (filters: Filters) => {
             setPage(1);
-            setAppliedSearch(value ?? search);
+            setAppliedFilters(filters);
         }
     }));
-
-    // ────────────────────────────────────────────────
-    //  Mutations
-    // ────────────────────────────────────────────────
-
-
-    const deleteMutation = useMutation({
-        mutationFn: async (id: number) => {
-            return axios.delete(`/api/order-items/${id}`);
-        },
-        onSuccess: () => {
-            refetch();
-        },
-    });
 
     // ────────────────────────────────────────────────
     //  Handlers
     // ────────────────────────────────────────────────
     const handleEditClick = (item: OrderItem) => {
         setEditingItem(item);
-    };
-
-    const handleDeleteClick = (id: number) => {
-        if (confirm('Voulez-vous vraiment supprimer cet article ?')) {
-            deleteMutation.mutate(id);
-        }
     };
 
     // ────────────────────────────────────────────────
@@ -95,7 +88,6 @@ export const OrdersTab = forwardRef<OrdersTabHandle, Props>(({ search = '' }, re
                             key={order.id}
                             order={order}
                             onEditItem={handleEditClick}
-                            onDeleteItem={handleDeleteClick}
                         />
                     ))}
 

@@ -4,6 +4,9 @@ import { Button } from "../ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { formatNumber } from "@/lib/format-number";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteOrderItem } from "@/api/order";
+import { Skeleton } from "../ui/skeleton";
 
 // ────────────────────────────────────────────────
 //  Types
@@ -11,7 +14,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 type Props = {
     items: OrderItem[];
     onEdit: (item: OrderItem) => void;
-    onDelete: (id: number) => void;
 }
 
 // ────────────────────────────────────────────────
@@ -20,10 +22,35 @@ type Props = {
 export default function OrderItemsTable({
     items,
     onEdit,
-    onDelete
 }: Props) {
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
+    const queryClient = useQueryClient();
     const isMobile = useIsMobile();
 
+    // ────────────────────────────────────────────────
+    //  Mutations
+    // ────────────────────────────────────────────────
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id: number) => deleteOrderItem(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
+        },
+    });
+
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
+    const handleDeleteOrderItem = async (id: number) => {
+        await deleteMutation.mutateAsync(id);
+    };
+
+
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <div className="space-y-4">
             {/* Desktop Table */}
@@ -50,24 +77,31 @@ export default function OrderItemsTable({
                             </TableRow>
                         )}
                         {items.map((item) => (
-                            <TableRow 
-                                key={item.id} 
+                            <TableRow
+                                key={item.id}
                                 className="group transition-colors hover:bg-muted/30 border-gray-50 dark:border-white/5"
                             >
                                 <TableCell className="font-medium text-foreground py-4">{item.product_name}</TableCell>
                                 <TableCell className="text-center text-sm">{item.quantity}</TableCell>
                                 <TableCell className="text-right text-sm">
-                                    {formatNumber(item.price as number, {endWith: 'DH'})}
+                                    {formatNumber(item.price as number, { endWith: 'DH' })}
                                 </TableCell>
                                 <TableCell className="text-right font-bold text-sm text-brand-600">
-                                    {formatNumber(item.total as number, {endWith: 'DH'})}
+                                    {formatNumber(item.total as number, { endWith: 'DH' })}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <ActionButtons
-                                            onEdit={() => onEdit(item)}
-                                            onDelete={() => onDelete(item.id)}
-                                        />
+                                        {deleteMutation.isPending ? (
+                                            <>
+                                                <Skeleton className="h-8 w-8" />
+                                                <Skeleton className="h-8 w-8" />
+                                            </>
+                                        ) : (
+                                            <ActionButtons
+                                                onEdit={() => onEdit(item)}
+                                                onDelete={() => handleDeleteOrderItem(item.id)}
+                                            />
+                                        )}
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -95,12 +129,19 @@ export default function OrderItemsTable({
                                         Quantité: <span className="font-medium text-foreground">{item.quantity}</span>
                                     </p>
                                 </div>
-                                <ActionButtons
-                                    onEdit={() => onEdit(item)}
-                                    onDelete={() => onDelete(item.id)}
-                                />
+                                {deleteMutation.isPending ? (
+                                    <>
+                                        <Skeleton className="h-8 w-8" />
+                                        <Skeleton className="h-8 w-8" />
+                                    </>
+                                ) : (
+                                    <ActionButtons
+                                        onEdit={() => onEdit(item)}
+                                        onDelete={() => handleDeleteOrderItem(item.id)}
+                                    />
+                                )}
                             </div>
-                            
+
                             <div className="grid grid-cols-2 gap-2 text-sm">
                                 <div className="rounded-md bg-muted/50 p-2 shadow-sm">
                                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Prix Unit.</p>
@@ -142,11 +183,11 @@ function ActionButtons({ onEdit, onDelete }: { onEdit: () => void; onDelete: () 
                 variant="destructive"
                 size="icon"
                 className="h-8 w-8"
-                onClick={onDelete}
+                onClick={() => confirm('Êtes-vous sûr de vouloir supprimer cet article ?') && onDelete()}
                 title="Supprimer"
             >
                 <Trash2 className="h-4 w-4" />
             </Button>
         </div>
     );
-}
+}

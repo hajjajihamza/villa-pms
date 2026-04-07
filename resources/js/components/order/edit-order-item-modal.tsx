@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
-import { Loader2 } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 import { OrderItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,28 +10,45 @@ import {
     DialogTitle,
     DialogFooter
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { updateOrderItem } from '@/api/order';
+import InputCounter from '../input-counter';
+import { formatNumber } from '@/lib/format-number';
+import { ScrollArea } from '../ui/scroll-area';
 
-interface EditOrderItemModalProps {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type Props = {
     item: OrderItem | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess?: () => void;
 }
 
-export default function EditOrderItemModal({ item, open, onOpenChange, onSuccess }: EditOrderItemModalProps) {
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
+export default function EditOrderItemModal({ item, open, onOpenChange, onSuccess }: Props) {
+    // ────────────────────────────────────────────────
+    //  State & Variables
+    // ────────────────────────────────────────────────
     const [quantity, setQuantity] = useState<number>(1);
 
+    // ────────────────────────────────────────────────
+    //  Effects
+    // ────────────────────────────────────────────────
     useEffect(() => {
         if (item) {
             setQuantity(item.quantity);
         }
     }, [item]);
 
+    // ────────────────────────────────────────────────
+    //  Mutations
+    // ────────────────────────────────────────────────
     const updateMutation = useMutation({
-        mutationFn: async ({ id, quantity }: { id: number, quantity: number }) => {
-            return axios.patch(`/api/order-items/${id}`, { quantity });
+        mutationFn: async () => {
+            await updateOrderItem(item?.id as number, quantity);
         },
         onSuccess: () => {
             if (onSuccess) onSuccess();
@@ -40,78 +56,80 @@ export default function EditOrderItemModal({ item, open, onOpenChange, onSuccess
         },
     });
 
-    const handleUpdateQuantity = () => {
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
+    const handleUpdateQuantity = async () => {
         if (item && quantity > 0) {
-            updateMutation.mutate({ id: item.id, quantity });
+            await updateMutation.mutateAsync();
         }
     };
 
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md rounded-2xl">
-                <DialogHeader>
+            <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl max-w-md overflow-hidden bg-background p-2">
+                <DialogHeader className="border-b px-6 py-4">
                     <DialogTitle className="text-xl font-bold">Modifier la quantité</DialogTitle>
                 </DialogHeader>
 
-                <div className="py-6 flex flex-col gap-4">
+                {/* scroll area */}
+                <ScrollArea className="px-2 max-h-[60vh] overflow-y-auto">
                     <div className="flex flex-col gap-2 p-4 rounded-xl bg-gray-50 dark:bg-dark-surface">
                         <span className="text-xs text-gray-400 uppercase font-bold">Produit</span>
                         <span className="font-bold text-lg">{item?.product_name}</span>
                         <div className="flex items-center justify-between mt-2">
                             <span className="text-sm text-gray-500">Prix unitaire</span>
                             <span className="font-medium">
-                                {parseFloat((item?.price || 0).toString()).toLocaleString('fr-FR')} €
+                                {formatNumber(item?.price || 0, { endWith: 'DH' })}
                             </span>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-3">
-                        <Label htmlFor="quantity" className="font-bold">Nouvelle Quantité</Label>
-                        <div className="flex items-center gap-3">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-12 w-12 rounded-xl border-gray-100"
-                                onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                            >
-                                -
-                            </Button>
-                            <Input
-                                id="quantity"
-                                type="number"
-                                value={quantity}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                className="h-12 text-center text-lg font-bold rounded-xl border-gray-100"
-                            />
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-12 w-12 rounded-xl border-gray-100"
-                                onClick={() => setQuantity(q => q + 1)}
-                            >
-                                +
-                            </Button>
-                        </div>
-                    </div>
+                    <InputCounter
+                        id="quantity"
+                        label="Nouvelle Quantité"
+                        value={quantity}
+                        min={1}
+                        step={1}
+                        unit=""
+                        onChange={(value) =>
+                            setQuantity(value)
+                        }
+                    />
 
                     <div className="flex items-center justify-between p-4 rounded-xl bg-brand-50/50 border border-brand-100 dark:bg-brand-500/10 dark:border-brand-500/20 mt-2">
                         <span className="font-bold text-brand-900 dark:text-brand-400">Nouveau Total</span>
                         <span className="font-black text-xl text-brand-600">
-                            {((item?.price || 0) * quantity).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+                            {formatNumber((item?.price || 0) * quantity, { endWith: 'DH' })}
                         </span>
                     </div>
-                </div>
+                </ScrollArea>
 
-                <DialogFooter className="gap-2">
-                    <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl h-11 flex-1">
+                {/* footer */}
+                <DialogFooter className="grid grid-cols-1 gap-3 border-t bg-muted/30 py-6 sm:grid-cols-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        size="lg"
+                        className="w-full"
+                    >
+                        <X className="size-4 mr-2" />
                         Annuler
                     </Button>
                     <Button
-                        onClick={handleUpdateQuantity}
+                        type="submit"
+                        variant="primary"
                         disabled={updateMutation.isPending}
-                        className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl h-11 flex-1 shadow-glow"
+                        size="lg"
+                        className="w-full"
+                        onClick={handleUpdateQuantity}
                     >
-                        {updateMutation.isPending ? <Loader2 size={18} className="animate-spin" /> : 'Enregistrer'}
+                        <Save className="size-4 mr-2" />
+                        {updateMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

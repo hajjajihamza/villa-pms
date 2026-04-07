@@ -15,13 +15,15 @@ class OrderApiController extends Controller
     public function index(Request $request)
     {
         $perPage = 12;
-        $orders = null;
         $query = Order::query()
             ->with(['reservation.mainVisitor', 'reservation.accommodation', 'orderItems'])
             ->when($request->accommodation_id, function (Builder $query, int $accommodationId) {
                 $query->whereHas('reservation.accommodation', function (Builder $q) use ($accommodationId) {
                     $q->where('id', $accommodationId);
                 });
+            })
+            ->when($request->date, function (Builder $query, $date) {
+                $query->whereDate('created_at', $date);
             })
             ->latest();
 
@@ -36,9 +38,8 @@ class OrderApiController extends Controller
                 }
 
                 return str_contains(strtolower($visitor->full_name), $search) || str_contains(strtolower($visitor->phone), $search);
-            })->values(); 
+            })->values();
 
-            // Step 3: Manual pagination
             $page = LengthAwarePaginator::resolveCurrentPage();
 
             $orders = new LengthAwarePaginator(
@@ -46,12 +47,12 @@ class OrderApiController extends Controller
                 $filtredList->count(),
                 $perPage,
                 $page,
-                ['path' => request()->url(), 'query' => request()->query()]
-            ); 
+                ['path' => request()->url(), 'query' => $request->query()]
+            );
         } else {
             $orders = $query
-            ->paginate($perPage)
-            ->withQueryString();
+                ->paginate($perPage)
+                ->withQueryString();
         }
 
         return response()->json([
