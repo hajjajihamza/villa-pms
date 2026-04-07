@@ -1,13 +1,15 @@
 import { Card } from "../ui/card";
 import { Order, OrderItem } from "@/types";
 import { format } from "date-fns";
-import { User, Home, ChevronDown, ChevronUp } from "lucide-react";
+import { User, Home, ChevronDown, ChevronUp, Eye } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { useState } from "react";
 import { formatNumber } from "@/lib/format-number";
 import OrderItemsTable from "./order-items";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ReservationModal from "../Reservations/ReservationDetails/ReservationModal";
+import { Button } from "../ui/button";
 
 // ────────────────────────────────────────────────
 //  Types
@@ -28,6 +30,7 @@ export default function OrderCard({
     //  States & variables
     // ────────────────────────────────────────────────
     const [isOpen, setIsOpen] = useState(false);
+    const [showReservationModal, setShowReservationModal] = useState(false);
     const isMobile = useIsMobile();
 
     // ────────────────────────────────────────────────
@@ -74,6 +77,21 @@ export default function OrderCard({
                                         {formatNumber(order.total_amount as number, { endWith: 'DH' })}
                                     </span>
                                 </div>
+                                {order.reservation?.id && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Détails de la réservation"
+                                        className="h-8 w-8 text-brand-600 hover:text-brand-700 hover:bg-brand-50"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setShowReservationModal(true);
+                                        }}
+                                    >
+                                        <Eye size={16} />
+                                    </Button>
+                                )}
                                 <div className="rounded-full bg-gray-50 p-2 text-gray-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors dark:bg-white/5">
                                     {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                 </div>
@@ -100,6 +118,14 @@ export default function OrderCard({
                     </div>
                 </CollapsibleContent>
             </Card>
+
+            {order.reservation?.id && showReservationModal && (
+                <ReservationModal
+                    open={showReservationModal}
+                    onOpenChange={setShowReservationModal}
+                    reservationId={order.reservation.id}
+                />
+            )}
         </Collapsible>
     );
 }
