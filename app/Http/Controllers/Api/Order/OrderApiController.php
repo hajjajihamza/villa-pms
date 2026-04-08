@@ -4,56 +4,20 @@ namespace App\Http\Controllers\Api\Order;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
-use App\Models\Order;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\OrderItem;
+use App\Services\Order\OrderService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
 
 class OrderApiController extends Controller
 {
-    public function index(Request $request)
+    public function __construct(
+        protected OrderService $orderService
+    ) {}
+
+    public function index(Request $request): JsonResponse
     {
-        $perPage = 12;
-        $query = Order::query()
-            ->with(['reservation.mainVisitor', 'reservation.accommodation', 'orderItems'])
-            ->when($request->accommodation_id, function (Builder $query, int $accommodationId) {
-                $query->whereHas('reservation.accommodation', function (Builder $q) use ($accommodationId) {
-                    $q->where('id', $accommodationId);
-                });
-            })
-            ->when($request->date, function (Builder $query, $date) {
-                $query->whereDate('created_at', $date);
-            })
-            ->latest();
-
-        if ($request->filled('search')) {
-            $search = strtolower($request->search);
-
-            $filtredList = $query->get()->filter(function ($order) use ($search) {
-                $visitor = $order->reservation->mainVisitor ?? null;
-
-                if (!$visitor) {
-                    return false;
-                }
-
-                return str_contains(strtolower($visitor->full_name), $search) || str_contains(strtolower($visitor->phone), $search);
-            })->values();
-
-            $page = LengthAwarePaginator::resolveCurrentPage();
-
-            $orders = new LengthAwarePaginator(
-                $filtredList->forPage($page, $perPage),
-                $filtredList->count(),
-                $perPage,
-                $page,
-                ['path' => request()->url(), 'query' => $request->query()]
-            );
-        } else {
-            $orders = $query
-                ->paginate($perPage)
-                ->withQueryString();
-        }
+        $orders = $this->orderService->getPaginatedOrders($request->all());
 
         return response()->json([
             'data' => OrderResource::collection($orders->items()),
@@ -64,4 +28,29 @@ class OrderApiController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Update the specified order item.
+     */
+    public function updateItem(Request $request, OrderItem $orderItem): JsonResponse
+    {
+        $request->validate([
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $this->orderService->updateOrderItemQuantity($orderItem, $request->integer('quantity'));
+
+        return response()->json(['message' => 'Quantité mise à jour avec succès.']);
+    }
+
+    /**
+     * Remove the specified order item from storage.
+     */
+    public function destroyItem(OrderItem $orderItem): JsonResponse
+    {
+        $this->orderService->deleteOrderItem($orderItem);
+
+        return response()->json(['message' => 'Article supprimé avec succès.']);
+    }
 }
+
