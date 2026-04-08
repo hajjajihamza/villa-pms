@@ -9,9 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Visitor } from '@/types/models';
 import { visitorService } from '@/api/visitorService';
-import { VisitorForm } from '../ReservationForm/VisitorForm';
+import { VisitorForm } from '../forms/VisitorForm';
 import { DocumentCard } from './DocumentCard';
-import { DocumentForm } from '../ReservationForm/DocumentForm';
+import { DocumentForm } from '../forms/DocumentForm';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 getName.registerLocale(frLocale);

@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { documentService } from '@/api/documentService';
 import type { Document } from '@/types/models';
 import { useState } from 'react';
-import { DocumentForm } from '../ReservationForm/DocumentForm';
+import { DocumentForm } from '../forms/DocumentForm';
 
 interface Props {
   document: Document;

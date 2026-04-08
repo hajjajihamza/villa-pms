@@ -7,33 +7,34 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { toFormDate } from "@/lib/format-date";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import InputError from "@/components/input-error";
 import { cn } from "@/lib/utils";
+import { DayButtonProps } from "react-day-picker";
 
 // ────────────────────────────────────────────────
 //  Types
 // ────────────────────────────────────────────────
 interface Props {
     id?: string;
-    label?: string;
-    defaultValue?: string;
+    label?: string | ReactNode;
     onChange?: (date: string) => void;
     error?: string;
     placeholder?: string;
     className?: string;
+    disabled?: DayButtonProps['disabled'];
+    selected?: Date;
 }
 
 
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export function DatePickerInput({ id, label, defaultValue, onChange, error, placeholder, className }: Props) {
+export function DatePickerInput({ id, label, onChange, error, placeholder, className, disabled, selected }: Props) {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
     const [open, setOpen] = useState(false);
-    const [date, setDate] = useState<Date | undefined>(defaultValue ? new Date(defaultValue) : undefined);
 
     // ────────────────────────────────────────────────
     //  Render
@@ -48,17 +49,17 @@ export function DatePickerInput({ id, label, defaultValue, onChange, error, plac
                         id={id}
                         className={cn("h-11 justify-start font-normal", className)}
                     >
-                        {date ? date.toLocaleDateString() : placeholder}
+                        {selected ? selected.toLocaleDateString() : placeholder}
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto overflow-hidden p-0" align="start">
                     <Calendar
                         mode="single"
-                        selected={date}
-                        defaultMonth={date}
+                        selected={selected}
+                        defaultMonth={selected}
                         captionLayout="dropdown"
+                        disabled={disabled}
                         onSelect={(date) => {
-                            setDate(date)
                             setOpen(false)
                             onChange?.(toFormDate(date))
                         }}

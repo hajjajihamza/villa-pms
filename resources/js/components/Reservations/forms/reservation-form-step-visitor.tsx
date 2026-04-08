@@ -6,13 +6,22 @@ import { cn } from '@/lib/utils';
 import 'react-international-phone/style.css';
 import { CountryDropdown } from '../../ui/country-dropdown';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type Props = {
     data: any;
     setData: (key: any, value?: any) => void;
     errors: any;
 };
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function StepVisitor({ data, setData, errors }: Props) {
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <div className="space-y-3">
             <div className="space-y-2 md:col-span-2">

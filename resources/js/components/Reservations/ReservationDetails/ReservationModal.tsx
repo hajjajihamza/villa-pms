@@ -28,28 +28,47 @@ import { StatusBadge } from '../ReservationList/ReservationCard';
 import { ReservationInvoice } from './ReservationInvoice';
 import { VisitorsSection } from './VisitorsSection';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     reservationId: number;
 };
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function ReservationModal({ open, onOpenChange, reservationId }: Props) {
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl sm:max-w-4xl overflow-hidden bg-background">
                 <Suspense fallback={<div className="p-8"><ReservationModalSkeleton /></div>}>
-                    <ReservationDetailsContent reservationId={reservationId} />
+                    {reservationId && <ReservationDetailsContent reservationId={reservationId} />}
                 </Suspense>
             </DialogContent>
         </Dialog>
     );
 }
 
+// ────────────────────────────────────────────────
+//  Sub-Component
+// ────────────────────────────────────────────────
 function ReservationDetailsContent({ reservationId }: { reservationId: number }) {
+    // ────────────────────────────────────────────────
+    //  Props
+    // ────────────────────────────────────────────────
+    const user = usePage().props.auth.user;
+
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
     const reservation = useReservationDetails(reservationId).data as Reservation;
 
-    const user = usePage().props.auth.user;
     const [showInvoice, setShowInvoice] = useState(false);
 
     const selectedAcc = reservation.accommodation;

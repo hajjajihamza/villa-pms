@@ -1,22 +1,23 @@
 import { usePage } from '@inertiajs/react';
-import { addDays, differenceInDays, startOfToday, isBefore } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { addDays, differenceInDays, startOfToday, isBefore, toDate } from 'date-fns';
 import { useEffect, useMemo } from 'react';
 import InputCounter from '@/components/input-counter';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useBookingData } from '@/hooks/use-booking-data';
-import type { BookingData} from '@/hooks/use-booking-data';
-import { formatDateDisplay, toFormDate } from '@/lib/format-date';
+import type { BookingData } from '@/hooks/use-booking-data';
+import { toFormDate } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
-import { cn } from '@/lib/utils';
 import type { Accommodation, Reservation, Unit } from '@/types';
 import { Badge } from '../../ui/badge';
-import type { ReservationFormData } from './ReservationForm';
+import type { ReservationFormData } from './reservation-form';
+import { DatePickerInput } from '@/components/date-picker_input';
+import { cn } from '@/lib/utils';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type Props = {
     data: ReservationFormData;
     setData: (key: any, value?: any) => void;
@@ -25,24 +26,40 @@ type Props = {
     reservation?: Reservation | null;
 };
 
-const checkIsReserved = (unites: Unit[], accommodation: Accommodation, check_in: string, check_out: string) => {
-    let isReserved = false;
-    unites.map((unit) => {
-        if (accommodation.units?.some((u) => u.id === unit.id)) {
-            if (unit.reserved_periods?.some((r) => r.check_in < check_out && r.check_out > check_in)) {
-                isReserved = true;
-            }
-        }
-    });
-
-    return isReserved;
+// ────────────────────────────────────────────────
+//  Helpers
+// ────────────────────────────────────────────────
+const checkIsReserved = (
+    units: Unit[],
+    accommodation: Accommodation,
+    check_in: string,
+    check_out: string
+): boolean => {
+    return units.some(unit =>
+        accommodation.units?.some(u => u.id === unit.id) &&
+        unit.reserved_periods?.some(r =>
+            r.check_in < check_out && r.check_out > check_in
+        )
+    );
 };
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function StepBooking({ data, setData, errors, isEditing, reservation }: Props) {
+    // ────────────────────────────────────────────────
+    //  Hooks
+    // ────────────────────────────────────────────────
     const bookingData = useBookingData().data as BookingData;
 
+    // ────────────────────────────────────────────────
+    // Props
+    // ────────────────────────────────────────────────
     const user = usePage().props.auth.user;
 
+    // ────────────────────────────────────────────────
+    //  Computed
+    // ────────────────────────────────────────────────
     const nights = useMemo(() => {
         if (!data.check_in || !data.check_out) return 0;
         return Math.max(0, differenceInDays(new Date(data.check_out), new Date(data.check_in)));
@@ -54,23 +71,16 @@ export default function StepBooking({ data, setData, errors, isEditing, reservat
         );
     }, [data.accommodation_id, bookingData.accommodations]);
 
-    // Auto-calculate total price
-    useEffect(() => {
-        if (selectedAccommodation && nights > 0) {
-            const calculatedTotal = nights * (isEditing && reservation ? reservation.daily_price : selectedAccommodation.daily_price || 0);
-            setData('total', Number(formatNumber(calculatedTotal,{thousandsSeparator:''})));
-        } else {
-            setData('total', 0);
-        }
-    }, [selectedAccommodation, nights]);
-
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const handleAccommodationSelect = (accommodation: Accommodation) => {
         setData({
             ...data,
             accommodation_id: accommodation.id,
             // Reset guests if they exceed new limits
-            adults: Math.min(Number(data.adults), accommodation.max_adults),
-            children: Math.min(Number(data.children), accommodation.max_children),
+            adults: Math.min(data.adults, accommodation.max_adults),
+            children: Math.min(data.children, accommodation.max_children),
         });
     };
 
@@ -86,23 +96,17 @@ export default function StepBooking({ data, setData, errors, isEditing, reservat
                 : minCheckOutDate,
             accommodation_id:
                 selectedAccommodation &&
-                !isEditing &&
-                checkIsReserved(
-                    bookingData.units,
-                    selectedAccommodation,
-                    check_in,
-                    data.check_out,
-                )
+                    !isEditing &&
+                    checkIsReserved(
+                        bookingData.units,
+                        selectedAccommodation,
+                        check_in,
+                        data.check_out,
+                    )
                     ? null
                     : data.accommodation_id,
         });
     };
-
-    useEffect(() => {
-        if (bookingData.channels.length > 0 && !data.channel_id) {
-            setData('channel_id', bookingData.channels[0].id);
-        }
-    }, []);
 
     const handleCheckOutSelect = (date?: Date) => {
         setData({
@@ -110,95 +114,81 @@ export default function StepBooking({ data, setData, errors, isEditing, reservat
             check_out: toFormDate(date),
             accommodation_id:
                 selectedAccommodation &&
-                !isEditing &&
-                checkIsReserved(
-                    bookingData.units,
-                    selectedAccommodation,
-                    data.check_in,
-                    toFormDate(date),
-                )
+                    !isEditing &&
+                    checkIsReserved(
+                        bookingData.units,
+                        selectedAccommodation,
+                        data.check_in,
+                        toFormDate(date),
+                    )
                     ? null
                     : data.accommodation_id,
         });
     };
 
-    // @ts-ignore
+    // ────────────────────────────────────────────────
+    //  Effects
+    // ────────────────────────────────────────────────
+    useEffect(() => {
+        if (bookingData.channels.length > 0 && !data.channel_id) {
+            setData('channel_id', bookingData.channels[0].id);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (selectedAccommodation && nights > 0) {
+            const calculatedTotal = nights * (isEditing && reservation ? reservation.daily_price : selectedAccommodation.daily_price || 0);
+            setData('total', Number(formatNumber(calculatedTotal, { thousandsSeparator: '' })));
+        } else {
+            setData('total', 0);
+        }
+    }, [selectedAccommodation, nights]);
+
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <div className="space-y-3">
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                    <Label>Arrivée</Label>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="mt-2 w-full justify-start text-left font-normal"
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {formatDateDisplay(data.check_in) ||
-                                    'Choisir la date'}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                                mode="single"
-                                disabled={{
-                                    before:
-                                        isEditing && user.is_admin
-                                            ? undefined
-                                            : startOfToday(),
-                                }}
-                                selected={
-                                    data.check_in
-                                        ? new Date(data.check_in)
-                                        : undefined
-                                }
-                                onSelect={handleCheckInSelect}
-                            />
-                        </PopoverContent>
-                    </Popover>
-                    <InputError message={errors.check_in} />
+                    <DatePickerInput
+                        id='check_in'
+                        label='Arrivée'
+                        placeholder='Choisir la date'
+                        selected={data.check_in ? toDate(data.check_in) : undefined}
+                        disabled={{
+                            before:
+                                isEditing && user.is_admin
+                                    ? undefined
+                                    : startOfToday(),
+                        }}
+                        onChange={(date) => handleCheckInSelect(date ? toDate(date) : undefined)}
+                        error={errors.check_in}
+                    />
                 </div>
                 <div className="space-y-2">
-                    <Label className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">Départ</div>
-                        {nights > 0 && (
-                            <Badge variant="secondary">
-                                {nights} {nights > 1 ? 'nuits' : 'nuit'}
-                            </Badge>
-                        )}
-                    </Label>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full justify-start text-left font-normal"
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {formatDateDisplay(data.check_out) ||
-                                    'Choisir la date'}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                                mode="single"
-                                disabled={{
-                                    before: data.check_in
-                                        ? addDays(data.check_in, 1)
-                                        : new Date(),
-                                }}
-                                selected={
-                                    data.check_out
-                                        ? new Date(data.check_out)
-                                        : undefined
-                                }
-                                onSelect={handleCheckOutSelect}
-                            />
-                        </PopoverContent>
-                    </Popover>
-                    <InputError message={errors.check_out} />
+                    <DatePickerInput
+                        id='check_out'
+                        label={
+                            <div className="flex items-center justify-between w-full">
+                                Départ
+                                {nights > 0 && (
+                                    <Badge variant="secondary">
+                                        {nights} {nights > 1 ? 'nuits' : 'nuit'}
+                                    </Badge>
+                                )}
+                            </div>
+                        }
+                        placeholder='Choisir la date'
+                        selected={data.check_out ? toDate(data.check_out) : undefined}
+                        disabled={{
+                            before: data.check_in
+                                ? addDays(data.check_in, 1)
+                                : new Date(),
+                        }}
+                        onChange={(date) => handleCheckOutSelect(date ? toDate(date) : undefined)}
+                        error={errors.check_out}
+                    />
                 </div>
             </div>
 
@@ -227,8 +217,8 @@ export default function StepBooking({ data, setData, errors, isEditing, reservat
                                     isSelected
                                         ? 'border-primary bg-primary/5 shadow-sm ring-2 ring-primary'
                                         : isReserved
-                                          ? 'cursor-not-allowed border-gray-50 bg-gray-50/50 opacity-40'
-                                          : 'border-border hover:border-primary/40',
+                                            ? 'cursor-not-allowed border-gray-50 bg-gray-50/50 opacity-40'
+                                            : 'border-border hover:border-primary/40',
                                 )}
                             >
                                 <div className="flex items-center gap-2">
@@ -285,11 +275,10 @@ export default function StepBooking({ data, setData, errors, isEditing, reservat
                                 key={chan.id}
                                 type="button"
                                 onClick={() => setData('channel_id', chan.id)}
-                                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-bold uppercase transition-all ${
-                                    isSelected
-                                        ? 'border-transparent text-white shadow-sm'
-                                        : 'border-gray-100 bg-gray-50 text-gray-500 hover:bg-gray-100 dark:border-white/5 dark:bg-dark-surface'
-                                } `}
+                                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-bold uppercase transition-all ${isSelected
+                                    ? 'border-transparent text-white shadow-sm'
+                                    : 'border-gray-100 bg-gray-50 text-gray-500 hover:bg-gray-100 dark:border-white/5 dark:bg-dark-surface'
+                                    } `}
                                 style={
                                     isSelected
                                         ? { backgroundColor: chan.color }

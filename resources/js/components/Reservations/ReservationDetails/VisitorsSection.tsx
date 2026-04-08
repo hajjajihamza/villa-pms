@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import type { Visitor } from '@/types/models';
-import { VisitorForm } from '../ReservationForm/VisitorForm';
+import { VisitorForm } from '../forms/VisitorForm';
 import { VisitorCard } from './VisitorCard';
 
 interface Props {

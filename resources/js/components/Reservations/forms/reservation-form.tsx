@@ -17,9 +17,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toFormDate } from '@/lib/format-date';
 import type { Reservation } from '@/types';
 import { Badge } from '../../ui/badge';
-import StepBooking from './StepBooking';
-import StepVisitor from './StepVisitor';
+import StepBooking from './reservation-form-step-booking';
+import StepVisitor from './reservation-form-step-visitor';
+import { Save } from 'lucide-react';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 export type ReservationFormData = {
     check_in: string;
     check_out: string;
@@ -42,6 +46,9 @@ type Props = {
     defaultDate?: string | null;
 };
 
+// ────────────────────────────────────────────────
+//  Constants
+// ────────────────────────────────────────────────
 const initialData: ReservationFormData = {
     check_in: toFormDate(startOfToday()),
     check_out: toFormDate(addDays(startOfToday(), 1)),
@@ -56,21 +63,30 @@ const initialData: ReservationFormData = {
     country: 'MA',
 };
 
-
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function ReservationForm({
     open,
     onOpenChange,
     reservation,
     defaultDate
 }: Props) {
-    const form = useForm<ReservationFormData>();
-    const isEditing = Boolean(reservation);
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
+    const isEditing = !!reservation;
+
+    const form = useForm<ReservationFormData>(initialData);
 
     const [step, setStep] = useState<number>(1);
     const totalSteps = 2;
 
     const progressValue = (step / totalSteps) * 100;
 
+    // ────────────────────────────────────────────────
+    //  Helpers
+    // ────────────────────────────────────────────────
     const isValid = () => {
         const requiredFields = [
             'check_in',
@@ -81,6 +97,24 @@ export default function ReservationForm({
         return requiredFields.every(
             (field) => !!form.data[field as keyof ReservationFormData],
         );
+    };
+
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
+    const submit = () => {
+        if (reservation) {
+            form.put(ReservationController.update(reservation.id).url, {
+                preserveScroll: true,
+                onSuccess: () => closeAndReset(),
+            });
+            return;
+        }
+
+        form.post(ReservationController.store().url, {
+            preserveScroll: true,
+            onSuccess: () => closeAndReset(),
+        });
     };
 
     const closeAndReset = () => {
@@ -107,6 +141,9 @@ export default function ReservationForm({
         }
     };
 
+    // ────────────────────────────────────────────────
+    //  Effects
+    // ────────────────────────────────────────────────
     useEffect(() => {
         if (!open) {
             form.setData(initialData);
@@ -114,9 +151,8 @@ export default function ReservationForm({
             return;
         }
 
-        if (reservation) {
+        if (isEditing && reservation) {
             form.setData({
-                ...initialData,
                 check_in: reservation.check_in,
                 check_out: reservation.check_out,
                 adults: reservation.adults,
@@ -130,7 +166,6 @@ export default function ReservationForm({
                 country: reservation.main_visitor?.country ?? 'MA',
             });
         } else {
-            form.setData(initialData);
             if (defaultDate) {
                 form.setData('check_in', toFormDate(parseISO(defaultDate)));
                 form.setData(
@@ -141,24 +176,12 @@ export default function ReservationForm({
         }
     }, [reservation, open]);
 
-    const submit = () => {
-        if (reservation) {
-            form.put(ReservationController.update(reservation.id).url, {
-                preserveScroll: true,
-                onSuccess: () => closeAndReset(),
-            });
-            return;
-        }
-
-        form.post(ReservationController.store().url, {
-            preserveScroll: true,
-            onSuccess: () => closeAndReset(),
-        });
-    };
-
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <Dialog open={open} onOpenChange={closeAndReset}>
-            <DialogContent className="overflow-hidden rounded-2xl border-0 bg-background p-0 shadow-2xl sm:max-w-2xl">
+            <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl sm:max-w-2xl overflow-hidden bg-background">
                 <DialogHeader className="border-b px-6 py-4 pb-1">
                     <DialogTitle className="text-xl">
                         {step === 1
@@ -183,7 +206,7 @@ export default function ReservationForm({
                     onSubmit={(e) => e.preventDefault()}
                     className="flex flex-col"
                 >
-                    <ScrollArea className="max-h-[60vh] overflow-y-auto px-8">
+                    <ScrollArea className="px-4 lg:px-8 max-h-[60vh] overflow-y-auto">
                         {step === 1 ? (
                             <Suspense fallback={<StepBookingSkeleton />}>
                                 <StepBooking
@@ -232,6 +255,7 @@ export default function ReservationForm({
                                 }
                                 size="lg"
                             >
+                                <Save className="size-4 mr-2" />
                                 {form.processing
                                     ? 'Enregistrement...'
                                     : isEditing

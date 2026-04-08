@@ -26,6 +26,7 @@ import type { Expense, ExpenseCategory, Unit } from '@/types';
 import { DatePickerInput } from '@/components/date-picker_input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
+import { toDate } from 'date-fns';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -223,7 +224,7 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                                 <DatePickerInput
                                     id="expense-date"
                                     label="Date"
-                                    defaultValue={data.date}
+                                    selected={data.date ? toDate(data.date) : undefined}
                                     onChange={(date) => setData('date', date)}
                                     error={errors.date}
                                     placeholder="Choisir une date"

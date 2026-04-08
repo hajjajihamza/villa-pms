@@ -1,14 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import type { Reservation } from '@/types';
+import apiService from '@/services/api';
 
 export const useReservationDetails = (reservationId: number) => {
     return useQuery<Reservation>({
         queryKey: ['reservation', reservationId],
-        queryFn: async () => {
-            const { data } = await axios.get<Reservation>(`/api/reservations/${reservationId}`);
-            return data;
-        },
+        queryFn: async () => await apiService.get<Reservation>(`/reservations/${reservationId}`),
         suspense: true,
     });
 };
