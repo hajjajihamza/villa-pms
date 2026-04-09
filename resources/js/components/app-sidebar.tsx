@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { CalendarClock, CalendarDays, HandCoins, LayoutDashboard, LayoutGrid, Settings, ShoppingCart } from 'lucide-react';
-import DashboardController from '@/actions/App/Http/Controllers/DashboardController';
+import DashboardController from '@/actions/App/Http/Controllers/Dashboard/DashboardController';
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
 import PlanningController from '@/actions/App/Http/Controllers/Reservation/PlanningController';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';

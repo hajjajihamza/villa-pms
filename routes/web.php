@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Expense\ExpenseController;
+use App\Http\Controllers\Pos\PosController;
 use App\Http\Controllers\Reservation\PlanningController;
 use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Reservation\VisitorController;
-use App\Http\Controllers\Pos\PosController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])
