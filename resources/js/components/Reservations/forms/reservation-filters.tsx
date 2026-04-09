@@ -223,7 +223,6 @@ export default function ReservationFilters({ accommodations }: Props) {
                             window.location.pathname,
                             {},
                             {
-                                preserveState: true,
                                 replace: true,
                             },
                         );

@@ -49,9 +49,7 @@ class ReservationController extends Controller
 
     protected function renderReservations(Builder $query, string $activeTab, Request $request): Response
     {
-        $reservations = $this->reservationService->getReservationsQuery($query, $request)
-            ->paginate(12)
-            ->withQueryString()
+        $reservations = $this->reservationService->getPaginatedReservations($query, $request->all())
             ->through(fn(Reservation $item) => $item->append(['duration', 'amount_to_pay', 'status', 'can_validate']))
         ;
 

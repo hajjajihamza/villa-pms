@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 import type { Reservation } from '@/types';
 import { Card } from '../../ui/card';
 import { StatusBadge } from './reservation-card';
-import { ReservationInvoice } from './reservation-invoice';
+import ReservationInvoice from './reservation-invoice';
 import { VisitorsSection } from './visitors-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

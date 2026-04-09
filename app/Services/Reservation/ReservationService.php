@@ -8,7 +8,7 @@ use App\Models\Accommodation;
 use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ReservationService
@@ -16,28 +16,47 @@ class ReservationService
     /**
      * Get reservations query based on request filters.
      *
-     * @return Builder<Reservation>
+     * @return LengthAwarePaginator<Reservation>
      */
-    public function getReservationsQuery(Builder $query, Request $request): Builder
+    public function getPaginatedReservations(Builder $query, array $filters, int $perPage = 12): LengthAwarePaginator
     {
-        return $query
-            ->with(['accommodation', 'orders.orderItems', 'mainVisitor'])
-            ->when($request->accommodation_id, function (Builder $query, int $accommodationId) {
+        $query->with(['accommodation', 'orders.orderItems', 'mainVisitor'])
+            ->when($filters['accommodation_id'] ?? null, function (Builder $query, int $accommodationId) {
                 $query->where('accommodation_id', $accommodationId);
             })
-            ->when($request->search, function (Builder $query, string $search) {
-                $query->whereHas('visitors', function (Builder $q) use ($search) {
-                    $q->whereLike('full_name', "%{$search}%")
-                        ->orWhereLike('phone', "%{$search}%");
-                });
-            })
-            ->when($request->date_from, function (Builder $query, string $dateFrom) {
+            ->when($filters['date_from'] ?? null, function (Builder $query, string $dateFrom) {
                 $query->where('check_in', '>=', $dateFrom);
             })
-            ->when($request->date_to, function (Builder $query, string $dateTo) {
+            ->when($filters['date_to'] ?? null, function (Builder $query, string $dateTo) {
                 $query->where('check_out', '<=', $dateTo);
             })
             ->orderBy('check_in');
+
+        if (!empty($filters['search'])) {
+            $search = strtolower($filters['search']);
+
+            $filtredList = $query->get()->filter(function (Reservation $reservation) use ($search) {
+                $visitor = $reservation->mainVisitor ?? null;
+
+                if (!$visitor) {
+                    return false;
+                }
+
+                return str_contains(strtolower($visitor->full_name), $search) || str_contains(strtolower($visitor->phone ?? ''), $search);
+            })->values();
+
+            $page = LengthAwarePaginator::resolveCurrentPage();
+
+            return new LengthAwarePaginator(
+                $filtredList->forPage($page, $perPage),
+                $filtredList->count(),
+                $perPage,
+                $page,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**

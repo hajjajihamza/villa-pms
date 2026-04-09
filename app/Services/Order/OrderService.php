@@ -37,7 +37,7 @@ class OrderService
                     return false;
                 }
 
-                return str_contains(strtolower($visitor->full_name), $search) || str_contains(strtolower($visitor->phone), $search);
+                return str_contains(strtolower($visitor->full_name), $search) || str_contains(strtolower($visitor->phone ?? ''), $search);
             })->values();
 
             $page = LengthAwarePaginator::resolveCurrentPage();
