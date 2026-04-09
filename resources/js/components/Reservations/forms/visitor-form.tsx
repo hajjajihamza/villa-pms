@@ -5,23 +5,32 @@ import { PhoneInput } from 'react-international-phone';
 import VisitorController from '@/actions/App/Http/Controllers/Reservation/VisitorController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Card, CardTitle } from '@/components/ui/card';
+import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CountryDropdown } from '@/components/ui/country-dropdown';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import 'react-international-phone/style.css';
 import { cn } from '@/lib/utils';
 import type { Visitor } from '@/types/models';
+import { useEffect } from 'react';
 
-
-interface Props {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type Props = {
     reservationId: number;
     visitor?: Visitor;
     onCancel?: () => void;
     onSuccess?: () => void;
 }
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Props) {
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
     const isEditing = !!visitor;
     const queryClient = useQueryClient();
 
@@ -32,6 +41,9 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
         is_main: visitor?.is_main || false,
     });
 
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -55,47 +67,58 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
         }
     };
 
+    // ────────────────────────────────────────────────
+    //  Effects
+    // ────────────────────────────────────────────────
+    useEffect(() => {
+        return () => {
+            reset();
+        }
+    }, [visitor]);
+
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
-        <Card className="border-brand-200 bg-brand-50/30 overflow-hidden py-1 shadow-sm dark:border-brand-500/20 dark:bg-brand-500/5">
-            <form onSubmit={handleSubmit} className="space-y-2 p-2 sm:p-3">
-                <div className="mb-1 flex items-center justify-between">
-                    <CardTitle className="text-[12px] font-bold tracking-tighter text-slate-500 uppercase">
-                        {isEditing ? 'Modifier Visiteur' : 'Nouveau Visiteur'}
-                    </CardTitle>
-                    {onCancel && (
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-md text-slate-400 hover:text-slate-600"
-                            onClick={onCancel}
-                        >
-                            <X size={12} />
-                        </Button>
-                    )}
+        <Card className="overflow-hidden border-border bg-card shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-all dark:bg-card/50 p-0 gap-0">
+            {/* Header */}
+            <CardHeader className="border-b border-border pt-3 [.border-b]:pb-2">
+                <CardTitle className="text-[14px] font-bold">
+                    {isEditing ? 'Modifier Visiteur' : 'Nouveau Visiteur'}
+                </CardTitle>
+                <CardAction>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onCancel}
+                    >
+                        <X />
+                    </Button>
+                </CardAction>
+            </CardHeader>
+            {/* Body */}
+            <form onSubmit={handleSubmit} className="space-y-2 p-2">
+                {/* Full Name */}
+                <div className="space-y-2">
+                    <Label htmlFor="expense-name">Nom Complet</Label>
+                    <Input
+                        id="expense-name"
+                        autoFocus
+                        value={data.full_name}
+                        onChange={(event) =>
+                            setData('full_name', event.target.value)
+                        }
+                        placeholder="Nom complet"
+                        className={cn(
+                            'h-10 rounded-xl bg-background/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]',
+                            errors.full_name &&
+                            'border-destructive',
+                        )}
+                    />
+                    <InputError message={errors.full_name} />
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {/* Full Name */}
-                    <div className="space-y-1 sm:col-span-2">
-                        <Label htmlFor="full_name">Nom complet</Label>
-                        <Input
-                            id="full_name"
-                            value={data.full_name}
-                            onChange={(e) =>
-                                setData('full_name', e.target.value)
-                            }
-                            placeholder="Nom de visiteur"
-                            className={cn(
-                                'h-9 rounded-xl bg-background/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]',
-                                errors.full_name && 'border-destructive',
-                            )}
-                            required
-                            autoFocus
-                        />
-                        <InputError message={errors.full_name} />
-                    </div>
-
+                <div className="grid gap-4 lg:grid-cols-2">
                     {/* Country */}
                     <div className="space-y-1">
                         <Label htmlFor="country">Pays / Nationalité</Label>
@@ -128,13 +151,15 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
                     </div>
                 </div>
 
-                <div className="border-brand-100 mt-1 flex justify-end gap-1.5 border-t pt-2 dark:border-white/5">
+                {/* Footer */}
+                <CardFooter className="grid gap-2 border-t bg-muted/30 [.border-t]:pt-2 px-2 sm:grid-cols-1 md:grid-cols-2">
                     {onCancel && (
                         <Button
                             type="button"
                             variant="outline"
                             onClick={onCancel}
                         >
+                            <X size={12} className="mr-1.5" />
                             Annuler
                         </Button>
                     )}
@@ -149,7 +174,7 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
                         )}
                         {isEditing ? 'Mettre à jour' : 'Enregistrer'}
                     </Button>
-                </div>
+                </CardFooter>
             </form>
         </Card>
     );

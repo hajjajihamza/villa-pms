@@ -3,7 +3,7 @@ import {
     CheckCheck, Clock, Edit3, Flag, Shield,
     ShieldCheck, Trash2, Calendar, User2
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { MouseEvent } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
 import { Button } from '@/components/ui/button';
@@ -23,37 +23,35 @@ import { formatNumber } from '@/lib/format-number';
 import { cn } from '@/lib/utils';
 import type { Reservation, ReservationStatus } from '@/types';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type Props = {
     reservation: Reservation;
     onOpenDetails: () => void;
     onEdit: (reservation: Reservation) => void;
 };
 
-export const StatusBadge: React.FC<{ status: ReservationStatus }> = ({ status }) => {
-    const config = {
-        CONFIRMED: { label: 'Confirmée', classes: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10', icon: ShieldCheck },
-        CHECKED_OUT: { label: 'Terminé', classes: 'bg-slate-50 text-slate-600 dark:bg-slate-500/10', icon: CheckCheck },
-        PENDING: { label: 'Attente', classes: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10', icon: Clock },
-        CANCELLED: { label: 'Archivé', classes: 'bg-red-50 text-red-600 dark:bg-red-500/10', icon: Shield }
-    };
-
-    const { label, classes, icon: Icon } = config[status] || config.PENDING;
-
-    return (
-        <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-1", classes)}>
-            <Icon size={12} />
-            <span>{label}</span>
-        </span>
-    );
-};
-
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function ReservationRowCard({ reservation, onOpenDetails, onEdit }: Props) {
+    // ────────────────────────────────────────────────
+    //  Props
+    // ────────────────────────────────────────────────
     const user = usePage().props.auth.user;
+
+    // ────────────────────────────────────────────────
+    //  State & Variables
+    // ────────────────────────────────────────────────
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [deleteNote, setDeleteNote] = useState<string>('');
     const [processing, setProcessing] = useState(false);
     const status = reservation.status ?? 'PENDING';
 
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const handleAction = (e: MouseEvent, action: () => void) => {
         e.stopPropagation();
         action();
@@ -215,3 +213,24 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
         </Card>
     );
 }
+
+// ────────────────────────────────────────────────
+//  Sub Component
+// ────────────────────────────────────────────────
+export const StatusBadge: React.FC<{ status: ReservationStatus }> = ({ status }) => {
+    const config = {
+        CONFIRMED: { label: 'Confirmée', classes: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10', icon: ShieldCheck },
+        CHECKED_OUT: { label: 'Terminé', classes: 'bg-slate-50 text-slate-600 dark:bg-slate-500/10', icon: CheckCheck },
+        PENDING: { label: 'Attente', classes: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10', icon: Clock },
+        CANCELLED: { label: 'Archivé', classes: 'bg-red-50 text-red-600 dark:bg-red-500/10', icon: Shield }
+    };
+
+    const { label, classes, icon: Icon } = config[status] || config.PENDING;
+
+    return (
+        <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase flex items-center gap-1", classes)}>
+            <Icon size={12} />
+            <span>{label}</span>
+        </span>
+    );
+};

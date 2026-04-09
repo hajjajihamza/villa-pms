@@ -2,7 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Archive, Bed, CalendarCheck, CalendarClock, CalendarX, List, Plus } from 'lucide-react';
 import { useState } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
-import ReservationFilters from '@/components/Reservations/forms/ReservationFilters';
+import ReservationFilters from '@/components/Reservations/forms/reservation-filters';
 import ReservationForm from '@/components/Reservations/forms/reservation-form';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -12,8 +12,8 @@ import type {
     Paginated,
     Reservation,
 } from '@/types';
-import ReservationModal from '@/components/Reservations/ReservationDetails/ReservationModal';
-import ReservationCard from '@/components/Reservations/ReservationList/ReservationCard';
+import ReservationModal from '@/components/Reservations/info/reservation-modal';
+import ReservationCard from '@/components/Reservations/info/reservation-card';
 import Pagination from '@/components/pagination';
 
 // ────────────────────────────────────────────────

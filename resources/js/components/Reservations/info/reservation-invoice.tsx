@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { Printer } from 'lucide-react';
+import { useRef } from 'react';
+import { Printer, X } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,23 +15,35 @@ import { formatNumber } from '@/lib/format-number';
 import Logo from '../../logo';
 import { formatDateDisplay } from '@/lib/format-date';
 
-interface ReservationInvoiceProps {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type Props = {
     reservation: Reservation;
     open: boolean;
     onOpenChange: (open: boolean) => void;
-}
+};
 
-export const ReservationInvoice: React.FC<ReservationInvoiceProps> = ({
-    reservation,
-    open,
-    onOpenChange
-}) => {
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
+export default function ReservationInvoice({ reservation, open, onOpenChange }: Props) {
+    // ────────────────────────────────────────────────
+    //  Ref
+    // ────────────────────────────────────────────────
     const componentRef = useRef<HTMLDivElement>(null);
 
+    // ────────────────────────────────────────────────
+    //  Handles
+    // ────────────────────────────────────────────────
     const handlePrint = useReactToPrint({
         contentRef: componentRef,
         documentTitle: `#Fact-${reservation.id}`,
     });
+
+    // ────────────────────────────────────────────────
+    //  Return
+    // ────────────────────────────────────────────────
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="rounded-2xl border-0 p-0 shadow-2xl sm:max-w-4xl overflow-hidden bg-background">
@@ -151,6 +163,7 @@ export const ReservationInvoice: React.FC<ReservationInvoiceProps> = ({
                             onClick={() => onOpenChange(false)}
                             className="h-12 rounded-xl font-bold uppercase tracking-widest text-xs border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
                         >
+                            <X size={16} />
                             Annuler
                         </Button>
                         <Button

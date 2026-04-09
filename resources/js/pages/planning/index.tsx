@@ -4,7 +4,7 @@ import { fr } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import PlanningController from '@/actions/App/Http/Controllers/Reservation/PlanningController';
-import ReservationModal from '@/components/Reservations/ReservationDetails/ReservationModal';
+import ReservationModal from '@/components/Reservations/info/reservation-modal';
 import ReservationForm from '@/components/Reservations/forms/reservation-form';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

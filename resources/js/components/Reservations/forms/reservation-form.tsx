@@ -2,7 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { addDays, parseISO, startOfToday } from 'date-fns';
 import { Suspense, useEffect, useState } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
-import StepBookingSkeleton from '@/components/Reservations/ReservationSkeleton/StepBookingSkeleton';
+import StepBookingSkeleton from '@/components/Reservations/skeletons/step-booking-skeleton';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -259,8 +259,8 @@ export default function ReservationForm({
                                 {form.processing
                                     ? 'Enregistrement...'
                                     : isEditing
-                                      ? 'Mettre à jour'
-                                      : 'Confirmer'}
+                                        ? 'Mettre à jour'
+                                        : 'Confirmer'}
                             </Button>
                         )}
                     </DialogFooter>

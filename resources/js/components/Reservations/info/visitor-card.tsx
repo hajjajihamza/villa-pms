@@ -2,35 +2,53 @@ import { useState } from 'react';
 import { CircleFlag } from 'react-circle-flags';
 import getName from 'i18n-iso-countries';
 import frLocale from 'i18n-iso-countries/langs/fr.json';
-import { Pencil, Trash2, Phone, User, Plus, FileText, ChevronDown, ChevronUp, Star } from 'lucide-react';
+import { Pencil, Trash2, Phone, User, Plus, FileText, ChevronDown, ChevronUp, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Visitor } from '@/types/models';
 import { visitorService } from '@/api/visitorService';
-import { VisitorForm } from '../forms/VisitorForm';
-import { DocumentCard } from './DocumentCard';
-import { DocumentForm } from '../forms/DocumentForm';
+import { VisitorForm } from '../forms/visitor-form';
+import { DocumentCard } from './document-card';
+import { DocumentForm } from '../forms/document-form';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
+// ────────────────────────────────────────────────
+//  Register locale
+// ────────────────────────────────────────────────
 getName.registerLocale(frLocale);
 
-interface Props {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type Props = {
   visitor: Visitor;
 }
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export function VisitorCard({ visitor }: Props) {
+  // ────────────────────────────────────────────────
+  //  States & variables
+  // ────────────────────────────────────────────────
   const [isEditing, setIsEditing] = useState(false);
   const [showDocForm, setShowDocForm] = useState(false);
   const [isDocsOpen, setIsDocsOpen] = useState(false);
 
   const countryName = visitor.country ? getName.getName(visitor.country, 'fr') : 'Inconnu';
 
+  // ────────────────────────────────────────────────
+  //  Handlers
+  // ────────────────────────────────────────────────
   const handleDelete = () => {
     visitorService.destroy(visitor.id, visitor.reservation_id);
   };
 
+  // ────────────────────────────────────────────────
+  //  Render Edit form
+  // ────────────────────────────────────────────────
   if (isEditing) {
     return (
       <VisitorForm
@@ -42,30 +60,25 @@ export function VisitorCard({ visitor }: Props) {
     );
   }
 
+  // ────────────────────────────────────────────────
+  //  Render Visitor card
+  // ────────────────────────────────────────────────
   return (
     <Card
       className={cn(
-        "overflow-hidden transition-all duration-200 border",
-        visitor.is_main
-          ? [
-            "bg-gradient-to-br from-indigo-50/60 via-white to-white",
-            "dark:from-indigo-500/[0.07] dark:via-dark-surface dark:to-dark-surface",
-            "border-indigo-200/70 dark:border-indigo-500/20",
-            "shadow-[0_2px_12px_-2px_rgba(99,102,241,0.15)]",
-            "ring-1 ring-indigo-500/10 dark:ring-indigo-500/10",
-          ].join(" ")
-          : [
-            "bg-white dark:bg-dark-surface",
-            "border-slate-200/80 dark:border-white/[0.06]",
-            "shadow-[0_1px_4px_rgba(0,0,0,0.04)]",
-          ].join(" ")
+        "overflow-hidden transition-all duration-200 border py-2",
+        [
+          "bg-gradient-to-br from-indigo-50/60 via-white to-white",
+          "dark:from-indigo-500/[0.07] dark:via-dark-surface dark:to-dark-surface",
+          "border-indigo-200/70 dark:border-indigo-500/20",
+          "shadow-[0_2px_12px_-2px_rgba(99,102,241,0.15)]",
+          "ring-1 ring-indigo-500/10 dark:ring-indigo-500/10",
+        ]
       )}
     >
       <div className="p-3">
-
-        {/* ── Header Row ── */}
+        {/* Header Row */}
         <div className="flex items-center gap-2.5">
-
           {/* Avatar */}
           <div
             className={cn(
@@ -81,37 +94,37 @@ export function VisitorCard({ visitor }: Props) {
           {/* Name + meta */}
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5 leading-none mb-1">
-              <span className="text-[11px] font-bold text-slate-900 dark:text-white tracking-tight truncate max-w-[140px]">
+              <span className="text-sm font-bold text-slate-900 dark:text-white tracking-tight truncate max-w-[140px]">
                 {visitor.full_name}
               </span>
               {visitor.is_main && (
-                <span className="inline-flex items-center gap-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-500/20 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full">
+                <Badge className='inline-flex items-center gap-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-500/20 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full'>
                   <Star size={7} fill="currentColor" strokeWidth={0} />
                   Responsable
-                </span>
+                </Badge>
               )}
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
               {visitor.country && (
-                <div className="inline-flex items-center gap-1 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.08] rounded-full px-1.5 py-0.5">
+                <Badge className='inline-flex items-center gap-0.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.08] rounded-full px-1.5 py-0.5'>
                   <CircleFlag
                     countryCode={visitor.country.toLowerCase()}
-                    height={9} width={9}
-                    className="rounded-full"
+                    height={12} width={12}
+                    className="rounded-full mr-1"
                   />
-                  <span className="text-[8.5px] font-semibold text-slate-500 dark:text-slate-400">
+                  <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                     {countryName}
                   </span>
-                </div>
+                </Badge>
               )}
               {visitor.phone && (
-                <div className="inline-flex items-center gap-1">
+                <Badge className='inline-flex items-center gap-0.5 bg-slate-50 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.08] rounded-full px-1.5 py-0.5'>
                   <Phone size={7} className="text-indigo-400" />
-                  <span className="text-[8.5px] font-medium text-slate-500 dark:text-slate-400">
+                  <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                     {visitor.phone}
                   </span>
-                </div>
+                </Badge>
               )}
             </div>
           </div>
@@ -141,10 +154,9 @@ export function VisitorCard({ visitor }: Props) {
           </div>
         </div>
 
-        {/* ── Documents Section ── */}
+        {/* Documents Section */}
         <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/[0.05]">
           <Collapsible open={isDocsOpen} onOpenChange={setIsDocsOpen}>
-
             <div className="flex items-center justify-between">
               {/* Trigger */}
               <CollapsibleTrigger asChild>
@@ -157,14 +169,14 @@ export function VisitorCard({ visitor }: Props) {
                         : "bg-slate-50 text-slate-300 dark:bg-white/[0.04] dark:text-slate-500"
                     )}
                   >
-                    <FileText size={10} />
+                    <FileText size={12} />
                   </div>
-                  <span className="text-[8.5px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
+                  <span className="text-[0.6rem] font-bold uppercase tracking-widest text-slate-700 group-hover:text-slate-800 transition-colors hover:underline">
                     Docs ({visitor.documents?.length || 0})
                   </span>
                   {isDocsOpen
-                    ? <ChevronUp size={9} className="text-slate-300 dark:text-slate-600" />
-                    : <ChevronDown size={9} className="text-slate-300 dark:text-slate-600" />
+                    ? <ChevronUp size={11} className="text-slate-700" />
+                    : <ChevronDown size={11} className="text-slate-700" />
                   }
                 </button>
               </CollapsibleTrigger>
@@ -174,11 +186,10 @@ export function VisitorCard({ visitor }: Props) {
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsDocsOpen(true);
-                  setShowDocForm(true);
+                  setShowDocForm(!showDocForm);
                 }}
                 size='sm'
                 variant="outline"
-                disabled={showDocForm}
                 className={cn(
                   "inline-flex items-center gap-0.5 h-7 px-1.5 rounded-md",
                   "text-[8px] font-bold uppercase tracking-widest",
@@ -187,8 +198,8 @@ export function VisitorCard({ visitor }: Props) {
                   "transition-all duration-150 disabled:opacity-40 disabled:pointer-events-none"
                 )}
               >
-                <Plus size={9} strokeWidth={2.5} />
-                Ajouter
+                {showDocForm ? <X size={9} strokeWidth={2.5} /> : <Plus size={9} strokeWidth={2.5} />}
+                {showDocForm ? 'Annuler' : 'Ajouter'}
               </Button>
             </div>
 

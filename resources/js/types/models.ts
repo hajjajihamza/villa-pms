@@ -41,6 +41,7 @@ export type Document = BaseModel & {
     type: DocType;
     visitor_id: number;
     visitor?: Visitor;
+    url?: string;
 };
 
 export type Expense = BaseModel & {

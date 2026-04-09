@@ -14,11 +14,20 @@ import { formatDateDisplay, toFormDate } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
 import type { Accommodation } from '@/types';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type Props = {
     accommodations: Accommodation[];
 };
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function ReservationFilters({ accommodations }: Props) {
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
     // on utilise URLSearchParams pour récupérer les paramètres de la requête
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -36,6 +45,9 @@ export default function ReservationFilters({ accommodations }: Props) {
         label: acc.name,
     }));
 
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     // envoie les données du formulaire au serveur sur le lien actuel
     const handleFilter = () => {
         get(window.location.pathname, {
@@ -45,6 +57,9 @@ export default function ReservationFilters({ accommodations }: Props) {
         });
     };
 
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <div className="flex flex-wrap items-end gap-3 pb-6">
             {/* le champ de recherche par nom ou téléphone */}

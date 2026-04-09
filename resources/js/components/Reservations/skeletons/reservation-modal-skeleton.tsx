@@ -1,7 +1,6 @@
-import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-function ReservationModalSkeleton() {
+export default function ReservationModalSkeleton() {
     return (
         <div className="space-y-6 p-2">
             <section className="space-y-3">
@@ -26,5 +25,3 @@ function ReservationModalSkeleton() {
         </div>
     );
 }
-
-export default ReservationModalSkeleton;

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { formatNumber } from "@/lib/format-number";
 import OrderItemsTable from "./order-items";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ReservationModal from "../Reservations/ReservationDetails/ReservationModal";
+import ReservationModal from "../Reservations/info/reservation-modal";
 import { Button } from "../ui/button";
 
 // ────────────────────────────────────────────────

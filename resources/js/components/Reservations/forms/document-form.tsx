@@ -6,12 +6,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Save, X, FileUp, Camera } from 'lucide-react';
 import { DocType } from '@/types/models';
 import type { Document } from '@/types/models';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, type SubmitEvent } from 'react';
 import VisitorController from '@/actions/App/Http/Controllers/Reservation/VisitorController';
-import { Card } from '@/components/ui/card';
+import { Card, CardAction, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import InputError from '@/components/input-error';
 
-interface Props {
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
+type Props = {
   visitorId: number;
   reservationId?: number;
   document?: Document;
@@ -19,6 +23,9 @@ interface Props {
   onSuccess?: () => void;
 }
 
+// ────────────────────────────────────────────────
+//  Constants
+// ────────────────────────────────────────────────
 const DOC_TYPES: { value: DocType; label: string }[] = [
   { value: 'ID_CARD', label: 'Carte d\'identité' },
   { value: 'PASSPORT', label: 'Passeport' },
@@ -26,22 +33,31 @@ const DOC_TYPES: { value: DocType; label: string }[] = [
   { value: 'RESIDENCE_CARD', label: 'Carte de séjour' },
 ];
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export function DocumentForm({ visitorId, reservationId, document, onCancel, onSuccess }: Props) {
+  // ────────────────────────────────────────────────
+  //  States & variables
+  // ────────────────────────────────────────────────
   const isEditing = !!document;
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(typeof document?.url === 'string' ? document.url : null);
+  const [preview, setPreview] = useState<string | undefined>(document?.url);
 
   const { data, setData, post, processing, errors, reset } = useForm<{
     type: DocType;
     file: File | null;
-    _method?: string;
+    _method?: string; 
   }>({
     type: document?.type || 'ID_CARD',
     file: null,
-    ...(isEditing ? { _method: 'PUT' } : {}),
+    ...(isEditing ? { _method: 'PUT' } : {}),// pour la mise à jour
   });
 
+  // ────────────────────────────────────────────────
+  //  Handlers
+  // ────────────────────────────────────────────────
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -51,12 +67,12 @@ export function DocumentForm({ visitorId, reservationId, document, onCancel, onS
         reader.onloadend = () => setPreview(reader.result as string);
         reader.readAsDataURL(file);
       } else {
-        setPreview(null);
+        setPreview(undefined);
       }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
 
     const url = isEditing
@@ -64,49 +80,52 @@ export function DocumentForm({ visitorId, reservationId, document, onCancel, onS
       : VisitorController.storeDocument.url(visitorId);
 
     post(url, {
-      forceFormData: true,
-      preserveScroll: true,
+      forceFormData: true, // pour l'envoi de fichier
+      preserveScroll: true, // pour ne pas perdre le scroll
       onSuccess: () => {
         if (reservationId) {
           queryClient.resetQueries({ queryKey: ['reservation', reservationId] });
         }
         reset();
-        setPreview(null);
+        setPreview(undefined);
         onSuccess?.();
       },
     });
   };
 
+  // ────────────────────────────────────────────────
+  //  Effects
+  // ────────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      reset();
+      setPreview(undefined);
+    };
+  }, []);
+
+  // ────────────────────────────────────────────────
+  //  Render
+  // ────────────────────────────────────────────────
   return (
-    <Card className="overflow-hidden border border-slate-200/80 dark:border-white/[0.06] py-1 bg-white dark:bg-[#0f1117] shadow-[0_2px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_24px_rgba(0,0,0,0.4)] rounded-xl">
-      <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
-
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.05]">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-4 rounded-full bg-brand-500" />
-            <h4 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400">
-              {isEditing ? 'Modifier le document' : 'Nouveau document'}
-            </h4>
-          </div>
-          {onCancel && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 rounded-lg text-slate-300 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
-              onClick={onCancel}
-            >
-              <X size={12} />
-            </Button>
-          )}
-        </div>
-
-        <div className="space-y-3">
-
-          {/* Type Selection */}
+    <Card className="overflow-hidden border-border bg-card shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-all dark:bg-card/50 p-0 gap-0">
+      <CardHeader className="border-b border-border pt-3 [.border-b]:pb-2">
+        <CardTitle className="text-[14px] font-bold">
+          {isEditing ? 'Modifier Document' : 'Nouveau Document'}
+        </CardTitle>
+        <CardAction>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+          >
+            <X />
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <form onSubmit={handleSubmit} className="p-2 space-y-2">
+        {/* Type Selection */}
           <div className="space-y-1.5">
-            <Label className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+            <Label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
               Type de document
             </Label>
             <Select
@@ -124,12 +143,7 @@ export function DocumentForm({ visitorId, reservationId, document, onCancel, onS
                 ))}
               </SelectContent>
             </Select>
-            {errors.type && (
-              <p className="text-[9px] text-rose-500 font-medium flex items-center gap-1">
-                <span className="inline-block w-1 h-1 rounded-full bg-rose-500" />
-                {errors.type}
-              </p>
-            )}
+            <InputError message={errors.type} />
           </div>
 
           {/* File Upload */}
@@ -178,41 +192,32 @@ export function DocumentForm({ visitorId, reservationId, document, onCancel, onS
                 </div>
               )}
             </div>
-            {errors.file && (
-              <p className="text-[9px] text-rose-500 font-medium flex items-center gap-1">
-                <span className="inline-block w-1 h-1 rounded-full bg-rose-500" />
-                {errors.file}
-              </p>
-            )}
+            <InputError message={errors.file} />
           </div>
 
-        </div>
-
         {/* Footer Actions */}
-        <div className="flex justify-end items-center gap-2 pt-3 border-t border-slate-100 dark:border-white/[0.05]">
+        <CardFooter className="grid gap-2 border-t bg-muted/30 [.border-t]:pt-2 px-2 sm:grid-cols-1 md:grid-cols-2">
           {onCancel && (
             <Button
               type="button"
-              variant="ghost"
-              size="sm"
+              variant="outline"
               onClick={onCancel}
             >
+              <X size={12} className="mr-1.5" />
               Annuler
             </Button>
           )}
           <Button
             type="submit"
-            size="sm"
             disabled={processing || (!data.file && !isEditing)}
           >
             {processing
-              ? <Loader2 size={11} className="animate-spin mr-1.5" />
-              : <Save size={11} className="mr-1.5" />
+              ? <Loader2 size={12} className="animate-spin mr-1.5" />
+              : <Save size={12} className="mr-1.5" />
             }
             {isEditing ? 'Mettre à jour' : 'Ajouter'}
           </Button>
-        </div>
-
+        </CardFooter>
       </form>
     </Card>
   );

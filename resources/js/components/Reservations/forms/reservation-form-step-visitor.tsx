@@ -24,7 +24,7 @@ export default function StepVisitor({ data, setData, errors }: Props) {
     // ────────────────────────────────────────────────
     return (
         <div className="space-y-3">
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
                 <Label htmlFor="full_name">Nom Complet</Label>
                 <Input
                     id="expense-name"
@@ -41,7 +41,7 @@ export default function StepVisitor({ data, setData, errors }: Props) {
 
             <div className="grid gap-4 lg:grid-cols-2">
                 <div className="space-y-2">
-                    <Label htmlFor="country">Pays</Label>
+                    <Label htmlFor="country">Pays / Nationalité</Label>
                     <CountryDropdown
                         placeholder="Sélectionner un pays"
                         defaultValue={data.country.toUpperCase()}
