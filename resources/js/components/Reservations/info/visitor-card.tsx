@@ -8,11 +8,13 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Visitor } from '@/types/models';
-import { visitorService } from '@/api/visitorService';
+import { queryClient } from '@/lib/query-client';
 import { VisitorForm } from '../forms/visitor-form';
 import { DocumentCard } from './document-card';
 import { DocumentForm } from '../forms/document-form';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import VisitorController from '@/actions/App/Http/Controllers/Reservation/VisitorController';
+import { router } from '@inertiajs/react';
 
 // ────────────────────────────────────────────────
 //  Register locale
@@ -43,7 +45,16 @@ export function VisitorCard({ visitor }: Props) {
   //  Handlers
   // ────────────────────────────────────────────────
   const handleDelete = () => {
-    visitorService.destroy(visitor.id, visitor.reservation_id);
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce visiteur ?')) {
+      router.delete(VisitorController.destroyVisitor.url(visitor.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+          if (visitor.reservation_id) {
+            queryClient.resetQueries({ queryKey: ['reservation', visitor.reservation_id] });
+          }
+        },
+      });
+    }
   };
 
   // ────────────────────────────────────────────────

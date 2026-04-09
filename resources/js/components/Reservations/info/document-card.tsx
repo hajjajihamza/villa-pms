@@ -1,12 +1,14 @@
 import { Pencil, Trash2, ExternalLink, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { documentService } from '@/api/documentService';
 import type { Document } from '@/types/models';
 import { useState } from 'react';
 import { DocumentForm } from '../forms/document-form';
 import { Badge } from '@/components/ui/badge';
 import { formatDateDisplay } from '@/lib/format-date';
+import { router } from '@inertiajs/react';
+import VisitorController from '@/actions/App/Http/Controllers/Reservation/VisitorController';
+import { queryClient } from '@/lib/query-client';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -40,10 +42,16 @@ export function DocumentCard({ document, reservationId }: Props) {
   //  Handlers
   // ────────────────────────────────────────────────
   const handleDelete = () => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
-      return;
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
+      router.delete(VisitorController.destroyDocument.url(document.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+          if (reservationId) {
+            queryClient.resetQueries({ queryKey: ['reservation', reservationId] });
+          }
+        },
+      });
     }
-    documentService.destroy(document.id);
   };
 
   // ────────────────────────────────────────────────
