@@ -11,6 +11,9 @@ import { Card } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type { Reservation } from '@/types';
 
+// ────────────────────────────────────────────────
+//  Types
+// ────────────────────────────────────────────────
 type PlanningUnit = {
     id: number;
     name: string;
@@ -23,7 +26,13 @@ type Props = {
     data: PlanningUnit[];
 };
 
+// ────────────────────────────────────────────────
+//  Component
+// ────────────────────────────────────────────────
 export default function PlanningIndex({ date, view, data }: Props) {
+    // ────────────────────────────────────────────────
+    //  States & variables
+    // ────────────────────────────────────────────────
     const currentDate = parseISO(date);
 
     const displayStart = currentDate;
@@ -32,11 +41,13 @@ export default function PlanningIndex({ date, view, data }: Props) {
     const days = eachDayOfInterval({ start: displayStart, end: displayEnd });
 
     const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [defaultDate, setDefaultDate] = useState<string | null>(null);
 
+    // ────────────────────────────────────────────────
+    //  Handlers
+    // ────────────────────────────────────────────────
     const navigateToDate = (newDate: Date, newView?: string) => {
         router.get(PlanningController.index().url,
             {
@@ -63,7 +74,6 @@ export default function PlanningIndex({ date, view, data }: Props) {
 
     const openReservationDetails = (id: number) => {
         setSelectedReservationId(id);
-        setIsDetailsModalOpen(true);
     };
 
     const openEmptySlot = (day: Date) => {
@@ -71,6 +81,9 @@ export default function PlanningIndex({ date, view, data }: Props) {
         setIsFormOpen(true);
     };
 
+    // ────────────────────────────────────────────────
+    //  Render
+    // ────────────────────────────────────────────────
     return (
         <AppLayout>
             <Head title="Planning" />
@@ -285,11 +298,12 @@ export default function PlanningIndex({ date, view, data }: Props) {
 
             {/* Modals */}
             <ReservationModal
-                open={isDetailsModalOpen}
-                onOpenChange={setIsDetailsModalOpen}
+                open={!!selectedReservationId}
+                onOpenChange={(open) => !open && setSelectedReservationId(null)}
                 reservationId={selectedReservationId as number}
             />
 
+            {/* form */}
             <ReservationForm
                 open={isFormOpen}
                 onOpenChange={setIsFormOpen}

@@ -1,12 +1,7 @@
 <?php
-
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Reservation;
 
 use App\Http\Controllers\Controller;
-use App\Models\Reservation;
-use App\Models\Unit;
 use App\Services\Reservation\PlanningService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
