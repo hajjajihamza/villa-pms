@@ -157,3 +157,136 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer components {
+    .planning-gantt {
+        --g-container-background: color-mix(in oklab, var(--color-card) 92%, transparent);
+        --g-header-background: color-mix(in oklab, var(--color-card) 96%, white 4%);
+        --g-row-color: color-mix(in oklab, var(--color-card) 94%, transparent);
+        --g-row-border-color: color-mix(in oklab, var(--color-border) 82%, transparent);
+        --g-border-color: color-mix(in oklab, var(--color-border) 88%, transparent);
+        --g-tick-color: color-mix(in oklab, var(--color-border) 70%, transparent);
+        --g-tick-color-thick: color-mix(in oklab, var(--color-foreground) 18%, transparent);
+        --g-text-dark: var(--color-foreground);
+        --g-text-muted: var(--color-muted-foreground);
+        --g-text-light: var(--color-background);
+        --g-weekend-highlight-color: color-mix(in oklab, var(--color-muted) 52%, transparent);
+        --g-today-highlight: color-mix(in oklab, var(--color-brand-500) 76%, transparent);
+        --g-popup-actions: var(--color-muted);
+        --g-actions-background: var(--color-muted);
+        --g-arrow-color: color-mix(in oklab, var(--color-foreground) 18%, transparent);
+        --g-bar-color: transparent;
+        --g-bar-border: transparent;
+        --g-progress-color: color-mix(in oklab, var(--color-brand-500) 14%, transparent);
+        overflow: hidden;
+    }
+
+    .planning-gantt__mount .gantt-container {
+        background: var(--g-container-background);
+        overflow: auto;
+    }
+
+    .planning-gantt__mount .grid-header {
+        backdrop-filter: blur(14px);
+    }
+
+    .planning-gantt__mount .upper-text {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .planning-gantt__mount .lower-text {
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .planning-gantt__mount .grid-row:nth-of-type(even) {
+        fill: color-mix(in oklab, var(--color-muted) 34%, transparent);
+    }
+
+    .planning-gantt__mount .current-highlight,
+    .planning-gantt__mount .current-ball-highlight {
+        display: none;
+    }
+
+    .planning-gantt__mount .bar-wrapper.planning-gantt__lane-placeholder,
+    .planning-gantt__mount .planning-gantt__lane-placeholder {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .planning-gantt__mount .planning-gantt__lane-placeholder .bar,
+    .planning-gantt__mount .planning-gantt__lane-placeholder .bar-label,
+    .planning-gantt__mount .planning-gantt__lane-placeholder .handle {
+        display: none;
+    }
+
+    .planning-gantt__overlay {
+        inset: 0;
+        pointer-events: none;
+        position: absolute;
+        z-index: 20;
+    }
+
+    .planning-gantt__cell {
+        background: transparent;
+        border: 0;
+        border-right: 1px solid color-mix(in oklab, var(--color-border) 60%, transparent);
+        cursor: pointer;
+        pointer-events: auto;
+        position: absolute;
+        transition:
+            background-color 0.18s ease,
+            box-shadow 0.18s ease;
+    }
+
+    .planning-gantt__cell:hover {
+        background: color-mix(in oklab, var(--color-brand-500) 10%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-brand-500) 22%, transparent);
+    }
+
+    .planning-gantt__cell--locked,
+    .planning-gantt__cell--locked:hover {
+        background: color-mix(in oklab, var(--color-muted) 44%, transparent);
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    .planning-gantt__cell--today {
+        box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-brand-500) 30%, transparent);
+    }
+
+    .planning-gantt__task {
+        align-items: flex-start;
+        backdrop-filter: blur(10px);
+        border: 1px solid;
+        border-left-width: 4px;
+        border-radius: 14px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        justify-content: center;
+        padding: 0 12px;
+        pointer-events: auto;
+        position: absolute;
+        text-align: left;
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease,
+            filter 0.18s ease;
+        z-index: 30;
+    }
+
+    .planning-gantt__task:hover {
+        filter: saturate(1.08);
+        transform: translateY(-1px);
+    }
+
+    .dark .planning-gantt {
+        --g-container-background: color-mix(in oklab, var(--color-card) 88%, black 12%);
+        --g-header-background: color-mix(in oklab, var(--color-card) 90%, black 10%);
+        --g-row-color: color-mix(in oklab, var(--color-card) 84%, black 16%);
+        --g-weekend-highlight-color: color-mix(in oklab, var(--color-muted) 28%, transparent);
+    }
+}

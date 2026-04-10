@@ -56,6 +56,7 @@
         "concurrently": "^9.0.1",
         "country-data-list": "^1.6.0",
         "date-fns": "^4.1.0",
+        "frappe-gantt": "^1.2.2",
         "globals": "^15.14.0",
         "i18n-iso-countries": "^7.14.0",
         "input-otp": "^1.4.2",
