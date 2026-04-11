@@ -8,12 +8,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Reservation\StoreReservationRequest;
 use App\Models\Accommodation;
 use App\Models\Reservation;
+use App\Services\Export\VisitorReportExportService;
 use App\Services\Reservation\ReservationService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ReservationController extends Controller
@@ -100,4 +103,16 @@ class ReservationController extends Controller
         return redirect()->back()->with('success', 'Séjour validé avec succès.');
     }
 
+    public function exportReportedVisitors(Request $request, VisitorReportExportService $exportService): StreamedResponse
+    {
+        $request->validate([
+            'period' => ['required', 'date_format:Y-m'],
+        ]);
+
+        // Build the 3-month window
+        $start = Carbon::createFromFormat('Y-m', $request->period)->startOfMonth();
+        $end   = $start->copy()->addMonths(3)->subDay()->endOfDay();
+
+        return $exportService->export($start, $end);
+    }
 }

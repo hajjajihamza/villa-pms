@@ -15,6 +15,7 @@ import type {
 import ReservationModal from '@/components/Reservations/info/reservation-modal';
 import ReservationCard from '@/components/Reservations/info/reservation-card';
 import Pagination from '@/components/pagination';
+import ExportVisitorsDropdown from '@/components/Reservations/forms/export-visitors-dropdown';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -64,18 +65,21 @@ export default function ReservationIndex({ reservations, accommodations, activeT
     return (
         <AppLayout
             breadcrumbs={breadcrumbs}
-            title='Reservations'
-            description='Gerez les sejours, la validation et les visiteurs supplementaires.'
+            title="Reservations"
+            description="Gerez les sejours, la validation et les visiteurs supplementaires."
             action={
-                <Button
-                    onClick={() => {
-                        setEditingReservation(null);
-                        setFormOpen(true);
-                    }}
-                >
-                    <Plus className="mr-2 size-4" />
-                    Nouvelle reservation
-                </Button>
+                <>
+                    <ExportVisitorsDropdown />
+                    <Button
+                        onClick={() => {
+                            setEditingReservation(null);
+                            setFormOpen(true);
+                        }}
+                    >
+                        <Plus className="mr-2 size-4" />
+                        Nouvelle reservation
+                    </Button>
+                </>
             }
         >
             <Head title="Reservations" />
@@ -89,10 +93,11 @@ export default function ReservationIndex({ reservations, accommodations, activeT
                     <Link
                         key={tab.id}
                         href={tab.href}
-                        className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${activeTab === tab.id
-                            ? 'border-primary text-primary'
-                            : 'border-transparent text-muted-foreground'
-                            }`}
+                        className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
+                            activeTab === tab.id
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted-foreground'
+                        }`}
                     >
                         <tab.icon className="size-4" />
                         {tab.label}
@@ -101,14 +106,16 @@ export default function ReservationIndex({ reservations, accommodations, activeT
             </div>
 
             {/* list */}
-            <div className="space-y-6 mt-1">
+            <div className="mt-1 space-y-6">
                 {reservations.data.length > 0 ? (
                     <>
                         {reservations.data.map((reservation) => (
                             <ReservationCard
                                 key={reservation.id}
                                 reservation={reservation}
-                                onOpenDetails={() => setSelectedReservationId(reservation.id)}
+                                onOpenDetails={() =>
+                                    setSelectedReservationId(reservation.id)
+                                }
                                 onEdit={(reservation) => {
                                     setEditingReservation(reservation);
                                     setFormOpen(true);
@@ -129,10 +136,15 @@ export default function ReservationIndex({ reservations, accommodations, activeT
                         />
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg bg-muted/20">
-                        <CalendarX className="size-12 text-muted-foreground/50 mb-4" />
-                        <h3 className="text-lg font-medium text-muted-foreground">Aucune réservation trouvée</h3>
-                        <p className="text-sm text-muted-foreground">Il n'y a pas de réservation correspondant à ce filtre pour le moment.</p>
+                    <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/20 py-12 text-center">
+                        <CalendarX className="mb-4 size-12 text-muted-foreground/50" />
+                        <h3 className="text-lg font-medium text-muted-foreground">
+                            Aucune réservation trouvée
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                            Il n'y a pas de réservation correspondant à ce
+                            filtre pour le moment.
+                        </p>
                     </div>
                 )}
             </div>

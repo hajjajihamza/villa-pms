@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Expense\ExpenseController;
+use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Pos\PosController;
+use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Reservation\PlanningController;
 use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Reservation\VisitorController;
@@ -49,6 +51,10 @@ Route::middleware('auth')->group(function (): void {
         ->name('reservations.documents.update');
     Route::delete('reservations/documents/{document}', [VisitorController::class, 'destroyDocument'])
         ->name('reservations.documents.destroy');
+
+    Route::get('reservations/export-visitors', [ReservationController::class, 'exportReportedVisitors'])
+        ->name('reservations.export-visitors');
+
     Route::resource('reservations', ReservationController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
@@ -57,14 +63,15 @@ Route::middleware('auth')->group(function (): void {
     // ────────────────────────────────────────────────
     Route::get('pos', [PosController::class, 'index'])->name('pos.index');
     Route::get('pos-v2', [PosController::class, 'indexV2'])->name('pos.indexV2');
-    Route::resource('products', \App\Http\Controllers\Product\ProductController::class)
+    
+    Route::resource('products', ProductController::class)
         ->only(['store', 'update', 'destroy']);
+
     // ────────────────────────────────────────────────
     //  Order
     // ────────────────────────────────────────────────
-    Route::post('orders', [\App\Http\Controllers\Order\OrderController::class, 'store'])->name('orders.store');
+    Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
 });
-
 
 require __DIR__.'/auth.php';
 require __DIR__.'/settings.php';
