@@ -34,6 +34,16 @@ export type Channel = BaseModel & {
     name: string;
     commission: number;
     color: string;
+    ical_sources?: IcalSource[];
+};
+
+export type IcalSource = BaseModel & {
+    unit_id: number;
+    channel_id: number;
+    url: string;
+    unit?: Unit;
+    channel?: Channel;
+    last_sync_at: Timestamp | null;
 };
 
 export type Document = BaseModel & {

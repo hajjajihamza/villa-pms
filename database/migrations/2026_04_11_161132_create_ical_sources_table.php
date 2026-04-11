@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('unit_id')->constrained()->onDelete('cascade');
             $table->foreignId('channel_id')->constrained()->onDelete('cascade');
             $table->text('url');
+            $table->timestamp('last_sync_at')->nullable();
             $table->timestamps();
         });
     }

@@ -7,6 +7,7 @@ use App\Http\Requests\Settings\PasswordUpdateRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use App\Models\Accommodation;
 use App\Models\Channel;
+use App\Models\Unit;
 use App\Services\Settings\SettingService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -29,6 +30,7 @@ class SettingController extends Controller
         return Inertia::render('settings/index', [
             'accommodations' => Accommodation::all(),
             'channels' => Channel::orderBy('name')->get(),
+            'units' => Unit::orderBy('name')->get(),
             'user' => auth()->user(),
         ]);
     }

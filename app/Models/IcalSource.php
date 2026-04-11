@@ -13,6 +13,11 @@ class IcalSource extends Model
         'unit_id',
         'channel_id',
         'url',
+        'last_sync_at',
+    ];
+
+    protected $casts = [
+        'last_sync_at' => 'datetime',
     ];
 
     public function unit(): BelongsTo

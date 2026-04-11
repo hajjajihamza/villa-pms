@@ -18,8 +18,8 @@ return new class extends Migration
             $table->dateTime('dtend');
             $table->foreignId('ical_source_id')
             ->constrained()
+            ->cascadeOnDelete()
             ->cascadeOnUpdate()
-            ->restrictOnDelete()
             ;
             $table->timestamps();
         });

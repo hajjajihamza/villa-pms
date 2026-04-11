@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import type { Channel } from '@/types';
+import type { Channel, Unit } from '@/types';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -33,6 +33,7 @@ type ChannelFormData = {
 type Props = {
     open: boolean;
     channel?: Channel | null;
+    units?: Unit[];
     onOpenChange: (open: boolean) => void;
 };
 
@@ -120,58 +121,61 @@ export default function ChannelForm({ open, channel, onOpenChange }: Props) {
                 {/* form */}
                 <form onSubmit={handleSubmit} className="flex flex-col">
                     {/* scroll area */}
-                    <ScrollArea className="px-4 lg:px-8 max-h-[60vh] overflow-y-auto">
-                        <div className="grid gap-4 pb-2">
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="channel-name"
-                                    className="text-[13px] font-medium text-foreground/90"
-                                >
-                                    Nom
-                                </Label>
-                                <Input
-                                    id="channel-name"
-                                    value={data.name}
-                                    onChange={(event) =>
-                                        setData('name', event.target.value)
+                    <ScrollArea className="px-4 lg:px-8 max-h-[70vh]">
+                        <div className="grid gap-6 pb-6 pt-4">
+                            <div className="grid gap-4">
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="channel-name"
+                                        className="text-[13px] font-medium text-foreground/90"
+                                    >
+                                        Nom
+                                    </Label>
+                                    <Input
+                                        id="channel-name"
+                                        value={data.name}
+                                        onChange={(event) =>
+                                            setData('name', event.target.value)
+                                        }
+                                        placeholder="Booking"
+                                        aria-invalid={Boolean(errors.name)}
+                                        className={cn(
+                                            'h-11 rounded-xl bg-background/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]',
+                                            errors.name &&
+                                            'border-destructive',
+                                        )}
+                                        autoFocus
+                                        required
+                                    />
+                                    <InputError message={errors.name} />
+                                </div>
+
+                                <InputCounter
+                                    id="channel-commission"
+                                    label="Commission"
+                                    icon={<Percent className="size-4" />}
+                                    value={data.commission}
+                                    min={0}
+                                    max={100}
+                                    step={0.5}
+                                    unit="%"
+                                    error={errors.commission}
+                                    onChange={(value) =>
+                                        setData('commission', value)
                                     }
-                                    placeholder="Booking"
-                                    aria-invalid={Boolean(errors.name)}
-                                    className={cn(
-                                        'h-11 rounded-xl bg-background/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]',
-                                        errors.name &&
-                                        'border-destructive',
-                                    )}
-                                    required
                                 />
-                                <InputError message={errors.name} />
+
+                                {/* Color picker */}
+                                <InputColorPicker
+                                    id="channel-color"
+                                    label="Identité visuelle"
+                                    value={data.color}
+                                    onChange={(color) =>
+                                        setData('color', color)
+                                    }
+                                    error={errors.color}
+                                />
                             </div>
-
-                            <InputCounter
-                                id="channel-commission"
-                                label="Commission"
-                                icon={<Percent className="size-4" />}
-                                value={data.commission}
-                                min={0}
-                                max={100}
-                                step={0.5}
-                                unit="%"
-                                error={errors.commission}
-                                onChange={(value) =>
-                                    setData('commission', value)
-                                }
-                            />
-
-                            {/* Color picker */}
-                            <InputColorPicker
-                                id="channel-color"
-                                label="Identité visuelle"
-                                value={data.color}
-                                onChange={(color) =>
-                                    setData('color', color)
-                                }
-                                error={errors.color}
-                            />
                         </div>
                     </ScrollArea>
 
@@ -201,4 +205,3 @@ export default function ChannelForm({ open, channel, onOpenChange }: Props) {
         </Dialog>
     );
 }
-

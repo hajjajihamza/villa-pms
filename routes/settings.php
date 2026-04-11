@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Settings\AccommodationController;
 use App\Http\Controllers\Settings\ChannelController;
+use App\Http\Controllers\Settings\IcalSourceController;
 use App\Http\Controllers\Settings\SettingController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,12 @@ Route::middleware(['auth'])->group(function () {
     //  Channels
     // ────────────────────────────────────────────────
     Route::resource('channels', ChannelController::class)
+        ->only(['store', 'update', 'destroy']);
+
+    // ────────────────────────────────────────────────
+    //  iCal Sources
+    // ────────────────────────────────────────────────
+    Route::resource('ical-sources', IcalSourceController::class)
         ->only(['store', 'update', 'destroy']);
 
     // ────────────────────────────────────────────────

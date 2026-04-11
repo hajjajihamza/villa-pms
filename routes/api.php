@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\Expense\ExpenseCategoryApiController;
+use App\Http\Controllers\Api\Ical\IcalSourceApiController;
 use App\Http\Controllers\Api\Order\OrderApiController;
 use App\Http\Controllers\Api\ProductCategoryApiController;
 use App\Http\Controllers\Api\Reservation\ReservationApiController;
@@ -40,3 +41,8 @@ Route::delete('/order-items/{orderItem}', [OrderApiController::class, 'destroyIt
 //  Statistics
 // ────────────────────────────────────────────────
 Route::get('/statistics/dashboard', [DashboardStatisticsApiController::class, 'index']);
+
+// ────────────────────────────────────────────────
+//  iCal Sources
+// ────────────────────────────────────────────────
+Route::get('/{channel}/ical-sources', [IcalSourceApiController::class, 'index']);

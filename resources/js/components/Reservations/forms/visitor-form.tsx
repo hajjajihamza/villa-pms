@@ -158,6 +158,7 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
                             type="button"
                             variant="outline"
                             onClick={onCancel}
+                            disabled={processing}
                         >
                             <X size={12} className="mr-1.5" />
                             Annuler
@@ -170,9 +171,11 @@ export function VisitorForm({ reservationId, visitor, onCancel, onSuccess }: Pro
                                 className="mr-1.5 animate-spin"
                             />
                         ) : (
-                            <Save size={12} className="mr-1.5" />
+                            <>
+                                <Save size={12} className="mr-1.5" />
+                                {isEditing ? 'Mettre à jour' : 'Enregistrer'}
+                            </>
                         )}
-                        {isEditing ? 'Mettre à jour' : 'Enregistrer'}
                     </Button>
                 </CardFooter>
             </form>

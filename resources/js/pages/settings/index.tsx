@@ -7,7 +7,7 @@ import ProfileForm from '@/components/settings/account/Profile-form';
 import ChannelTable from '@/components/settings/channel/channel-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
-import type { Accommodation, BreadcrumbItem, Channel } from '@/types';
+import type { Accommodation, BreadcrumbItem, Channel, Unit } from '@/types';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -15,6 +15,7 @@ import type { Accommodation, BreadcrumbItem, Channel } from '@/types';
 type SettingsPageProps = {
     accommodations: Accommodation[];
     channels: Channel[];
+    units: Unit[];
 };
 
 // ────────────────────────────────────────────────
@@ -30,7 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function SettingsIndex({ accommodations, channels }: SettingsPageProps) {
+export default function SettingsIndex({ accommodations, channels, units }: SettingsPageProps) {
     // ────────────────────────────────────────────────
     // Render
     // ────────────────────────────────────────────────
@@ -80,7 +81,7 @@ export default function SettingsIndex({ accommodations, channels }: SettingsPage
 
                 {/* Channels Tab Content */}
                 <TabsContent value="channels" className="mt-0 outline-none">
-                    <ChannelTable channels={channels} />
+                    <ChannelTable channels={channels} units={units} />
                 </TabsContent>
 
                 {/* Profile Tab Content */}
