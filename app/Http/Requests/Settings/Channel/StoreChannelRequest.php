@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Settings\Channel;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule\ValidationRule;
 
 class StoreChannelRequest extends FormRequest
 {
@@ -17,6 +18,7 @@ class StoreChannelRequest extends FormRequest
             'name' => ['required', 'string', 'max:255', 'unique:channels,name'],
             'commission' => ['required', 'numeric', 'min:0', 'max:100'],
             'color' => ['nullable', 'string', 'max:20'],
+            'ical_url' => ['nullable', 'url'],
         ];
     }
 }

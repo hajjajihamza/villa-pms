@@ -17,6 +17,7 @@ class Channel extends Model
         'name',
         'commission',
         'color',
+        'ical_url',
     ];
 
     /**
@@ -36,5 +37,10 @@ class Channel extends Model
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    public function icalReservations(): HasMany
+    {
+        return $this->hasMany(IcalReservation::class);
     }
 }

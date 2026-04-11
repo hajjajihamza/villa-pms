@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { Reservation } from '@/types';
 import DashboardController from '@/actions/App/Http/Controllers/Dashboard/DashboardController';
+import IcalController from '@/actions/App/Http/Controllers/Ical/IcalController';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -100,7 +101,7 @@ export default function Planning({ date, view, data, className }: Props & { clas
                     {/* refresh button */}
                     <Button
                         variant="outline-info"
-                        onClick={() => router.reload()}
+                        onClick={() => router.get(IcalController.sync().url)}
                     >
                         <RefreshCcw className="h-4 w-4" />
                         Actualiser
