@@ -261,7 +261,7 @@
         backdrop-filter: blur(10px);
         border: 1px solid;
         border-left-width: 4px;
-        border-radius: 14px;
+        border-radius: 8px;
         cursor: pointer;
         display: flex;
         flex-direction: column;

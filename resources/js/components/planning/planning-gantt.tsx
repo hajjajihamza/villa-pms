@@ -363,7 +363,7 @@ export default function PlanningGantt({
                                 <TooltipTrigger asChild>
                                     <button
                                         type="button"
-                                        className="planning-gantt__task rounded-sm"
+                                        className="planning-gantt__task truncate"
                                         style={{
                                             left: task.left,
                                             top: metrics.headerHeight + task.unitIndex * metrics.rowHeight + 1.2,
@@ -382,7 +382,7 @@ export default function PlanningGantt({
                                             locale: fr,
                                         })} au ${format(task.end, 'dd MMM yyyy', { locale: fr })}`}
                                     >
-                                        <span className="truncate text-[11px] font-semibold text-foreground">
+                                        <span className="text-[11px] font-semibold text-foreground">
                                             {capitalize(task.guestName)}
                                         </span>
                                     </button>
