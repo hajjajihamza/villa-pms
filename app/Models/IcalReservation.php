@@ -13,7 +13,7 @@ class IcalReservation extends Model
         'uid',
         'dtstart',
         'dtend',
-        'channel_id',
+        'ical_source_id',
     ];
 
     /**
@@ -28,10 +28,10 @@ class IcalReservation extends Model
     }
 
     /**
-     * @return BelongsTo<Channel, IcalReservation>
+     * @return BelongsTo<IcalSource, IcalReservation>
      */
-    public function channel(): BelongsTo
+    public function icalSource(): BelongsTo
     {
-        return $this->belongsTo(Channel::class);
+        return $this->belongsTo(IcalSource::class);
     }
 }

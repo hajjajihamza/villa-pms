@@ -17,8 +17,7 @@ class StoreChannelRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255', 'unique:channels,name'],
             'commission' => ['required', 'numeric', 'min:0', 'max:100'],
-            'color' => ['nullable', 'string', 'max:20'],
-            'ical_url' => ['nullable', 'url'],
+            'color' => ['nullable', 'string', 'max:20']
         ];
     }
 }

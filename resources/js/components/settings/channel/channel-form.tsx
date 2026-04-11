@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { Link, Percent, Save, X } from 'lucide-react';
+import { Percent, Save, X } from 'lucide-react';
 import type { SubmitEvent } from 'react';
 import { useEffect } from 'react';
 import ChannelController from '@/actions/App/Http/Controllers/Settings/ChannelController';
@@ -28,7 +28,6 @@ type ChannelFormData = {
     name: string;
     commission: number;
     color: string;
-    ical_url: string;
 };
 
 type Props = {
@@ -43,8 +42,7 @@ type Props = {
 const initialData: ChannelFormData = {
     name: '',
     commission: 0,
-    color: '#f97316',
-    ical_url: '',
+    color: '#f97316'
 };
 
 // ────────────────────────────────────────────────
@@ -97,7 +95,6 @@ export default function ChannelForm({ open, channel, onOpenChange }: Props) {
                 name: channel.name,
                 commission: channel.commission ?? 0,
                 color: channel.color ?? '',
-                ical_url: channel.ical_url ?? '',
             });
             return;
         }
@@ -148,33 +145,6 @@ export default function ChannelForm({ open, channel, onOpenChange }: Props) {
                                     required
                                 />
                                 <InputError message={errors.name} />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="channel-ical-url"
-                                    className="text-[13px] font-medium text-foreground/90"
-                                >
-                                    URL iCal
-                                </Label>
-                                <div className="relative">
-                                    <Input
-                                        id="channel-ical-url"
-                                        value={data.ical_url}
-                                        onChange={(event) =>
-                                            setData('ical_url', event.target.value)
-                                        }
-                                        placeholder="https://example.com/calendar.ics"
-                                        aria-invalid={Boolean(errors.ical_url)}
-                                        className={cn(
-                                            'h-11 pl-10 rounded-xl bg-background/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.05)]',
-                                            errors.ical_url &&
-                                            'border-destructive',
-                                        )}
-                                    />
-                                    <Link className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                                </div>
-                                <InputError message={errors.ical_url} />
                             </div>
 
                             <InputCounter

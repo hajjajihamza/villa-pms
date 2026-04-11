@@ -22,7 +22,7 @@ class PosController extends Controller
         $accommodations = Accommodation::all();
         $reservations = Reservation::where('check_out', '>', $today)
                     ->where('check_in', '>=', $today)
-                    ->orWhere('real_check_out', '>', $today)
+                    ->orWhere('real_check_out', '>=', $today)
                     ->with('mainVisitor')
                     ->orderBy('check_in')
                     ->get(['id', 'check_in', 'check_out', 'real_check_in', 'real_check_out'])

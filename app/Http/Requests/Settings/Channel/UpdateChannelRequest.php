@@ -22,8 +22,7 @@ class UpdateChannelRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('channels', 'name')->ignore($channel->id)],
             'commission' => ['required', 'numeric', 'min:0', 'max:100'],
-            'color' => ['nullable', 'string', 'max:20'],
-            'ical_url' => ['nullable', 'url'],
+            'color' => ['nullable', 'string', 'max:20']
         ];
     }
 }

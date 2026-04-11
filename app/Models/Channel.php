@@ -5,6 +5,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Channel extends Model
 {
@@ -16,8 +17,7 @@ class Channel extends Model
     protected $fillable = [
         'name',
         'commission',
-        'color',
-        'ical_url',
+        'color'
     ];
 
     /**
@@ -39,8 +39,15 @@ class Channel extends Model
         return $this->hasMany(Reservation::class);
     }
 
-    public function icalReservations(): HasMany
+    public function units(): BelongsToMany
     {
-        return $this->hasMany(IcalReservation::class);
+        return $this->belongsToMany(Unit::class, 'ical_sources')
+            ->withPivot('url')
+            ->withTimestamps();
+    }
+
+    public function icalSources(): HasMany
+    {
+        return $this->hasMany(IcalSource::class);
     }
 }

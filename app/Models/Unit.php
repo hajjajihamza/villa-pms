@@ -36,6 +36,18 @@ class Unit extends Model
         return $this->hasMany(Expense::class);
     }
 
+    public function channels(): BelongsToMany
+    {
+        return $this->belongsToMany(Channel::class, 'ical_sources')
+            ->withPivot('url')
+            ->withTimestamps();
+    }
+
+    public function icalSources(): HasMany
+    {
+        return $this->hasMany(IcalSource::class);
+    }
+
     // ────────────────────────────────────────────────
     //  Accessors & Mutators
     // ────────────────────────────────────────────────

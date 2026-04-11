@@ -34,7 +34,6 @@ export type Channel = BaseModel & {
     name: string;
     commission: number;
     color: string;
-    ical_url: string | null;
 };
 
 export type Document = BaseModel & {
