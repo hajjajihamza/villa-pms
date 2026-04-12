@@ -57,7 +57,7 @@ class Unit extends Model
         return Attribute::get(function () {
             $date = Carbon::today()->subWeek();
 
-            return DB::table('reservations')
+            $reservationsDates = DB::table('reservations')
                 ->select('reservations.check_in', 'reservations.check_out')
                 ->join('accommodations', 'accommodations.id', '=', 'reservations.accommodation_id')
                 ->join('accommodation_unit', 'accommodation_unit.accommodation_id', '=', 'accommodations.id')
@@ -66,6 +66,19 @@ class Unit extends Model
                 ->whereNull('reservations.deleted_at')
                 ->get()
                 ->toArray();
+
+            $iCalReservationsDates = DB::table('ical_reservations')
+                ->select(
+                    DB::raw('DATE_FORMAT(ical_reservations.dtstart, "%Y-%m-%d") as check_in'),
+                    DB::raw('DATE_FORMAT(ical_reservations.dtend, "%Y-%m-%d") as check_out')
+                )
+                ->join('ical_sources', 'ical_sources.id', '=', 'ical_reservations.ical_source_id')
+                ->where('dtstart' ,'>=' ,$date)
+                ->where('ical_sources.unit_id', $this->id)
+                ->get()
+                ->toArray()
+                ;
+            return array_merge($reservationsDates, $iCalReservationsDates);
         });
     }
 }

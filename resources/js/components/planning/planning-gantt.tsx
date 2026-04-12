@@ -19,8 +19,8 @@ import { createPortal } from 'react-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import type {PlanningUnit} from '@/pages/planning';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
+import { PlanningUnit } from './plannin';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -54,6 +54,7 @@ type ReservationTask = {
     width: number;
     nights: number;
     accommodationName: string;
+    is_external: boolean;
 };
 
 // ────────────────────────────────────────────────
@@ -177,7 +178,8 @@ function createReservationTasks(
                     left,
                     width: right - left,
                     nights: Math.max(differenceInCalendarDays(reservationEnd, reservationStart), 1),
-                    accommodationName: reservation.accommodation?.name || unit.name
+                    accommodationName: reservation.accommodation?.name || unit.name,
+                    is_external: reservation?.is_external ?? false
                 },
             ];
         }),
@@ -375,8 +377,10 @@ export default function PlanningGantt({
                                             boxShadow: `0 12px 24px ${withAlpha(task.color, 0.18)}`,
                                         }}
                                         onClick={(event) => {
-                                            event.stopPropagation();
-                                            onReservationSelect(task.reservationId);
+                                            if (!task.is_external) {
+                                                event.stopPropagation();
+                                                onReservationSelect(task.reservationId);
+                                            }
                                         }}
                                         aria-label={`${task.guestName}, du ${format(task.start, 'dd MMM yyyy', {
                                             locale: fr,

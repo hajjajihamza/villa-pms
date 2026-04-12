@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Ical;
 
 use App\Http\Controllers\Controller;
-use App\Models\Channel;
+use App\Models\IcalSource;
 use App\Services\Ical\IcalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Http;
@@ -22,9 +22,11 @@ class IcalController extends Controller
      */
     public function sync(): RedirectResponse
     {
-        $channels = Channel::whereNotNull('ical_url')->get();
+        $sources = IcalSource::query()
+            ->with(['unit', 'channel', 'icalReservations'])
+            ->get();
 
-        foreach ($channels as $channel) {
+        foreach ($sources as $source) {
             try {
                 // pour éviter le proplem de 429 too many requests
                 $response = Http::retry(3, 2000)
@@ -32,15 +34,15 @@ class IcalController extends Controller
                     ->withHeaders([
                         'User-Agent' => 'Laravel iCal Client',
                     ])
-                    ->get((string) $channel->ical_url);
+                    ->get((string) $source->url);
 
                 if ($response->successful()) {
-                    $this->icalService->syncFromContent($response->body(), $channel);
+                    $this->icalService->syncFromContent($response->body(), $source);
                 } else {
-                    Log::error("Failed to fetch iCal for channel {$channel->name}: HTTP {$response->status()}");
+                    Log::error("Failed to fetch iCal for iCal source : channel:{$source->channel->name}: | unit:{$sources->unit->name} | url:{$sources->url}: HTTP {$response->status()}");
                 }
             } catch (\Exception $e) {
-                Log::error("Error syncing iCal for channel {$channel->name}: {$e->getMessage()}");
+                Log::error("Error syncing iCal for source : {$source->id}: {$e->getMessage()}");
             }
         }
 

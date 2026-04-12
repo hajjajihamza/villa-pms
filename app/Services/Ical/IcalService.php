@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Services\Ical;
 
-use App\Models\Channel;
 use App\Models\IcalReservation;
+use App\Models\IcalSource;
 use Sabre\VObject\Reader;
 
 class IcalService
@@ -13,10 +13,10 @@ class IcalService
      * Parse iCal content and store reservations for a given channel.
      *
      * @param string $content
-     * @param Channel $channel
+     * @param IcalSource $source
      * @return void
      */
-    public function syncFromContent(string $content, Channel $channel): void
+    public function syncFromContent(string $content, IcalSource $source): void
     {
         $vcalendar = Reader::read($content);
 
@@ -30,9 +30,11 @@ class IcalService
                 [
                     'dtstart' => $dtstart->format('Y-m-d H:i:s'),
                     'dtend' => $dtend->format('Y-m-d H:i:s'),
-                    'channel_id' => $channel->id,
+                    'ical_source_id' => $source->id,
                 ]
             );
+
+            $source->update(['last_sync_at' => now()]);
         }
     }
 }
