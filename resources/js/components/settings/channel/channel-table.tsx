@@ -22,27 +22,28 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { formatNumber } from '@/lib/format-number';
-import type { Channel, Unit } from '@/types';
+import type { Channel } from '@/types';
 import IcalSourceList from './ical-source-list';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // ────────────────────────────────────────────────
 //  Types
 // ────────────────────────────────────────────────
 type Props = {
     channels: Channel[];
-    units: Unit[];
 };
 
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function ChannelTable({ channels, units }: Props) {
+export default function ChannelTable({ channels }: Props) {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
     const [open, setOpen] = useState(false); // form dialog open
     const [selected, setSelected] = useState<Channel | null>(null); // object to edit
-    
+    const isMobile = useIsMobile();
+
     // iCal List State
     const [selectedIcalChannelId, setSelectedIcalChannelId] = useState<number | null>(null);
 
@@ -85,7 +86,7 @@ export default function ChannelTable({ channels, units }: Props) {
             </CardHeader>
             <CardContent className="p-0 sm:p-6">
                 {/* Desktop Table View (Visible on sm and up) */}
-                <div className="hidden sm:block">
+                {!isMobile && (
                     <Table>
                         <TableHeader className="bg-muted">
                             <TableRow>
@@ -137,62 +138,64 @@ export default function ChannelTable({ channels, units }: Props) {
                             ))}
                         </TableBody>
                     </Table>
-                </div>
+                )}
 
                 {/* Mobile Card View (Visible only on tiny screens) */}
-                <div className="divide-y divide-border sm:hidden">
-                    {channels.length === 0 && (
-                        <div className="flex flex-col items-center justify-center p-12 text-center">
-                            <div className="rounded-full bg-muted p-3 mb-4">
-                                <Plus className="h-6 w-6 text-muted-foreground/60" />
+                {isMobile && (
+                    <div className="divide-y divide-border">
+                        {channels.length === 0 && (
+                            <div className="flex flex-col items-center justify-center p-12 text-center">
+                                <div className="rounded-full bg-muted p-3 mb-4">
+                                    <Plus className="h-6 w-6 text-muted-foreground/60" />
+                                </div>
+                                <p className="text-sm font-medium text-muted-foreground">Aucun canal trouvé.</p>
                             </div>
-                            <p className="text-sm font-medium text-muted-foreground">Aucun canal trouvé.</p>
-                        </div>
-                    )}
+                        )}
 
-                    {channels.map((channel) => (
-                        <div
-                            key={channel.id}
-                            className="p-5 transition-colors active:bg-muted/50"
-                        >
-                            {/* Header Section */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="space-y-1.5 text-left">
-                                    <div className="flex items-center gap-2">
-                                        <h4 className="text-base font-bold tracking-tight text-foreground">
-                                            {channel.name}
-                                        </h4>
+                        {channels.map((channel) => (
+                            <div
+                                key={channel.id}
+                                className="p-5 transition-colors active:bg-muted/50"
+                            >
+                                {/* Header Section */}
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="space-y-1.5 text-left">
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="text-base font-bold tracking-tight text-foreground">
+                                                {channel.name}
+                                            </h4>
+                                        </div>
+
+                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                            <ColorBadge color={channel.color} />
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                        <ColorBadge color={channel.color} />
-                                    </div>
+                                    <ActionButtons
+                                        onEdit={() => openEdit(channel)}
+                                        onDelete={() => remove(channel)}
+                                        onIcal={() => setSelectedIcalChannelId(channel.id)}
+                                    />
                                 </div>
 
-                                <ActionButtons
-                                    onEdit={() => openEdit(channel)}
-                                    onDelete={() => remove(channel)}
-                                    onIcal={() => setSelectedIcalChannelId(channel.id)}
-                                />
-                            </div>
-
-                            {/* Info Grid */}
-                            <div className="grid grid-cols-1 gap-2 text-sm">
-                                <div className="flex items-center justify-between rounded-md bg-muted/50 p-3 shadow-sm">
-                                    <div className="flex items-center gap-2">
-                                        <Percent className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-xs text-muted-foreground uppercase">Commission</span>
+                                {/* Info Grid */}
+                                <div className="grid grid-cols-1 gap-2 text-sm">
+                                    <div className="flex items-center justify-between rounded-md bg-muted/50 p-3 shadow-sm">
+                                        <div className="flex items-center gap-2">
+                                            <Percent className="h-4 w-4 text-muted-foreground" />
+                                            <span className="text-xs text-muted-foreground uppercase">Commission</span>
+                                        </div>
+                                        <p className="font-medium">
+                                            {formatNumber(channel.commission, {
+                                                endWith: '%',
+                                            })}
+                                        </p>
                                     </div>
-                                    <p className="font-medium">
-                                        {formatNumber(channel.commission, {
-                                            endWith: '%',
-                                        })}
-                                    </p>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </CardContent>
 
             {/* Dialogs */}
@@ -202,14 +205,13 @@ export default function ChannelTable({ channels, units }: Props) {
                 onOpenChange={setOpen}
             />
 
-            {selectedIcalChannelId && (
+            {/* {selectedIcalChannelId && (
                 <IcalSourceList 
                     open={!!selectedIcalChannelId}
                     onOpenChange={(isOpen) => !isOpen && setSelectedIcalChannelId(null)}
                     channelId={selectedIcalChannelId}
-                    units={units}
                 />
-            )}
+            )} */}
         </Card>
     );
 }

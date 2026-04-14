@@ -9,6 +9,7 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatNumber } from '@/lib/format-number';
 import type { Accommodation } from '@/types';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -26,6 +27,7 @@ export default function AccommodationTable({ accommodations }: Props) {
     // ────────────────────────────────────────────────
     const [open, setOpen] = useState(false); // dialog open
     const [selected, setSelected] = useState<Accommodation | null>(null); // object to edit
+    const isMobile = useIsMobile();
 
     // ────────────────────────────────────────────────
     //  Handlers
@@ -64,7 +66,7 @@ export default function AccommodationTable({ accommodations }: Props) {
             </CardHeader>
             <CardContent>
                 {/* Desktop Table View (Visible on sm and up) */}
-                <div className="hidden sm:block">
+                {!isMobile && (
                     <Table>
                         <TableHeader className="bg-muted">
                             <TableRow>
@@ -77,6 +79,14 @@ export default function AccommodationTable({ accommodations }: Props) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                            {accommodations.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center">
+                                        Aucun hébergement.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+
                             {accommodations.map((acc) => (
                                 <TableRow
                                     key={acc.id}
@@ -126,20 +136,13 @@ export default function AccommodationTable({ accommodations }: Props) {
                                     </TableCell>
                                 </TableRow>
                             ))}
-
-                            {accommodations.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
-                                        Aucun hébergement.
-                                    </TableCell>
-                                </TableRow>
-                            )}
                         </TableBody>
                     </Table>
-                </div>
-
+                )}
+                
                 {/* Mobile Card View (Visible only on tiny screens) */}
-                <div className="divide-y divide-border sm:hidden">
+                {isMobile && (
+                    <div className="divide-y divide-border">
                     {accommodations.length === 0 && (
                         <div className="flex flex-col items-center justify-center p-12 text-center">
                             <div className="rounded-full bg-muted p-3 mb-4">
@@ -209,6 +212,7 @@ export default function AccommodationTable({ accommodations }: Props) {
                         </div>
                     ))}
                 </div>
+                )}    
             </CardContent>
 
             {/* Dialog */}

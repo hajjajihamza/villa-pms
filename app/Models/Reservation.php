@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -84,9 +85,9 @@ class Reservation extends Model
         return $this->belongsTo(Channel::class);
     }
 
-    public function accommodation(): BelongsTo
+    public function accommodations(): BelongsToMany
     {
-        return $this->belongsTo(Accommodation::class);
+        return $this->belongsToMany(Accommodation::class, 'accommodation_reservation');
     }
 
     public function visitors(): HasMany

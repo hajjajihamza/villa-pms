@@ -22,7 +22,7 @@ class Expense extends Model
         'description',
         'created_by',
         'category_id',
-        'unit_id',
+        'accommodation_id',
     ];
 
     /**
@@ -50,9 +50,9 @@ class Expense extends Model
         return $this->belongsTo(ExpenseCategory::class, 'category_id');
     }
 
-    public function unit(): BelongsTo
+    public function accommodation(): BelongsTo
     {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(Accommodation::class);
     }
 
     // ────────────────────────────────────────────────

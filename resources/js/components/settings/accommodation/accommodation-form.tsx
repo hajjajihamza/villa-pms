@@ -107,6 +107,12 @@ export default function AccommodationForm({ open, accommodation, onOpenChange }:
                 color: accommodation.color ?? '',
             });
         }
+
+        // reset form when dialog is closed
+        return () => {
+            reset();
+            clearErrors();
+        };
     }, [open, accommodation]);
 
     // ────────────────────────────────────────────────
@@ -151,6 +157,7 @@ export default function AccommodationForm({ open, accommodation, onOpenChange }:
                                         errors.name &&
                                             'border-destructive',
                                     )}
+                                    autoFocus
                                     required
                                 />
                                 <InputError message={errors.name} />

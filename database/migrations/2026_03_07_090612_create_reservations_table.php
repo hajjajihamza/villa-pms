@@ -32,10 +32,6 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
-            $table->foreignId('accommodation_id')
-                ->constrained()
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

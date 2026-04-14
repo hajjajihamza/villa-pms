@@ -20,7 +20,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import AppLayout from '@/layouts/app-layout';
 import { formatDateDisplay } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
-import type { BreadcrumbItem, Expense, ExpenseCategory, Paginated, Unit } from '@/types';
+import type { BreadcrumbItem, Expense, ExpenseCategory, Paginated, Accommodation } from '@/types';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -32,7 +32,7 @@ type PaginatedExpenses = Paginated & {
 type Props = {
     expenses: PaginatedExpenses;
     categories: ExpenseCategory[];
-    units: Unit[];
+    accommodations: Accommodation[];
     filters: Filters;
 };
 
@@ -49,7 +49,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function ExpenseIndex({ expenses, categories, units, filters }: Props) {
+export default function ExpenseIndex({ expenses, categories, accommodations, filters }: Props) {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
@@ -108,7 +108,7 @@ export default function ExpenseIndex({ expenses, categories, units, filters }: P
 
             {/* Collapsible Filter Card */}
             <ExpenseFilter
-                units={units}
+                accommodations={accommodations}
                 categories={categories}
                 filters={filters}
                 open={openFilters}
@@ -127,7 +127,7 @@ export default function ExpenseIndex({ expenses, categories, units, filters }: P
                                         <TableHead className="font-semibold">Montant</TableHead>
                                         <TableHead className="font-semibold">Date</TableHead>
                                         <TableHead className="font-semibold">Categorie</TableHead>
-                                        <TableHead className="font-semibold">Unite</TableHead>
+                                        <TableHead className="font-semibold">Logement</TableHead>
                                         <TableHead className="font-semibold">Cree par</TableHead>
                                         <TableHead className="text-right font-semibold">Actions</TableHead>
                                     </TableRow>
@@ -162,7 +162,7 @@ export default function ExpenseIndex({ expenses, categories, units, filters }: P
                                                 {expense.category?.name ?? '-'}
                                             </TableCell>
                                             <TableCell className="text-sm text-muted-foreground">
-                                                {expense.unit?.name ?? '-'}
+                                                {expense.accommodation?.name ?? '-'}
                                             </TableCell>
                                             <TableCell className="text-sm text-muted-foreground">
                                                 {expense.creator?.name ?? '-'}
@@ -238,8 +238,8 @@ export default function ExpenseIndex({ expenses, categories, units, filters }: P
                                                 </p>
                                             </div>
                                             <div className="rounded-md bg-muted/50 p-2 shadow-sm">
-                                                <p className="text-xs text-muted-foreground uppercase">Unite</p>
-                                                <p className="font-medium">{expense.unit?.name ?? '-'}</p>
+                                                <p className="text-xs text-muted-foreground uppercase">Logement</p>
+                                                <p className="font-medium">{expense.accommodation?.name ?? '-'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -268,7 +268,7 @@ export default function ExpenseIndex({ expenses, categories, units, filters }: P
                     onOpenChange={setOpen}
                     expense={selected}
                     categories={categories}
-                    units={units}
+                    accommodations={accommodations}
                 />
             </div>
         </AppLayout>

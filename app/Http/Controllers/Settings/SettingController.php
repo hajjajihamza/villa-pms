@@ -28,10 +28,8 @@ class SettingController extends Controller
     public function index(): Response
     {
         return Inertia::render('settings/index', [
-            'accommodations' => Accommodation::all(),
+            'accommodations' => Accommodation::orderBy('name')->get(),
             'channels' => Channel::orderBy('name')->get(),
-            'units' => Unit::orderBy('name')->get(),
-            'user' => auth()->user(),
         ]);
     }
 

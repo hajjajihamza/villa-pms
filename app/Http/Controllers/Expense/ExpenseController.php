@@ -6,9 +6,9 @@ namespace App\Http\Controllers\Expense;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Expense\StoreExpenseRequest;
 use App\Http\Requests\Expense\UpdateExpenseRequest;
+use App\Models\Accommodation;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
-use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,7 +19,7 @@ class ExpenseController extends Controller
     public function index(Request $request): Response
     {
         $query = Expense::query()
-            ->with(['category', 'unit', 'creator'])
+            ->with(['category', 'accommodation', 'creator'])
             ->latest('date');
 
         if ($request->filled('name')) {
@@ -30,8 +30,8 @@ class ExpenseController extends Controller
             $query->where('category_id', $request->integer('category_id'));
         }
 
-        if ($request->filled('unit_id')) {
-            $query->where('unit_id', $request->integer('unit_id'));
+        if ($request->filled('accommodation_id')) {
+            $query->where('accommodation_id', $request->integer('accommodation_id'));
         }
 
         if ($request->filled('date')) {
@@ -43,11 +43,11 @@ class ExpenseController extends Controller
                 ->paginate(30)
                 ->withQueryString(),
             'categories' => ExpenseCategory::query()->orderBy('name')->get(['id', 'name']),
-            'units' => Unit::query()->orderBy('name')->get(['id', 'name']),
+            'accommodations' => Accommodation::query()->orderBy('name')->get(['id', 'name']),
             'filters' => [
                 'name' => $request->string('name')->toString(),
                 'category_id' => $request->string('category_id')->toString(),
-                'unit_id' => $request->string('unit_id')->toString(),
+                'accommodation_id' => $request->string('accommodation_id')->toString(),
                 'date' => $request->string('date')->toString(),
             ],
         ]);

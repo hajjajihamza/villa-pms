@@ -23,14 +23,14 @@ class UpdateExpenseRequest extends FormRequest
             'date' => ['required', 'date'],
             'description' => ['nullable', 'string'],
             'category_id' => ['nullable', 'exists:expense_categories,id'],
-            'unit_id' => ['nullable', 'exists:units,id'],
+            'accommodation_id' => ['nullable', 'exists:accommodations,id'],
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        if ($this->input('unit_id') === '') {
-            $this->merge(['unit_id' => null]);
+        if ($this->input('accommodation_id') === '') {
+            $this->merge(['accommodation_id' => null]);
         }
     }
 }

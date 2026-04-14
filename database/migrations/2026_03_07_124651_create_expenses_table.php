@@ -26,7 +26,7 @@ return new class extends Migration
                 ->constrained('expense_categories')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
-            $table->foreignId('unit_id')
+            $table->foreignId('accommodation_id')
                 ->nullable()
                 ->constrained()
                 ->cascadeOnUpdate()

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('ical_sources', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('unit_id')->constrained()->onDelete('cascade');
-            $table->foreignId('channel_id')->constrained()->onDelete('cascade');
+            $table->foreignId('accommodation_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('channel_id')->constrained()->cascadeOnDelete();
             $table->text('url');
             $table->timestamp('last_sync_at')->nullable();
             $table->timestamps();

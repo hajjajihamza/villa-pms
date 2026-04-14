@@ -31,7 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function SettingsIndex({ accommodations, channels, units }: SettingsPageProps) {
+export default function SettingsIndex({ accommodations, channels }: SettingsPageProps) {
     // ────────────────────────────────────────────────
     // Render
     // ────────────────────────────────────────────────
@@ -81,7 +81,7 @@ export default function SettingsIndex({ accommodations, channels, units }: Setti
 
                 {/* Channels Tab Content */}
                 <TabsContent value="channels" className="mt-0 outline-none">
-                    <ChannelTable channels={channels} units={units} />
+                    <ChannelTable channels={channels} />
                 </TabsContent>
 
                 {/* Profile Tab Content */}

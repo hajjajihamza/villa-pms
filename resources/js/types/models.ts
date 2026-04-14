@@ -27,7 +27,6 @@ export type Accommodation = BaseModel & {
     max_children: number;
     service_price: number;
     color: string;
-    units?: Unit[]
 };
 
 export type Channel = BaseModel & {
@@ -38,10 +37,10 @@ export type Channel = BaseModel & {
 };
 
 export type IcalSource = BaseModel & {
-    unit_id: number;
+    accommodation_id: number;
     channel_id: number;
     url: string;
-    unit?: Unit;
+    accommodation?: Accommodation;
     channel?: Channel;
     last_sync_at: Timestamp | null;
 };
@@ -63,8 +62,8 @@ export type Expense = BaseModel & {
     creator?: User;
     category_id: number;
     category?: ExpenseCategory;
-    unit_id: number | null;
-    unit?: Unit;
+    accommodation_id: number | null;
+    accommodation?: Accommodation;
 };
 
 export type ExpenseCategory = BaseModel & {
@@ -145,11 +144,6 @@ export type Reservation = BaseModel &
         main_visitor?: Visitor;
         orders?: Order[];
     };
-
-export type Unit = BaseModel & {
-    name: string;
-    reserved_periods: { check_in: string; check_out: string }[];
-};
 
 export type Visitor = BaseModel & {
     full_name: string;

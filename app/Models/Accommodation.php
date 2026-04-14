@@ -38,13 +38,13 @@ class Accommodation extends Model
     //  Relationships
     // ────────────────────────────────────────────────
 
-    public function units(): BelongsToMany
+    public function reservations(): BelongsToMany
     {
-        return $this->belongsToMany(Unit::class);
+        return $this->belongsToMany(Reservation::class, 'accommodation_reservation');
     }
 
-    public function reservations(): HasMany
+    public function expenses(): HasMany
     {
-        return $this->hasMany(Reservation::class);
+        return $this->hasMany(Expense::class);
     }
 }

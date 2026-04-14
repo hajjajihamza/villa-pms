@@ -12,8 +12,9 @@ import {
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { ExpenseCategory, Unit } from '@/types';
+import type { ExpenseCategory, Accommodation } from '@/types';
 import { DatePickerInput } from '../date-picker_input';
+import { toDate } from 'date-fns';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -21,7 +22,7 @@ import { DatePickerInput } from '../date-picker_input';
 export type Filters = {
     name: string;
     category_id: string;
-    unit_id: string;
+    accommodation_id: string;
     date: string;
 };
 
@@ -31,7 +32,7 @@ type Option = {
 };
 
 type Props = {
-    units: Unit[];
+    accommodations: Accommodation[];
     categories: ExpenseCategory[];
     filters: Filters;
     open: boolean;
@@ -41,14 +42,14 @@ type Props = {
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props) {
+function ExpenseFilter({ accommodations, categories, filters, open, onOpenChange }: Props) {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
     const { data, setData, get, processing } = useForm<Filters>({
         name: filters.name ?? '',
         category_id: filters.category_id ?? '',
-        unit_id: filters.unit_id ?? '',
+        accommodation_id: filters.accommodation_id ?? '',
         date: filters.date ?? '',
     });
 
@@ -60,22 +61,22 @@ function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props
             })),
         [categories],
     );
-    const unitOptions = useMemo<Option[]>(
+    const accommodationOptions = useMemo<Option[]>(
         () =>
-            units.map((unit) => ({
-                value: unit.id,
-                label: unit.name,
+            accommodations.map((accommodation) => ({
+                value: accommodation.id,
+                label: accommodation.name,
             })),
-        [units],
+        [accommodations],
     );
 
     const selectedCategory =
         categoryOptions.find(
             (option) => String(option.value) === data.category_id,
         ) ?? null;
-    const selectedUnit =
-        unitOptions.find(
-            (option) => String(option.value) === data.unit_id,
+    const selectedAccommodation =
+        accommodationOptions.find(
+            (option) => String(option.value) === data.accommodation_id,
         ) ?? null;
 
     // ────────────────────────────────────────────────
@@ -95,7 +96,7 @@ function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props
         const empty: Filters = {
             name: '',
             category_id: '',
-            unit_id: '',
+            accommodation_id: '',
             date: '',
         };
 
@@ -152,17 +153,17 @@ function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props
 
                             {/* Unit Filter */}
                             <div className="grid gap-2">
-                                <Label>Unité</Label>
+                                <Label>Logement</Label>
                                 <Select
-                                    value={selectedUnit}
+                                    value={selectedAccommodation}
                                     onChange={(option) =>
                                         setData(
-                                            'unit_id',
+                                            'accommodation_id',
                                             option ? String(option.value) : '',
                                         )
                                     }
-                                    options={unitOptions}
-                                    placeholder="Toutes les unités"
+                                    options={accommodationOptions}
+                                    placeholder="Tous les logements"
                                     isClearable
                                 />
                             </div>
@@ -172,7 +173,7 @@ function ExpenseFilter({ units, categories, filters, open, onOpenChange }: Props
                                 <DatePickerInput
                                     id="expense-date"
                                     label="Date"
-                                    defaultValue={data.date}
+                                    selected={data.date ? toDate(data.date) : undefined}
                                     onChange={(date) => setData('date', date)}
                                     placeholder="Choisir une date"
                                     className='h-10'

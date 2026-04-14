@@ -14,7 +14,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { fr } from 'date-fns/locale';
-import Planning, { Props as PlanningProps } from '@/components/planning/plannin';
 import DashboardController from '@/actions/App/Http/Controllers/Dashboard/DashboardController';
 import { BreadcrumbItem } from '@/types';
 
@@ -31,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function Dashboard({ date, view, data }: PlanningProps) {
+export default function Dashboard() {
     // ────────────────────────────────────────────────
     //  States & variables
     // ────────────────────────────────────────────────
@@ -65,14 +64,6 @@ export default function Dashboard({ date, view, data }: PlanningProps) {
             <Suspense fallback={<DashboardSkeleton />}>
                 <DashboardContent month={format(selectedMonth, 'yyyy-MM')} />
             </Suspense>
-
-            {/* Planning */}
-            <Planning
-                date={date}
-                view={view}
-                data={data}
-                className="mt-8"
-            />
         </AppLayout>
     );
 }

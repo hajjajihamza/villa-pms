@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toFormDate } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
-import type { Expense, ExpenseCategory, Unit } from '@/types';
+import type { Expense, ExpenseCategory, Accommodation } from '@/types';
 import { DatePickerInput } from '@/components/date-picker_input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
@@ -40,7 +40,7 @@ type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     categories: ExpenseCategory[];
-    units: Unit[];
+    accommodations: Accommodation[];
     expense?: Expense | null;
 };
 
@@ -50,7 +50,7 @@ type ExpenseFormData = {
     date: string;
     description: string;
     category_id?: number;
-    unit_id?: number;
+    accommodation_id?: number;
 };
 
 // ────────────────────────────────────────────────
@@ -62,13 +62,13 @@ const initialData: ExpenseFormData = {
     date: toFormDate(new Date()),
     description: '',
     category_id: undefined,
-    unit_id: undefined,
+    accommodation_id: undefined,
 };
 
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function ExpenseForm({ open, onOpenChange, categories, units, expense }: Props) {
+export default function ExpenseForm({ open, onOpenChange, categories, accommodations, expense }: Props) {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
@@ -83,20 +83,20 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
     );
 
     // Units options
-    const unitOptions = useMemo<Option[]>(
+    const accommodationOptions = useMemo<Option[]>(
         () =>
-            units.map((unit) => ({
-                value: unit.id,
-                label: unit.name,
+            accommodations.map((accommodation) => ({
+                value: accommodation.id,
+                label: accommodation.name,
             })),
-        [units],
+        [accommodations],
     );
 
     // Form data
     const { data, setData, put, post, processing, errors, reset, clearErrors } = useForm<ExpenseFormData>(initialData);
 
     const selectedCategory = categoryOptions.find((option) => option.value === data.category_id);
-    const selectedUnit = unitOptions.find((option) => option.value === data.unit_id);
+    const selectedAccommodation = accommodationOptions.find((option) => option.value === data.accommodation_id);
 
     // ────────────────────────────────────────────────
     //  Mutation
@@ -157,9 +157,14 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                 date: expense.date ?? toFormDate(new Date()),
                 description: expense.description ?? '',
                 category_id: expense.category_id ?? undefined,
-                unit_id: expense.unit_id ?? undefined,
+                accommodation_id: expense.accommodation_id ?? undefined,
             });
         }
+
+        return () => {
+            reset();
+            clearErrors();
+        };
     }, [open, expense]);
 
     // ────────────────────────────────────────────────
@@ -258,17 +263,17 @@ export default function ExpenseForm({ open, onOpenChange, categories, units, exp
                             </div>
 
                             <div className="sm:col-span-5">
-                                <Label htmlFor="expense-unit">Unite</Label>
+                                <Label htmlFor="expense-accommodation">Logement</Label>
                                 <Select
-                                    inputId="expense-unit"
+                                    inputId="expense-accommodation"
                                     isClearable
                                     className="mt-1"
-                                    options={unitOptions}
-                                    value={selectedUnit}
-                                    onChange={(option) => setData('unit_id', option?.value)}
-                                    placeholder="Choisir une unite"
+                                    options={accommodationOptions}
+                                    value={selectedAccommodation}
+                                    onChange={(option) => setData('accommodation_id', option?.value)}
+                                    placeholder="Choisir un logement"
                                 />
-                                <InputError message={errors.unit_id} />
+                                <InputError message={errors.accommodation_id} />
                             </div>
 
                             <div className="sm:col-span-12">

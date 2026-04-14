@@ -4,13 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class IcalSource extends Model
 {
     /** @var array<int, string> */
     protected $fillable = [
-        'unit_id',
+        'accommodation_id',
         'channel_id',
         'url',
         'last_sync_at',
@@ -20,21 +19,13 @@ class IcalSource extends Model
         'last_sync_at' => 'datetime',
     ];
 
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class);
-    }
-
     public function channel(): BelongsTo
     {
         return $this->belongsTo(Channel::class);
     }
 
-    /**
-     * @return HasMany<IcalReservation, IcalSource>
-     */
-    public function icalReservations(): HasMany
+    public function accommodation(): BelongsTo
     {
-        return $this->hasMany(IcalReservation::class);
+        return $this->belongsTo(Accommodation::class);
     }
 }

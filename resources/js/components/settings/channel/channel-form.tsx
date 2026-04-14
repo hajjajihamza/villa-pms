@@ -101,6 +101,11 @@ export default function ChannelForm({ open, channel, onOpenChange }: Props) {
         }
 
         setData(initialData);
+
+        return () => {
+            reset();
+            clearErrors();
+        };
     }, [open, channel]);
 
     // ────────────────────────────────────────────────
