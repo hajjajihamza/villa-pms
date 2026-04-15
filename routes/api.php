@@ -27,7 +27,7 @@ Route::post('/product-categories', [ProductCategoryApiController::class, 'store'
 // ────────────────────────────────────────────────
 //  Reservations
 // ────────────────────────────────────────────────
-Route::get('/booking-data', [ReservationApiController::class, 'bookingData']);
+Route::get('/reservations/booking-data', [ReservationApiController::class, 'bookingData']);
 Route::get('/reservations/{reservation}', [ReservationApiController::class, 'show']);
 
 // ────────────────────────────────────────────────

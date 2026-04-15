@@ -20,9 +20,11 @@ class ReservationService
      */
     public function getPaginatedReservations(Builder $query, array $filters, int $perPage = 12): LengthAwarePaginator
     {
-        $query->with(['accommodation', 'orders.orderItems', 'mainVisitor'])
+        $query->with(['accommodations', 'orders.orderItems', 'mainVisitor'])
             ->when($filters['accommodation_id'] ?? null, function (Builder $query, int $accommodationId) {
-                $query->where('accommodation_id', $accommodationId);
+                $query->whereHas('accommodations', function (Builder $query) use ($accommodationId) {
+                    $query->where('accommodations.id', $accommodationId);
+                });
             })
             ->when($filters['date_from'] ?? null, function (Builder $query, string $dateFrom) {
                 $query->where('check_in', '>=', $dateFrom);
@@ -65,7 +67,7 @@ class ReservationService
     public function createReservation(array $data): Reservation
     {
         return DB::transaction(function () use ($data) {
-            $accommodation = Accommodation::findOrFail($data['accommodation_id']);
+            $service_price = Accommodation::whereIn('id', $data['accommodation_ids'])->sum('service_price');
 
             $duration = (int) Carbon::parse($data['check_in'])->diffInDays(Carbon::parse($data['check_out']));
             $dailyPrice = (float) $data['total'] / ($duration ?: 1);
@@ -75,15 +77,15 @@ class ReservationService
                 'check_out' => $data['check_out'],
                 'adults' => $data['adults'],
                 'children' => $data['children'],
-                'advance_amount' => $data['advance_amount'],
                 'daily_price' => $dailyPrice,
-                'service_price' => $accommodation->service_price,
+                'service_price' => $service_price,
                 'channel_id' => $data['channel_id'],
-                'accommodation_id' => $accommodation->id,
                 'created_by' => auth()->id(),
             ];
 
             $reservation = Reservation::create($reservationData);
+            
+            $reservation->accommodations()->attach($data['accommodation_ids']);
 
              $reservation->visitors()->create([
                 'full_name' => $data['full_name'],
@@ -102,7 +104,7 @@ class ReservationService
     public function updateReservation(Reservation $reservation, array $data): Reservation
     {
         return DB::transaction(function () use ($reservation, $data) {
-            $accommodation = Accommodation::findOrFail($data['accommodation_id']);
+            $service_price = Accommodation::whereIn('id', $data['accommodation_ids'])->sum('service_price');
 
             $duration = (int) Carbon::parse($data['check_in'])->diffInDays(Carbon::parse($data['check_out']));
             $dailyPrice = (float) $data['total'] / ($duration ?: 1);
@@ -112,11 +114,9 @@ class ReservationService
                 'check_out' => $data['check_out'],
                 'adults' => $data['adults'],
                 'children' => $data['children'],
-                'advance_amount' => $data['advance_amount'],
                 'daily_price' => $dailyPrice,
-                'service_price' => $accommodation->service_price,
+                'service_price' => $service_price,
                 'channel_id' => $data['channel_id'],
-                'accommodation_id' => $accommodation->id,
             ];
 
             $reservation->update($reservationData);
@@ -126,6 +126,8 @@ class ReservationService
                 'phone' => $data['phone'],
                 'country' => $data['country'],
             ]);
+
+            $reservation->accommodations()->sync($data['accommodation_ids']);
 
             return $reservation;
         });

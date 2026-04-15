@@ -75,14 +75,18 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
             onClick={onOpenDetails}
             className="group relative flex flex-col sm:flex-row items-stretch overflow-hidden border-border/50 hover:bg-accent/5 transition-colors cursor-pointer transition hover:-translate-y-1 hover:shadow-lg"
         >
-            {/* Left Color Accent (Vertical on Desktop, Top on Mobile) */}
-            <div
-                className="w-full h-1 sm:w-1.5 sm:h-auto shrink-0"
-                style={{ backgroundColor: reservation.accommodation?.color ?? '#d4d4d8' }}
-            />
+            {/* Color Accent — horizontal on mobile, vertical on desktop */}
+            <div className="flex flex-row gap-0.5 sm:flex-col">
+                {reservation?.accommodations?.map((acc) => (
+                    <div
+                        key={acc.id}
+                        className="h-1 w-full sm:h-full sm:w-1.5"
+                        style={{ backgroundColor: acc.color ?? '#d4d4d8' }}
+                    />
+                ))}
+            </div>
 
             <div className="flex flex-1 flex-col sm:flex-row items-center gap-4 p-3 sm:py-2 sm:px-4">
-
                 {/* 1. Guest & Accommodation Main Info */}
                 <div className="flex flex-1 items-center gap-3 w-full sm:w-auto">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
@@ -93,7 +97,16 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
                             {reservation.main_visitor?.full_name ?? 'Visiteur'}
                         </h4>
                         <p className="truncate text-xs text-muted-foreground">
-                            {reservation.accommodation?.name ?? 'Villa'} • {reservation.adults} Adulte{reservation.children > 0 && ` / ${reservation.children} Enfants`}
+                            {reservation?.accommodations?.map((acc) => (
+                                    <span
+                                        key={acc.id}
+                                        className="text-xs font-medium pb-px border-b mr-2 underline underline-offset-2"
+                                        style={{ color: acc.color ?? '#d4d4d8', borderColor: acc.color ?? '#d4d4d8' }}
+                                    >
+                                        {acc.name}
+                                    </span>
+                                ))}
+                            • {reservation.adults} Adulte{reservation.children > 0 && ` / ${reservation.children} Enfants`}
                         </p>
                     </div>
                 </div>
@@ -130,14 +143,14 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
                 <div className="flex items-center gap-1 border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto justify-end">
                     {!reservation.deleted_at && (
                         <Button
-                        title="Modifier"
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground text-sky-600"
-                        onClick={(e) => handleAction(e, () => onEdit(reservation))}
-                    >
-                        <Edit3 size={14} />
-                    </Button>
+                            title="Modifier"
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground text-sky-600"
+                            onClick={(e) => handleAction(e, () => onEdit(reservation))}
+                        >
+                            <Edit3 size={14} />
+                        </Button>
                     )}
 
                     {reservation.can_validate && reservation.status === 'PENDING' && (

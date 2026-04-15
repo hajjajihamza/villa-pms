@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Accommodation;
 use App\Models\Channel;
 use App\Models\Reservation;
-use App\Models\Unit;
 use Illuminate\Http\JsonResponse;
 
 class ReservationApiController extends Controller
@@ -22,8 +21,7 @@ class ReservationApiController extends Controller
     {
         return response()->json([
             'channels' => Channel::all(),
-            'accommodations' => Accommodation::with('units:id')->get(),
-            'units' => Unit::all()->append('reserved_periods'),
+            'accommodations' => Accommodation::orderBy('name')->get()->append('reserved_periods'),
         ]);
     }
 

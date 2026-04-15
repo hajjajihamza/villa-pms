@@ -20,7 +20,6 @@ return new class extends Migration
             $table->unsignedInteger('adults')->default(1);
             $table->unsignedInteger('children')->default(0);
             $table->boolean('reported')->default(false);
-            $table->decimal('advance_amount', 12, 2)->default(0);
             $table->decimal('daily_price', 12, 2);
             $table->decimal('service_price', 12, 2)->default(0);
             $table->text('deleted_note')->nullable();

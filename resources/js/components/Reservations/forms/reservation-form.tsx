@@ -29,14 +29,13 @@ export type ReservationFormData = {
     check_out: string;
     adults: number;
     children: number;
-    advance_amount: number;
     total: number;
     channel_id?: number;
-    accommodation_id?: number;
     // Visitor info
     full_name: string;
     phone: string;
     country: string;
+    accommodation_ids: number[];
 };
 
 type Props = {
@@ -55,12 +54,11 @@ const initialData: ReservationFormData = {
     adults: 1,
     children: 0,
     total: 0,
-    advance_amount: 0,
     channel_id: undefined,
-    accommodation_id: undefined,
     full_name: '',
     phone: '',
     country: 'MA',
+    accommodation_ids: [],
 };
 
 // ────────────────────────────────────────────────
@@ -91,9 +89,11 @@ export default function ReservationForm({
         const requiredFields = [
             'check_in',
             'check_out',
-            'accommodation_id',
             'channel_id',
         ];
+        if(form.data.accommodation_ids.length === 0){
+            return false;
+        }
         return requiredFields.every(
             (field) => !!form.data[field as keyof ReservationFormData],
         );
@@ -157,13 +157,12 @@ export default function ReservationForm({
                 check_out: reservation.check_out,
                 adults: reservation.adults,
                 children: reservation.children,
-                advance_amount: reservation.advance_amount ?? 0,
                 channel_id: reservation.channel_id,
-                accommodation_id: reservation.accommodation_id,
                 total: reservation.total_price ?? 0,
                 full_name: reservation.main_visitor?.full_name ?? '',
                 phone: reservation.main_visitor?.phone ?? '',
                 country: reservation.main_visitor?.country ?? 'MA',
+                accommodation_ids: reservation.accommodations?.map((a) => a.id) ?? [],
             });
         } else {
             if (defaultDate) {
