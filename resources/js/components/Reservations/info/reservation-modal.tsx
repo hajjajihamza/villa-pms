@@ -17,8 +17,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useReservationDetails } from '@/hooks/use-reservation-details';
-import { formatDateDisplay } from '@/lib/format-date';
 import { formatNumber } from '@/lib/format-number';
 import { cn } from '@/lib/utils';
 import type { Reservation } from '@/types';
@@ -28,6 +26,9 @@ import ReservationInvoice from './reservation-invoice';
 import { VisitorsSection } from './visitors-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { getReservationDetails } from '@/api/reservation';
+import { formatDateDisplay } from '@/lib/format-date';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -66,17 +67,27 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
     const user = usePage().props.auth.user;
 
     // ────────────────────────────────────────────────
+    //  Query
+    // ────────────────────────────────────────────────
+    const { data: reservation } = useQuery<Reservation>({
+        queryKey: ['reservation', reservationId],
+        queryFn: async () => await getReservationDetails(reservationId),
+        suspense: true,
+    });
+
+    if (!reservation) {
+        return;
+    }
+
+    // ────────────────────────────────────────────────
     //  States & variables
     // ────────────────────────────────────────────────
-    const reservation = useReservationDetails(reservationId).data as Reservation; // get reservation details api
-
     const [showInvoice, setShowInvoice] = useState(false);
 
-    const selectedAcc = reservation.accommodation;
     const selectedChannel = reservation.channel;
 
     const housingTotal = reservation.total_price || 0;
-    const invoiceTotal = Number(reservation.amount_to_pay || 0) + Number(reservation.advance_amount || 0);
+    const invoiceTotal = Number(reservation.amount_to_pay || 0);
 
     const commissionRate = selectedChannel?.commission || 0;
     const commissionAmount = (housingTotal * commissionRate) / 100;
@@ -141,14 +152,24 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
                         <Card className="overflow-hidden p-0">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 divide-y divide-border sm:[&>*:nth-child(odd)]:border-r sm:[&>*:nth-child(odd)]:border-border">
 
-                                {/* Hébergement */}
+                                {/* Hébergements */}
                                 <div className="flex items-center gap-3 p-4">
-                                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0" style={{ color: selectedAcc?.color }}>
+                                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                                         <MapPin size={14} />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[0.6rem] font-medium text-muted-foreground uppercase tracking-wider mb-1">Hébergement</p>
-                                        <p className="text-sm font-medium text-foreground truncate">{selectedAcc?.name}</p>
+                                        <p className="text-[0.6rem] font-medium text-muted-foreground uppercase tracking-wider mb-1">Hébergements</p>
+                                        <p className="text-sm font-medium text-foreground truncate">
+                                            {reservation?.accommodations?.map((acc) => (
+                                                <span
+                                                    key={acc.id}
+                                                    className="text-xs font-medium pb-px border-b mr-2 underline underline-offset-2"
+                                                    style={{ color: acc.color ?? '#d4d4d8', borderColor: acc.color ?? '#d4d4d8' }}
+                                                >
+                                                    {acc.name}
+                                                </span>
+                                            ))}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -310,7 +331,7 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
                                         {/* Hébergement row */}
                                         <tr className="bg-muted/30">
                                             <td className="py-3.5 px-4">
-                                                <p className="text-sm font-medium text-foreground">Hébergement — {selectedAcc?.name}</p>
+                                                <p className="text-sm font-medium text-foreground">Hébergements — {reservation.accommodations?.map((acc: any) => acc.name).join(', ')}</p>
                                                 <p className="text-[0.6rem] text-muted-foreground uppercase tracking-wider mt-0.5">
                                                     Séjour de {reservation.duration} {Number(reservation.duration) > 1 ? 'nuits' : 'nuit'}
                                                 </p>
@@ -358,12 +379,12 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
                                     <span className="text-sm font-medium text-foreground">{formatNumber(reservation.total_orders_amount || 0, { endWith: 'DH' })}</span>
                                 </div>
 
-                                <div className="flex justify-between items-center">
+                                {/* <div className="flex justify-between items-center">
                                     <span className="text-[0.6rem] font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Avance</span>
                                     <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
                                         − {formatNumber(reservation.advance_amount, { endWith: 'DH' })}
                                     </span>
-                                </div>
+                                </div> */}
 
                                 {/* Total row */}
                                 <div className="flex items-center justify-between pt-3 border-t border-border">

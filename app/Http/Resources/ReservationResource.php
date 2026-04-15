@@ -28,13 +28,11 @@ class ReservationResource extends JsonResource
             'adults' => $this->adults,
             'children' => $this->children,
             'reported' => $this->reported,
-            'advance_amount' => (float) $this->advance_amount,
             'daily_price' => (float) $this->daily_price,
             'service_price' => (float) $this->service_price,
             'deleted_note' => $this->deleted_note,
             'created_by' => $this->created_by,
             'channel_id' => $this->channel_id,
-            'accommodation_id' => $this->accommodation_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
@@ -48,7 +46,7 @@ class ReservationResource extends JsonResource
             'can_validate' => $this->can_validate,
 
             // Relationships
-            'accommodation' => $this->whenLoaded('accommodation'),
+            'accommodations' => $this->whenLoaded('accommodations'),
             'channel' => $this->whenLoaded('channel'),
             'main_visitor' => new VisitorResource($this->whenLoaded('mainVisitor')),
             'visitors' => VisitorResource::collection($this->whenLoaded('visitors')),

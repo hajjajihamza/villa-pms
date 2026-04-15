@@ -124,7 +124,6 @@ export type Reservation = BaseModel &
         adults: number;
         children: number;
         reported: boolean;
-        advance_amount: number;
         daily_price: number;
         service_price: number;
         deleted_note: string | null;

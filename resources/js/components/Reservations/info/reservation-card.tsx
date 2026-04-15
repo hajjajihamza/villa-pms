@@ -98,14 +98,14 @@ export default function ReservationRowCard({ reservation, onOpenDetails, onEdit 
                         </h4>
                         <p className="truncate text-xs text-muted-foreground">
                             {reservation?.accommodations?.map((acc) => (
-                                    <span
-                                        key={acc.id}
-                                        className="text-xs font-medium pb-px border-b mr-2 underline underline-offset-2"
-                                        style={{ color: acc.color ?? '#d4d4d8', borderColor: acc.color ?? '#d4d4d8' }}
-                                    >
-                                        {acc.name}
-                                    </span>
-                                ))}
+                                <span
+                                    key={acc.id}
+                                    className="text-xs font-medium pb-px border-b mr-2 underline underline-offset-2"
+                                    style={{ color: acc.color ?? '#d4d4d8', borderColor: acc.color ?? '#d4d4d8' }}
+                                >
+                                    {acc.name}
+                                </span>
+                            ))}
                             • {reservation.adults} Adulte{reservation.children > 0 && ` / ${reservation.children} Enfants`}
                         </p>
                     </div>

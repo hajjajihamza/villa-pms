@@ -72,7 +72,6 @@ export default function ReservationInvoice({ reservation, open, onOpenChange }: 
                             <div className="text-right space-y-1">
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Référence</p>
                                 <p className="text-sm font-black">#RES-{reservation.id}</p>
-                                <p className="text-[10px] font-bold text-gray-600">Unité : {reservation.accommodation?.name}</p>
                                 <p className="text-[10px] font-bold text-gray-600">Séjour : {formatDateDisplay(reservation.check_in)} au {formatDateDisplay(reservation.check_out)}</p>
                             </div>
                         </div>
@@ -90,7 +89,7 @@ export default function ReservationInvoice({ reservation, open, onOpenChange }: 
                             <tbody className="divide-y divide-gray-100">
                                 <tr className="text-xs font-bold bg-gray-50">
                                     <td className="py-4">
-                                        <p className="font-black">Hébergement ({reservation.accommodation?.name})</p>
+                                        <p className="font-black">Hébergement ({reservation.accommodations?.map((acc) => acc.name).join(', ')})</p>
                                         <p className="text-[8px] text-gray-400 uppercase">Séjour de {reservation.duration} {Number(reservation.duration) > 1 ? 'nuits' : 'nuit'}</p>
                                     </td>
                                     <td className="py-4 text-center">1</td>
@@ -128,10 +127,10 @@ export default function ReservationInvoice({ reservation, open, onOpenChange }: 
                                     <span>Total Consommations</span>
                                     <span>{formatNumber((reservation.total_orders_amount || 0), { endWith: 'DH' })}</span>
                                 </div>
-                                <div className="flex justify-between items-center text-[10px] font-black text-emerald-600 tracking-widest">
+                                {/* <div className="flex justify-between items-center text-[10px] font-black text-emerald-600 tracking-widest">
                                     <span>Avance</span>
                                     <span>- {formatNumber((reservation.advance_amount || 0), { endWith: 'DH' })}</span>
-                                </div>
+                                </div> */}
                                 <div className="flex justify-between items-center text-sm font-bold text-gray-500 tracking-widest">
                                     <span>Total Brut</span>
                                     <span className="text-black font-black">{formatNumber((reservation.total_price || 0) + (reservation.total_orders_amount || 0), { endWith: 'DH' })}</span>

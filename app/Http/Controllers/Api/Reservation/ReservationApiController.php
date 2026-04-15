@@ -34,7 +34,7 @@ class ReservationApiController extends Controller
     public function show(Reservation $reservation): JsonResponse
     {
         $reservation->load([
-            'accommodation',
+            'accommodations',
             'channel',
             'mainVisitor',
             'visitors.documents',
