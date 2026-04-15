@@ -300,7 +300,7 @@ export default function PlanningGantt({
                         className="flex items-center border-b bg-muted/40 px-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground"
                         style={{ height: metrics.headerHeight }}
                     >
-                        Unites
+                        Hébergements
                     </div>
 
                     {units.map((unit) => (
