@@ -18,17 +18,18 @@ Route::middleware(['auth'])->group(function () {
     // ────────────────────────────────────────────────
     Route::resource('accommodations', AccommodationController::class)
         ->only(['store', 'update', 'destroy']);
+    // ────────────────────────────────────────────────
+    //  iCal Sources
+    // ────────────────────────────────────────────────
+    Route::controller(IcalSourceController::class)->group(function () {
+        Route::post('/accommodations/{accommodation}/ical-sources', 'store')->name('ical-sources.store');
+        Route::delete('/ical-sources/{icalSource}', 'destroy')->name('ical-sources.destroy');
+    });
 
     // ────────────────────────────────────────────────
     //  Channels
     // ────────────────────────────────────────────────
     Route::resource('channels', ChannelController::class)
-        ->only(['store', 'update', 'destroy']);
-
-    // ────────────────────────────────────────────────
-    //  iCal Sources
-    // ────────────────────────────────────────────────
-    Route::resource('ical-sources', IcalSourceController::class)
         ->only(['store', 'update', 'destroy']);
 
     // ────────────────────────────────────────────────

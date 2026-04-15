@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Globe, Link2, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Globe, Link2, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -10,7 +10,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { IcalSource, Unit } from '@/types/models';
+import type { Channel, IcalSource } from '@/types/models';
 import { getIcalSources } from '@/api/ical-source';
 import { Suspense, useState } from 'react';
 import IcalSourceController from '@/actions/App/Http/Controllers/Settings/IcalSourceController';
@@ -24,14 +24,14 @@ import IcalSourceForm from './ical-source-form';
 type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    channelId: number;
-    units: Unit[];
+    accommodationId: number;
+    channels: Channel[];
 };
 
 // ────────────────────────────────────────────────
 //  Sub Component
 // ────────────────────────────────────────────────
-export default function IcalSourceList({ open, onOpenChange, channelId, units }: Props) {
+export default function IcalSourceList({ open, onOpenChange, accommodationId, channels }: Props) {
     // ────────────────────────────────────────────────
     //  Render
     // ────────────────────────────────────────────────
@@ -44,11 +44,11 @@ export default function IcalSourceList({ open, onOpenChange, channelId, units }:
                         <span>Sources iCal</span>
                     </DialogTitle>
                     <DialogDescription>
-                        Gérez les synchronisations iCal pour ce canal.
+                        Gérez les synchronisations iCal pour cet hébergement.
                     </DialogDescription>
                 </DialogHeader>
                 <Suspense fallback={<ICalSourcesSkeleton />}>
-                    <IcalSourceContent channelId={channelId} units={units} />
+                    <IcalSourceContent accommodationId={accommodationId} channels={channels} />
                 </Suspense>
             </DialogContent>
         </Dialog>
@@ -58,26 +58,23 @@ export default function IcalSourceList({ open, onOpenChange, channelId, units }:
 // ────────────────────────────────────────────────
 //  Sub Components
 // ────────────────────────────────────────────────
-function IcalSourceContent({ channelId, units }: { channelId: number, units: Unit[] }) {
+function IcalSourceContent({ accommodationId, channels }: { accommodationId: number, channels: Channel[] }) {
     // ────────────────────────────────────────────────
     //  States & Variables
     // ────────────────────────────────────────────────
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [selectedSource, setSelectedSource] = useState<IcalSource | null>(null); // source to edit
     const queryClient = useQueryClient();
 
     // ────────────────────────────────────────────────
     //  Data Fetching
     // ────────────────────────────────────────────────
     const { data: sources = [] } = useQuery<IcalSource[]>({
-        queryKey: ['ical-sources', channelId],
-        queryFn: async () => await getIcalSources(channelId),
-        enabled: !!channelId, // only fetch when channelId is provided
+        queryKey: ['ical-sources', accommodationId],
+        queryFn: async () => await getIcalSources(accommodationId),
+        enabled: !!accommodationId, // only fetch when accommodationId is provided
         suspense: true,
     });
 
-    const availableUnits = units.filter(u => !sources.find(s => s.unit_id == u.id));
-    
     // ────────────────────────────────────────────────
     //  Handlers
     // ────────────────────────────────────────────────
@@ -86,7 +83,7 @@ function IcalSourceContent({ channelId, units }: { channelId: number, units: Uni
             router.delete(IcalSourceController.destroy(id).url, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    queryClient.resetQueries({ queryKey: ['ical-sources', channelId] });
+                    queryClient.resetQueries({ queryKey: ['ical-sources', accommodationId] });
                 },
             });
         }
@@ -98,8 +95,8 @@ function IcalSourceContent({ channelId, units }: { channelId: number, units: Uni
     return (
         <ScrollArea className="max-h-[60vh] p-3">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-md font-semibold">{selectedSource ? 'Modifier la source iCal' : isFormOpen ? 'Ajoute une source iCal' : 'Les sources iCal'}</h3>
-                {!isFormOpen && availableUnits.length > 0 && (
+                <h3 className="text-md font-semibold">{isFormOpen ? 'Ajoute une source iCal' : 'Les sources iCal'}</h3>
+                {!isFormOpen && (
                     <Button
                         variant="primary"
                         size="sm"
@@ -114,12 +111,10 @@ function IcalSourceContent({ channelId, units }: { channelId: number, units: Uni
             {/* form */}
             {isFormOpen &&
                 <IcalSourceForm
-                    channelId={channelId}
-                    availableUnits={availableUnits}
-                    source={selectedSource}
+                    accommodationId={accommodationId}
+                    channels={channels}
                     onCancel={() => {
                         setIsFormOpen(false);
-                        setSelectedSource(null);
                     }}
                 />
             }
@@ -150,8 +145,8 @@ function IcalSourceContent({ channelId, units }: { channelId: number, units: Uni
                                 {/* Info */}
                                 <div className="flex min-w-0 flex-col gap-1.5">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-sm font-semibold text-foreground">
-                                            {source.unit?.name ?? "N/A"}
+                                        <span className="text-sm font-semibold text-foreground border-b" style={{ color: source.channel?.color ?? '#d4d4d8', borderColor: source.channel?.color ?? '#d4d4d8' }}>
+                                            {source.channel?.name ?? "N/A"}
                                         </span>
                                     </div>
 
@@ -174,18 +169,6 @@ function IcalSourceContent({ channelId, units }: { channelId: number, units: Uni
 
                                 {/* Actions */}
                                 <div className={cn("flex shrink-0 items-center gap-1.5")}>
-                                    <Button
-                                        variant="info"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        title="Modifier"
-                                        onClick={() => {
-                                            setSelectedSource(source);
-                                            setIsFormOpen(true);
-                                        }}
-                                    >
-                                        <Pencil className="h-4 w-4" />
-                                    </Button>
                                     <Button
                                         variant="destructive"
                                         size="icon"

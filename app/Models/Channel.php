@@ -39,11 +39,10 @@ class Channel extends Model
         return $this->hasMany(Reservation::class);
     }
 
-    public function units(): BelongsToMany
+    public function accommodations(): BelongsToMany
     {
-        return $this->belongsToMany(Unit::class, 'ical_sources')
-            ->withPivot('url')
-            ->withTimestamps();
+        return $this->belongsToMany(Accommodation::class, 'ical_sources')
+            ->withPivot('url', 'last_sync_at');
     }
 
     public function icalSources(): HasMany

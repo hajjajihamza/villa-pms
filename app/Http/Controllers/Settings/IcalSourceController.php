@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\IcalSource\StoreIcalSourceRequest;
-use App\Http\Requests\Settings\IcalSource\UpdateIcalSourceRequest;
+use App\Models\Accommodation;
 use App\Models\IcalSource;
 use Illuminate\Http\RedirectResponse;
 
@@ -13,21 +13,16 @@ class IcalSourceController extends Controller
     /**
      * Store a newly created iCal source in storage.
      */
-    public function store(StoreIcalSourceRequest $request): RedirectResponse
+    public function store(StoreIcalSourceRequest $request, Accommodation $accommodation): RedirectResponse
     {
-        IcalSource::create($request->validated());
+        $data = $request->validated();
+        $accommodation->channels()->syncWithoutDetaching([
+            $data['channel_id'] => [
+                'url' => $data['url']
+            ]
+        ]);
 
         return back()->with('success', 'Source iCal ajoutée avec succès.');
-    }
-
-    /**
-     * Update the specified iCal source in storage.
-     */
-    public function update(UpdateIcalSourceRequest $request, IcalSource $icalSource): RedirectResponse
-    {
-        $icalSource->update($request->validated());
-
-        return back()->with('success', 'Source iCal mise à jour avec succès.');
     }
 
     /**

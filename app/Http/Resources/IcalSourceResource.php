@@ -17,8 +17,8 @@ class IcalSourceResource extends JsonResource
         return [
             'id' => $this->id,
             'channel_id' => $this->channel_id,
-            'unit_id' => $this->unit_id,
-            'unit' => $this->whenLoaded('unit'),
+            'accommodation_id' => $this->accommodation_id,
+            'channel' => $this->whenLoaded('channel'),
             'url' => $this->url,
             'last_sync_at' => $this->last_sync_at,
         ];

@@ -76,7 +76,7 @@ export default function SettingsIndex({ accommodations, channels }: SettingsPage
 
                 {/* Accommodations Tab Content */}
                 <TabsContent value="accommodations" className="mt-0 outline-none">
-                    <AccommodationTable accommodations={accommodations} />
+                    <AccommodationTable accommodations={accommodations} channels={channels} />
                 </TabsContent>
 
                 {/* Channels Tab Content */}

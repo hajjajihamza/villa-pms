@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { Baby, Home, Pencil, Plus, Trash2, Users } from 'lucide-react';
+import { Baby, Globe, Home, Pencil, Plus, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
 import AccommodationController from '@/actions/App/Http/Controllers/Settings/AccommodationController';
 import AccommodationForm from '@/components/settings/accommodation/accommodation-form';
@@ -8,25 +8,29 @@ import { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatNumber } from '@/lib/format-number';
-import type { Accommodation } from '@/types';
+import type { Accommodation, Channel } from '@/types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import IcalSourceList from './ical-source-list';
 
 // ────────────────────────────────────────────────
 //  Types
 // ────────────────────────────────────────────────
 type Props = {
     accommodations: Accommodation[];
+    channels: Channel[];
 };
 
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function AccommodationTable({ accommodations }: Props) {
+export default function AccommodationTable({ accommodations, channels }: Props) {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
     const [open, setOpen] = useState(false); // dialog open
     const [selected, setSelected] = useState<Accommodation | null>(null); // object to edit
+    // iCal List State
+    const [selectedIcalAccommodationId, setSelectedIcalAccommodationId] = useState<number | null>(null);
     const isMobile = useIsMobile();
 
     // ────────────────────────────────────────────────
@@ -131,6 +135,7 @@ export default function AccommodationTable({ accommodations }: Props) {
                                             <ActionButtons
                                                 onEdit={() => openEdit(acc)}
                                                 onDelete={() => remove(acc)}
+                                                onIcal={() => setSelectedIcalAccommodationId(acc.id)}
                                             />
                                         </div>
                                     </TableCell>
@@ -183,6 +188,7 @@ export default function AccommodationTable({ accommodations }: Props) {
                                 <ActionButtons
                                     onEdit={() => openEdit(acc)}
                                     onDelete={() => remove(acc)}
+                                    onIcal={() => setSelectedIcalAccommodationId(acc.id)}
                                 />
                             </div>
 
@@ -221,6 +227,15 @@ export default function AccommodationTable({ accommodations }: Props) {
                 accommodation={selected}
                 onOpenChange={setOpen}
             />
+
+            {selectedIcalAccommodationId && (
+                <IcalSourceList 
+                    open={!!selectedIcalAccommodationId}
+                    onOpenChange={(isOpen) => !isOpen && setSelectedIcalAccommodationId(null)}
+                    accommodationId={selectedIcalAccommodationId}
+                    channels={channels}
+                />
+            )}
         </Card>
     );
 }
@@ -238,9 +253,18 @@ function ColorBadge({ color }: { color?: string }) {
     );
 }
 
-function ActionButtons({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
+function ActionButtons({ onEdit, onDelete, onIcal }: { onEdit: () => void; onDelete: () => void; onIcal: () => void }) {
     return (
         <div className="flex justify-end gap-2">
+            <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                onClick={onIcal}
+                title="Sources iCal"
+            >
+                <Globe className="h-4 w-4" />
+            </Button>
             <Button
                 variant="info"
                 size="icon"

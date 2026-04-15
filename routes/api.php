@@ -38,11 +38,11 @@ Route::patch('/order-items/{orderItem}', [OrderApiController::class, 'updateItem
 Route::delete('/order-items/{orderItem}', [OrderApiController::class, 'destroyItem']);
 
 // ────────────────────────────────────────────────
+//  iCal Sources
+// ────────────────────────────────────────────────
+Route::get('/accommodations/{accommodation}/ical-sources', [IcalSourceApiController::class, 'index']);
+
+// ────────────────────────────────────────────────
 //  Statistics
 // ────────────────────────────────────────────────
 Route::get('/statistics/dashboard', [DashboardStatisticsApiController::class, 'index']);
-
-// ────────────────────────────────────────────────
-//  iCal Sources
-// ────────────────────────────────────────────────
-Route::get('/{channel}/ical-sources', [IcalSourceApiController::class, 'index']);

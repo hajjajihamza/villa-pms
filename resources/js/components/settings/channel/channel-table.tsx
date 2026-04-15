@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { Pencil, Plus, Trash2, Percent, Globe } from 'lucide-react';
+import { Pencil, Plus, Trash2, Percent } from 'lucide-react';
 import { useState } from 'react';
 import ChannelController from '@/actions/App/Http/Controllers/Settings/ChannelController';
 import ChannelForm from '@/components/settings/channel/channel-form';
@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/table';
 import { formatNumber } from '@/lib/format-number';
 import type { Channel } from '@/types';
-import IcalSourceList from './ical-source-list';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 // ────────────────────────────────────────────────
@@ -36,16 +35,13 @@ type Props = {
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function ChannelTable({ channels }: Props) {
+export default function kChannelTable({ channels }: Props) {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
     const [open, setOpen] = useState(false); // form dialog open
     const [selected, setSelected] = useState<Channel | null>(null); // object to edit
     const isMobile = useIsMobile();
-
-    // iCal List State
-    const [selectedIcalChannelId, setSelectedIcalChannelId] = useState<number | null>(null);
 
     // ────────────────────────────────────────────────
     //  Handlers
@@ -130,7 +126,6 @@ export default function ChannelTable({ channels }: Props) {
                                             <ActionButtons
                                                 onEdit={() => openEdit(channel)}
                                                 onDelete={() => remove(channel)}
-                                                onIcal={() => setSelectedIcalChannelId(channel.id)}
                                             />
                                         </div>
                                     </TableCell>
@@ -174,7 +169,6 @@ export default function ChannelTable({ channels }: Props) {
                                     <ActionButtons
                                         onEdit={() => openEdit(channel)}
                                         onDelete={() => remove(channel)}
-                                        onIcal={() => setSelectedIcalChannelId(channel.id)}
                                     />
                                 </div>
 
@@ -204,14 +198,6 @@ export default function ChannelTable({ channels }: Props) {
                 channel={selected}
                 onOpenChange={setOpen}
             />
-
-            {/* {selectedIcalChannelId && (
-                <IcalSourceList 
-                    open={!!selectedIcalChannelId}
-                    onOpenChange={(isOpen) => !isOpen && setSelectedIcalChannelId(null)}
-                    channelId={selectedIcalChannelId}
-                />
-            )} */}
         </Card>
     );
 }
@@ -232,23 +218,12 @@ function ColorBadge({ color }: { color?: string }) {
 function ActionButtons({
     onEdit,
     onDelete,
-    onIcal,
 }: {
     onEdit: () => void;
     onDelete: () => void;
-    onIcal: () => void;
 }) {
     return (
         <div className="flex justify-end gap-2 text-right">
-            <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
-                onClick={onIcal}
-                title="Sources iCal"
-            >
-                <Globe className="h-4 w-4" />
-            </Button>
             <Button
                 variant="info"
                 size="icon"

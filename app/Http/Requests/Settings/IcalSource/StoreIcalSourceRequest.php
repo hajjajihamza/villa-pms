@@ -23,12 +23,6 @@ class StoreIcalSourceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'unit_id' => [
-                'required',
-                'exists:units,id',
-                \Illuminate\Validation\Rule::unique('ical_sources')
-                    ->where('channel_id', $this->channel_id)
-            ],
             'channel_id' => ['required', 'exists:channels,id'],
             'url' => ['required', 'url'],
         ];

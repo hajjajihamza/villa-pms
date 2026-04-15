@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 
 class Accommodation extends Model
 {
@@ -47,6 +46,12 @@ class Accommodation extends Model
         return $this->belongsToMany(Reservation::class, 'accommodation_reservation');
     }
 
+    public function channels(): BelongsToMany
+    {
+        return $this->belongsToMany(Channel::class, 'ical_sources')
+            ->withPivot('url', 'last_sync_at');
+    }
+
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
@@ -65,7 +70,7 @@ class Accommodation extends Model
                 ->select('check_in', 'check_out')
                 ->where('check_in', '>=', $date)
                 ->get()
-                ->map(fn($data) => [
+                ->map(fn ($data) => [
                     'check_in' => $data->check_in->format('Y-m-d'),
                     'check_out' => $data->check_out->format('Y-m-d'),
                 ])

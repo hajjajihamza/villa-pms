@@ -8,33 +8,29 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import type { IcalSource, Unit } from '@/types';
+import type { Channel, IcalSource } from '@/types';
 import IcalSourceController from '@/actions/App/Http/Controllers/Settings/IcalSourceController';
 
 // ────────────────────────────────────────────────
 //  Types
 // ────────────────────────────────────────────────
 type Props = {
-    channelId: number;
-    availableUnits: Unit[];
-    source?: IcalSource | null;
+    accommodationId: number;
+    channels: Channel[];
     onCancel: () => void;
 };
 
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function IcalSourceForm({ channelId, availableUnits, source, onCancel }: Props) {
+export default function IcalSourceForm({ accommodationId, channels, onCancel }: Props) {
     // ────────────────────────────────────────────────
     //  State & Variables
     // ────────────────────────────────────────────────
-    const isEditing = !!source;
     const queryClient = useQueryClient();
 
     // inertia form
-    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm<Partial<IcalSource>>({
-        channel_id: channelId,
-    });
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm<Partial<IcalSource>>();
 
     // ────────────────────────────────────────────────
     //  Handlers
@@ -42,33 +38,18 @@ export default function IcalSourceForm({ channelId, availableUnits, source, onCa
     const handleSubmit = (e: SubmitEvent) => {
         e.preventDefault();
 
-        const options = {
+        post(IcalSourceController.store(accommodationId).url, {
             preserveScroll: true,
             onSuccess: () => {
-                queryClient.resetQueries({ queryKey: ['ical-sources', channelId] });
+                queryClient.resetQueries({ queryKey: ['ical-sources', accommodationId] });
                 onCancel();
             },
-        };
-
-        if (isEditing && source) {
-            put(IcalSourceController.update(source.id).url, options);
-        } else {
-            post(IcalSourceController.store().url, options);
-        }
+        });
     };
 
     // ────────────────────────────────────────────────
     //  Effects
     // ────────────────────────────────────────────────
-    useEffect(() => {
-        if (isEditing && source) {
-            setData({
-                unit_id: source.unit_id,
-                url: source.url,
-                channel_id: channelId,
-            });
-        }
-    }, [isEditing, source]);
 
     useEffect(() => {
         return () => {
@@ -84,23 +65,23 @@ export default function IcalSourceForm({ channelId, availableUnits, source, onCa
         <form onSubmit={handleSubmit} className='mb-2'>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div className="space-y-2">
-                    <Label className="text-[13px] font-medium">Unité</Label>
+                    <Label className="text-[13px] font-medium">Canal</Label>
                     <Select
-                        value={data.unit_id?.toString()}
-                        onValueChange={(value) => setData('unit_id', Number(value))}
+                        value={(data.channel_id)?.toString()}
+                        onValueChange={(value) => setData('channel_id', Number(value))}
                     >
-                        <SelectTrigger className={cn('w-full', errors.unit_id && 'border-destructive')}>
-                            <SelectValue placeholder="Sélectionner une unité" />
+                        <SelectTrigger className={cn('w-full', errors.channel_id && 'border-destructive')}>
+                            <SelectValue placeholder="Sélectionner un canal" />
                         </SelectTrigger>
                         <SelectContent>
-                            {availableUnits.map((unit) => (
-                                <SelectItem key={unit.id} value={unit.id.toString()}>
-                                    {unit.name}
+                            {channels.map((channel) => (
+                                <SelectItem key={channel.id} value={channel.id.toString()}>
+                                    {channel.name}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
-                    <InputError message={errors.unit_id} />
+                    <InputError message={errors.channel_id} />
                 </div>
 
                 <div className="space-y-2">
@@ -137,7 +118,7 @@ export default function IcalSourceForm({ channelId, availableUnits, source, onCa
                     ) : (
                         <>
                             <Save size={12} className="mr-1.5" />
-                            {isEditing ? 'Mettre à jour' : 'Ajouter'}
+                            Ajouter
                         </>
                     )}
                 </Button>
