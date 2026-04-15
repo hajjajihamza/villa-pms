@@ -21,6 +21,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import { PlanningUnit } from './plannin';
+import { Channel } from '@/types';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -55,6 +56,7 @@ type ReservationTask = {
     nights: number;
     accommodationName: string;
     is_external: boolean;
+    channel?: Channel;
 };
 
 // ────────────────────────────────────────────────
@@ -172,14 +174,15 @@ function createReservationTasks(
                     reservationId: reservation.id,
                     guestName: reservation.main_visitor?.full_name || 'Visiteur inconnu',
                     unitIndex,
-                    color: reservation.accommodation?.color || '#0f766e',
+                    color: unit.color || '#0f766e',
                     start: reservationStart,
                     end: reservationEnd,
                     left,
                     width: right - left,
                     nights: Math.max(differenceInCalendarDays(reservationEnd, reservationStart), 1),
                     accommodationName: reservation.accommodation?.name || unit.name,
-                    is_external: reservation?.is_external ?? false
+                    is_external: reservation?.is_external ?? false,
+                    channel: reservation.channel
                 },
             ];
         }),
@@ -307,7 +310,7 @@ export default function PlanningGantt({
                             style={{ height: metrics.rowHeight }}
                         >
                             <div className="min-w-0">
-                                <p className="truncate">{unit.name}</p>
+                                <p className="truncate border-b" style={{ color: unit.color ?? '#d4d4d8', borderColor: unit.color ?? '#d4d4d8' }}>{unit.name}</p>
                                 <p className="text-xs font-medium text-muted-foreground">
                                     {unit.reservations.length} reservation{unit.reservations.length > 1 ? 's' : ''}
                                 </p>
@@ -389,6 +392,9 @@ export default function PlanningGantt({
                                         <span className="text-[11px] font-semibold text-foreground">
                                             {capitalize(task.guestName)}
                                         </span>
+                                        <div className="gap-1.5 font-mono text-[9px] font-bold text-white rounded-full px-2" style={{ backgroundColor: task.channel?.color ?? "#000" }}>
+                                            {task.channel?.name}
+                                        </div>
                                     </button>
                                 </TooltipTrigger>
 

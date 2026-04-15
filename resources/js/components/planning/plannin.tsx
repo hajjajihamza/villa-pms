@@ -9,8 +9,8 @@ import ReservationModal from '@/components/Reservations/info/reservation-modal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { Reservation } from '@/types';
-import DashboardController from '@/actions/App/Http/Controllers/Dashboard/DashboardController';
 import IcalController from '@/actions/App/Http/Controllers/Ical/IcalController';
+import PlanningController from '@/actions/App/Http/Controllers/Reservation/PlanningController';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -18,6 +18,7 @@ import IcalController from '@/actions/App/Http/Controllers/Ical/IcalController';
 export type PlanningUnit = {
     id: number;
     name: string;
+    color: string;
     reservations: Reservation[];
 };
 
@@ -47,7 +48,7 @@ export default function Planning({ date, view, data, className }: Props & { clas
     // ────────────────────────────────────────────────
     const navigateToDate = (newDate: Date, newView?: string) => {
         router.get(
-            DashboardController.index().url,
+            PlanningController.index().url,
             {
                 date: format(newDate, 'yyyy-MM-dd'),
                 view: newView || view,
@@ -158,7 +159,7 @@ export default function Planning({ date, view, data, className }: Props & { clas
             <Card className="flex flex-1 flex-col overflow-hidden border-0 bg-white py-0 shadow-sm dark:bg-dark-surface/50">
                 {data.length === 0 ? (
                     <div className="flex-1 p-8 text-center font-bold uppercase tracking-widest text-gray-500">
-                        Aucune unite disponible.
+                        Aucune Hébergement disponible.
                     </div>
                 ) : (
                     <PlanningGantt
