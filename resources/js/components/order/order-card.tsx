@@ -55,7 +55,7 @@ export default function OrderCard({
                                     <div className="flex items-center gap-1 min-w-0">
                                         <User size={14} className="text-gray-400 shrink-0" />
                                         <span className="font-medium truncate max-w-[120px] sm:max-w-none">
-                                            {order.reservation?.main_visitor?.full_name || 'Client Direct'}
+                                            {order.reservation ? order.reservation?.main_visitor?.full_name ?? 'Client Inconnu' : 'Client Direct'}
                                         </span>
                                     </div>
                                     {!isMobile && order.reservation?.accommodation?.name && (
