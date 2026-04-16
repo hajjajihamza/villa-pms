@@ -31,6 +31,7 @@ class Reservation extends Model
 
     /** @var array<int, string> */
     protected $fillable = [
+        'uid',
         'check_in',
         'check_out',
         'real_check_in',

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('reservations', function (Blueprint $table): void {
             $table->id();
+            $table->string('uid')->unique()->nullable();
             $table->date('check_in');
             $table->date('check_out');
             $table->dateTime('real_check_in')->nullable();

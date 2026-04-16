@@ -42,6 +42,7 @@ export default function Planning({ date, view, data, className }: Props & { clas
     const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [defaultDate, setDefaultDate] = useState<string | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
 
     // ────────────────────────────────────────────────
     //  Handlers
@@ -102,10 +103,18 @@ export default function Planning({ date, view, data, className }: Props & { clas
                     {/* refresh button */}
                     <Button
                         variant="outline-info"
-                        onClick={() => router.get(IcalController.sync().url)}
+                        onClick={() => router.get(IcalController.sync().url, {}, {
+                            onStart: () => setIsSyncing(true),
+                            onFinish: () => setIsSyncing(false),
+                        })}
+                        disabled={isSyncing}
                     >
-                        <RefreshCcw className="h-4 w-4" />
-                        Actualiser
+                        {isSyncing ? (
+                            <RefreshCcw className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <RefreshCcw className="h-4 w-4" />
+                        )}
+                        {isSyncing ? 'Actualisation...' : 'Actualiser'}
                     </Button>
 
                     <div className="flex w-full items-center rounded-lg border bg-muted p-1 shadow-sm md:w-fit">

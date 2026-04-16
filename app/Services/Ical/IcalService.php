@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Services\Ical;
 
-use App\Models\IcalReservation;
+use App\Enums\RoleEnum;
 use App\Models\IcalSource;
-use Illuminate\Support\Facades\DB;
-use Sabre\VObject\Reader;
+use App\Models\Reservation;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Sabre\VObject\Reader;
 
 class IcalService
 {
     public function syncAll(): void
     {
         $sources = IcalSource::query()
-            ->with(['unit', 'channel', 'icalReservations'])
+            ->with(['accommodation', 'channel'])
             ->get();
 
         foreach ($sources as $source) {
@@ -32,7 +33,7 @@ class IcalService
                 if ($response->successful()) {
                     $this->syncFromContent($response->body(), $source);
                 } else {
-                    Log::error("Failed to fetch iCal for iCal source : channel:{$source->channel->name}: | unit:{$sources->unit->name} | url:{$sources->url}: HTTP {$response->status()}");
+                    Log::error("Failed to fetch iCal for iCal source : channel:{$source->channel->name}: | accommodation:{$source->accommodation->name} | url:{$source->url}: HTTP {$response->status()}");
                 }
             } catch (\Exception $e) {
                 Log::error("Error syncing iCal for source : {$source->id}: {$e->getMessage()}");
@@ -52,26 +53,43 @@ class IcalService
             $dtstart = $event->DTSTART->getDateTime();
             $dtend = $event->DTEND->getDateTime();
 
-            $existingReservation = IcalReservation::query()
+            $accommodation = $source->accommodation;
+
+            // existing reservation by uid
+            $existingReservationByUid = Reservation::query()
                 ->where('uid', $uid)
-                ->orWhere(DB::raw('DATE_FORMAT(dtstart, "%Y-%m-%d")'), $dtstart->format('Y-m-d'))
-                ->orWhere(DB::raw('DATE_FORMAT(dtend, "%Y-%m-%d")'), $dtend->format('Y-m-d'))
                 ->first();
 
-            if ($existingReservation) {
-                $existingReservation->update([
-                    'dtstart' => $dtstart->format('Y-m-d H:i:s'),
-                    'dtend' => $dtend->format('Y-m-d H:i:s'),
-                    'ical_source_id' => $source->id,
+            if ($existingReservationByUid) {
+                $existingReservationByUid->update([
+                    'check_in' => $dtstart->format('Y-m-d'),
+                    'check_out' => $dtend->format('Y-m-d'),
                 ]);
-            } else {
-                IcalReservation::create([
-                    'uid' => $uid,
-                    'dtstart' => $dtstart->format('Y-m-d H:i:s'),
-                    'dtend' => $dtend->format('Y-m-d H:i:s'),
-                    'ical_source_id' => $source->id,
-                ]);
+
+                continue;
             }
+
+            // existing reservation by date interval overlap
+            $existingReservationByDate = Reservation::query()
+                ->where('check_in', '<', $dtend->format('Y-m-d'))
+                ->where('check_out', '>', $dtstart->format('Y-m-d'))
+                ->first();
+
+            if ($existingReservationByDate) {
+                continue;
+            }
+
+            $reservation = Reservation::create([
+                'uid' => $uid,
+                'channel_id' => $source->channel_id,
+                'check_in' => $dtstart->format('Y-m-d'),
+                'check_out' => $dtend->format('Y-m-d'),
+                'daily_price' => $accommodation->daily_price,
+                'service_price' => $accommodation->service_price,
+                'created_by' => User::where('role', RoleEnum::ADMIN->value)->first()->id,
+            ]);
+
+            $accommodation->reservations()->attach($reservation->id);
 
             $source->update(['last_sync_at' => now()]);
         }

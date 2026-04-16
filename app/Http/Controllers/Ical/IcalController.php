@@ -14,13 +14,10 @@ class IcalController extends Controller
         protected IcalService $icalService
     ) {}
 
-    /**
-     * Synchronize iCal reservations from all channels.
-     */
     public function sync(): RedirectResponse
     {
         $this->icalService->syncAll();
 
-        return redirect()->route('dashboard')->with('success', 'Synchronisation iCal terminée.');
+        return redirect()->route('planning.index')->with('success', 'Synchronisation iCal terminée.');
     }
 }
