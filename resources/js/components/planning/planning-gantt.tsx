@@ -414,6 +414,9 @@ export default function PlanningGantt({
                                         <p className="text-xs text-muted-foreground">
                                             {task.nights} nuit{task.nights > 1 ? 's' : ''}
                                         </p>
+                                        <div className="gap-1.5 font-mono text-[9px] font-bold text-white rounded-full px-2 text-center" style={{ backgroundColor: task.channel?.color ?? "#000" }}>
+                                            {task.channel?.name}
+                                        </div>
                                     </div>
                                 </TooltipContent>
                             </Tooltip>
