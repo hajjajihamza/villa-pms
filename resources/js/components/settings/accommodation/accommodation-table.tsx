@@ -30,7 +30,7 @@ export default function AccommodationTable({ accommodations, channels }: Props) 
     const [open, setOpen] = useState(false); // dialog open
     const [selected, setSelected] = useState<Accommodation | null>(null); // object to edit
     // iCal List State
-    const [selectedIcalAccommodationId, setSelectedIcalAccommodationId] = useState<number | null>(null);
+    const [selectedIcalAccommodation, setSelectedIcalAccommodation] = useState<Accommodation | null>(null);
     const isMobile = useIsMobile();
 
     // ────────────────────────────────────────────────
@@ -135,7 +135,7 @@ export default function AccommodationTable({ accommodations, channels }: Props) 
                                             <ActionButtons
                                                 onEdit={() => openEdit(acc)}
                                                 onDelete={() => remove(acc)}
-                                                onIcal={() => setSelectedIcalAccommodationId(acc.id)}
+                                                onIcal={() => setSelectedIcalAccommodation(acc)}
                                             />
                                         </div>
                                     </TableCell>
@@ -188,7 +188,7 @@ export default function AccommodationTable({ accommodations, channels }: Props) 
                                 <ActionButtons
                                     onEdit={() => openEdit(acc)}
                                     onDelete={() => remove(acc)}
-                                    onIcal={() => setSelectedIcalAccommodationId(acc.id)}
+                                    onIcal={() => setSelectedIcalAccommodation(acc)}
                                 />
                             </div>
 
@@ -228,11 +228,11 @@ export default function AccommodationTable({ accommodations, channels }: Props) 
                 onOpenChange={setOpen}
             />
 
-            {selectedIcalAccommodationId && (
+            {selectedIcalAccommodation && (
                 <IcalSourceList 
-                    open={!!selectedIcalAccommodationId}
-                    onOpenChange={(isOpen) => !isOpen && setSelectedIcalAccommodationId(null)}
-                    accommodationId={selectedIcalAccommodationId}
+                    open={!!selectedIcalAccommodation}
+                    onOpenChange={(isOpen) => !isOpen && setSelectedIcalAccommodation(null)}
+                    accommodation={selectedIcalAccommodation}
                     channels={channels}
                 />
             )}

@@ -17,6 +17,10 @@ class VisitorService
      */
     public function storeVisitor(array $data, Reservation $reservation): Visitor
     {
+        if ($reservation->visitors()->count() == 0) {
+            $data['is_main'] = true;
+        }
+        
         return $reservation->visitors()->create($data);
     }
 

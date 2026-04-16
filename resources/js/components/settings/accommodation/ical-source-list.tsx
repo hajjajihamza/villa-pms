@@ -10,7 +10,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Channel, IcalSource } from '@/types/models';
+import type { Accommodation, Channel, IcalSource } from '@/types/models';
 import { getIcalSources } from '@/api/ical-source';
 import { Suspense, useState } from 'react';
 import IcalSourceController from '@/actions/App/Http/Controllers/Settings/IcalSourceController';
@@ -24,14 +24,14 @@ import IcalSourceForm from './ical-source-form';
 type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    accommodationId: number;
+    accommodation: Accommodation;
     channels: Channel[];
 };
 
 // ────────────────────────────────────────────────
 //  Sub Component
 // ────────────────────────────────────────────────
-export default function IcalSourceList({ open, onOpenChange, accommodationId, channels }: Props) {
+export default function IcalSourceList({ open, onOpenChange, accommodation, channels }: Props) {
     // ────────────────────────────────────────────────
     //  Render
     // ────────────────────────────────────────────────
@@ -41,14 +41,14 @@ export default function IcalSourceList({ open, onOpenChange, accommodationId, ch
                 <DialogHeader className="border-b px-6 py-4">
                     <DialogTitle className="flex items-center gap-2">
                         <Globe className="h-5 w-5 text-primary" />
-                        <span>Sources iCal</span>
+                        <span>Sources iCal de {accommodation.name}</span>
                     </DialogTitle>
                     <DialogDescription>
                         Gérez les synchronisations iCal pour cet hébergement.
                     </DialogDescription>
                 </DialogHeader>
                 <Suspense fallback={<ICalSourcesSkeleton />}>
-                    <IcalSourceContent accommodationId={accommodationId} channels={channels} />
+                    <IcalSourceContent accommodation={accommodation} channels={channels} />
                 </Suspense>
             </DialogContent>
         </Dialog>
@@ -58,7 +58,7 @@ export default function IcalSourceList({ open, onOpenChange, accommodationId, ch
 // ────────────────────────────────────────────────
 //  Sub Components
 // ────────────────────────────────────────────────
-function IcalSourceContent({ accommodationId, channels }: { accommodationId: number, channels: Channel[] }) {
+function IcalSourceContent({ accommodation, channels }: { accommodation: Accommodation, channels: Channel[] }) {
     // ────────────────────────────────────────────────
     //  States & Variables
     // ────────────────────────────────────────────────
@@ -69,9 +69,9 @@ function IcalSourceContent({ accommodationId, channels }: { accommodationId: num
     //  Data Fetching
     // ────────────────────────────────────────────────
     const { data: sources = [] } = useQuery<IcalSource[]>({
-        queryKey: ['ical-sources', accommodationId],
-        queryFn: async () => await getIcalSources(accommodationId),
-        enabled: !!accommodationId, // only fetch when accommodationId is provided
+        queryKey: ['ical-sources', accommodation.id],
+        queryFn: async () => await getIcalSources(accommodation.id),
+        enabled: !!accommodation.id, // only fetch when accommodationId is provided
         suspense: true,
     });
 
@@ -83,7 +83,7 @@ function IcalSourceContent({ accommodationId, channels }: { accommodationId: num
             router.delete(IcalSourceController.destroy(id).url, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    queryClient.resetQueries({ queryKey: ['ical-sources', accommodationId] });
+                    queryClient.resetQueries({ queryKey: ['ical-sources', accommodation.id] });
                 },
             });
         }
@@ -111,7 +111,7 @@ function IcalSourceContent({ accommodationId, channels }: { accommodationId: num
             {/* form */}
             {isFormOpen &&
                 <IcalSourceForm
-                    accommodationId={accommodationId}
+                    accommodationId={accommodation.id}
                     channels={channels}
                     onCancel={() => {
                         setIsFormOpen(false);

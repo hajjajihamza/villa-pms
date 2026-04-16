@@ -7,7 +7,7 @@ import ProfileForm from '@/components/settings/account/Profile-form';
 import ChannelTable from '@/components/settings/channel/channel-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
-import type { Accommodation, BreadcrumbItem, Channel, Unit } from '@/types';
+import type { Accommodation, BreadcrumbItem, Channel } from '@/types';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -15,7 +15,6 @@ import type { Accommodation, BreadcrumbItem, Channel, Unit } from '@/types';
 type SettingsPageProps = {
     accommodations: Accommodation[];
     channels: Channel[];
-    units: Unit[];
 };
 
 // ────────────────────────────────────────────────
