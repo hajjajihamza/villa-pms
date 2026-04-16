@@ -8,6 +8,7 @@ use App\Enums\RoleEnum;
 use App\Models\IcalSource;
 use App\Models\Reservation;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Sabre\VObject\Reader;
@@ -50,36 +51,23 @@ class IcalService
 
         foreach ($vcalendar->VEVENT as $event) {
             $uid = (string) $event->UID;
-            $dtstart = $event->DTSTART->getDateTime();
-            $dtend = $event->DTEND->getDateTime();
+            $dtstart = Carbon::parse($event->DTSTART->getDateTime());
+            $dtend = Carbon::parse($event->DTEND->getDateTime());
 
             $accommodation = $source->accommodation;
 
-            // existing reservation by uid
-            $existingReservationByUid = Reservation::query()
-                ->where('uid', $uid)
-                ->first();
-
-            if ($existingReservationByUid) {
-                $existingReservationByUid->update([
-                    'check_in' => $dtstart->format('Y-m-d'),
-                    'check_out' => $dtend->format('Y-m-d'),
-                ]);
-
-                continue;
-            }
-
-            // existing reservation by date interval overlap
-            $existingReservationByDate = Reservation::query()
+            // existing reservation by date interval overlap or uid
+            $existingReservation = Reservation::query()
                 ->where('check_in', '<', $dtend->format('Y-m-d'))
                 ->where('check_out', '>', $dtstart->format('Y-m-d'))
+                ->orWhere('uid', $uid)
                 ->first();
 
-            if ($existingReservationByDate) {
+            if ($existingReservation) {
                 continue;
             }
 
-            $reservation = Reservation::create([
+            $data = [
                 'uid' => $uid,
                 'channel_id' => $source->channel_id,
                 'check_in' => $dtstart->format('Y-m-d'),
@@ -87,7 +75,14 @@ class IcalService
                 'daily_price' => $accommodation->daily_price,
                 'service_price' => $accommodation->service_price,
                 'created_by' => User::where('role', RoleEnum::ADMIN->value)->first()->id,
-            ]);
+            ];
+
+            if ($dtstart->lt(now())) {
+                $data['real_check_in'] = $dtstart->format('Y-m-d');
+                $data['real_check_out'] = $dtend->format('Y-m-d');
+            }
+
+            $reservation = Reservation::create($data);
 
             $accommodation->reservations()->attach($reservation->id);
 

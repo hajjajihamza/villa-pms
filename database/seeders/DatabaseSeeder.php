@@ -54,6 +54,30 @@ class DatabaseSeeder extends Seeder
 
         Accommodation::insert($accommodationsData);
 
+        $booking = Channel::where('name', 'Booking')->first();
+        $airbnb = Channel::where('name', 'Airbnb')->first();
+
+        $villa = Accommodation::where('name', 'Villa')->first();
+        $suite = Accommodation::where('name', 'Suite')->first();
+
+        $suite->channels()->syncWithoutDetaching([
+            $booking->id => [
+                'url' => 'https://ical.booking.com/v1/export?t=05da9d91-caa1-4014-acad-8d53688b514f'
+            ],
+            $airbnb->id => [
+                'url' => 'https://www.airbnb.fr/calendar/ical/1416957436988903210.ics?t=7d8e5322499a4e74ab26bb7690c12e55'
+            ]
+        ]);
+
+        $villa->channels()->syncWithoutDetaching([
+            $booking->id => [
+                'url' => 'https://ical.booking.com/v1/export?t=161f6973-5ef2-4345-b950-3e1480ffe7b4'
+            ],
+            $airbnb->id => [
+                'url' => 'https://www.airbnb.fr/calendar/ical/1078787907790149250.ics?t=71686e4e3c034bc8ae30f87f54dea01b'
+            ]
+        ]);
+
         $categoriesData = [
             ['name' => 'Food'],
             ['name' => 'Service'],
