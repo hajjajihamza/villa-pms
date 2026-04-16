@@ -346,7 +346,12 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
                                         {(reservation.orders || []).flatMap((order: any) =>
                                             (order.order_items || []).map((item: any) => (
                                                 <tr key={item.id}>
-                                                    <td className="py-3.5 px-4 text-sm font-medium text-foreground">{item.product_name}</td>
+                                                    <td className="py-3.5 px-4 text-sm font-medium text-foreground">
+                                                        {item.product_name}
+                                                        <p className="text-[0.6rem] text-muted-foreground uppercase tracking-wider mt-0.5">
+                                                            {formatDateDisplay(item.created_at)}
+                                                        </p>
+                                                    </td>
                                                     <td className="py-3.5 px-4 text-center text-sm font-medium text-muted-foreground">×{item.quantity}</td>
                                                     <td className="py-3.5 px-4 text-right text-sm font-medium text-foreground">{formatNumber(item.price)}</td>
                                                     <td className="py-3.5 px-4 text-right text-sm font-medium text-foreground">{formatNumber(item.total || 0, { endWith: 'DH' })}</td>

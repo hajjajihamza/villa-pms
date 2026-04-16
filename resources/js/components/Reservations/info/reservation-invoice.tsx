@@ -101,6 +101,7 @@ export default function ReservationInvoice({ reservation, open, onOpenChange }: 
                                     <tr key={item.id} className="text-xs">
                                         <td className="py-4">
                                             <p className="font-black uppercase text-sm">{item.product_name}</p>
+                                            <p className="text-[8px] text-muted-foreground uppercase">{formatDateDisplay(item.created_at)}</p>
                                         </td>
                                         <td className="py-4 text-center">x{item.quantity}</td>
                                         <td className="py-4 text-right">{formatNumber(item.price)}</td>
