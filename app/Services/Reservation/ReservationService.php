@@ -20,7 +20,7 @@ class ReservationService
      */
     public function getPaginatedReservations(Builder $query, array $filters, int $perPage = 12): LengthAwarePaginator
     {
-        $query->with(['accommodations', 'orders.orderItems', 'mainVisitor'])
+        $query->with(['accommodations', 'orders.orderItems', 'mainVisitor', 'advances'])
             ->when($filters['accommodation_id'] ?? null, function (Builder $query, int $accommodationId) {
                 $query->whereHas('accommodations', function (Builder $query) use ($accommodationId) {
                     $query->where('accommodations.id', $accommodationId);

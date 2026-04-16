@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { getReservationDetails } from '@/api/reservation';
 import { formatDateDisplay } from '@/lib/format-date';
+import { AdvanceSection } from './advance-section';
 
 // ────────────────────────────────────────────────
 //  Types
@@ -305,9 +306,9 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
                             </Card>
                         </section>
                     )}
-
+    
                     {/* Section: Consommations */}
-                    <section className="space-y-2 mb-1">
+                    <section className="space-y-2 mb-3">
                         <h3 className="text-[0.6rem] font-medium text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
                             <FileText size={11} className="opacity-60" />
                             Consommations
@@ -379,12 +380,12 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
                                     <span className="text-sm font-medium text-foreground">{formatNumber(reservation.total_orders_amount || 0, { endWith: 'DH' })}</span>
                                 </div>
 
-                                {/* <div className="flex justify-between items-center">
+                                <div className="flex justify-between items-center">
                                     <span className="text-[0.6rem] font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Avance</span>
                                     <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                                        − {formatNumber(reservation.advance_amount, { endWith: 'DH' })}
+                                        − {formatNumber(reservation.advance_amount || 0, { endWith: 'DH' })}
                                     </span>
-                                </div> */}
+                                </div>
 
                                 {/* Total row */}
                                 <div className="flex items-center justify-between pt-3 border-t border-border">
@@ -402,6 +403,9 @@ function ReservationDetailsContent({ reservationId }: { reservationId: number })
                             </div>
                         </Card>
                     </section>
+
+                    {/* Section: Avances */}
+                    <AdvanceSection reservationId={reservation.id} advances={reservation.advances ?? []} maxAmount={reservation?.amount_to_pay ?? undefined} defaultStatus={(reservation.advances?.length ?? 0) > 0} />
                 </div>
             </ScrollArea>
 

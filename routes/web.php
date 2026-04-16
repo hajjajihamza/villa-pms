@@ -6,6 +6,7 @@ use App\Http\Controllers\Ical\IcalController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Pos\PosController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Reservation\AdvanceController;
 use App\Http\Controllers\Reservation\PlanningController;
 use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Reservation\VisitorController;
@@ -58,6 +59,9 @@ Route::middleware('auth')->group(function (): void {
 
     Route::resource('reservations', ReservationController::class)
         ->only(['index', 'store', 'update', 'destroy']);
+
+    Route::resource('advances', AdvanceController::class)
+        ->only(['store', 'update', 'destroy']);
 
     // ────────────────────────────────────────────────
     //  iCal Sync

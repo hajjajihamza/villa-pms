@@ -39,7 +39,6 @@ class Reservation extends Model
         'adults',
         'children',
         'reported',
-        'advance_amount',
         'daily_price',
         'service_price',
         'deleted_note',
@@ -59,7 +58,6 @@ class Reservation extends Model
             'real_check_in' => 'datetime',
             'real_check_out' => 'datetime',
             'reported' => 'boolean',
-            'advance_amount' => 'decimal:2',
             'total_price' => 'decimal:2',
             'service_price' => 'decimal:2',
             'daily_price' => 'decimal:2',
@@ -101,6 +99,11 @@ class Reservation extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function advances(): HasMany
+    {
+        return $this->hasMany(Advance::class);
+    }
+
     // ────────────────────────────────────────────────
     //  Accessors & Mutators
     // ────────────────────────────────────────────────
@@ -136,6 +139,13 @@ class Reservation extends Model
 
                 return $ordersTotal;
             }
+        );
+    }
+
+    protected function advanceAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (float) $this->advances()->sum('amount'),
         );
     }
 

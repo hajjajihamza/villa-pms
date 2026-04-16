@@ -40,6 +40,7 @@ class ReservationApiController extends Controller
             'visitors.documents',
             'orders.orderItems',
             'creator',
+            'advances'
         ]);
 
         return response()->json($reservation->toResource());

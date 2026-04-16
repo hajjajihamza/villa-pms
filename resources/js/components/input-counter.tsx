@@ -19,6 +19,7 @@ type CounterInputProps = {
     unit?: string;
     error?: string;
     disabled?: boolean;
+    autoFocus?: boolean;
     maxIndicator?: boolean;
     onChange: (value: number) => void;
 };
@@ -54,6 +55,7 @@ export default function InputCounter({
     unit,
     error,
     disabled = false,
+    autoFocus = false,
     maxIndicator = true,
     onChange,
 }: CounterInputProps) {
@@ -167,6 +169,7 @@ export default function InputCounter({
                         onValueChange={handleValueChange}
                         onBlur={onBlur}
                         disabled={disabled}
+                        autoFocus={autoFocus}
                         allowNegative={typeof min === 'number' ? min < 0 : true}
                         isAllowed={(values) => {
                             const { floatValue } = values;

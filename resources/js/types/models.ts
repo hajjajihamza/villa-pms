@@ -134,6 +134,7 @@ export type Reservation = BaseModel &
         accommodations?: Accommodation[];
         total_price?: number;
         total_orders_amount?: number;
+        advance_amount?: number;
         duration?: number;
         guests_count?: number;
         amount_to_pay?: number;
@@ -142,7 +143,15 @@ export type Reservation = BaseModel &
         visitors?: Visitor[];
         main_visitor?: Visitor;
         orders?: Order[];
+        advances?: Advance[];
     };
+
+export type Advance = BaseModel & {
+    amount: number;
+    date: DateString;
+    reservation_id: number;
+    reservation?: Reservation;
+};
 
 export type Visitor = BaseModel & {
     full_name: string;

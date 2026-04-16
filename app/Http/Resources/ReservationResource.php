@@ -40,6 +40,7 @@ class ReservationResource extends JsonResource
             'amount_to_pay' => $this->amount_to_pay,
             'total_price' => $this->total_price,
             'total_orders_amount' => $this->total_orders_amount,
+            'advance_amount' => $this->advance_amount,
             'guests_count' => $this->guests_count,
             'duration' => $this->duration,
             'status' => $this->status,
@@ -50,6 +51,7 @@ class ReservationResource extends JsonResource
             'channel' => $this->whenLoaded('channel'),
             'main_visitor' => new VisitorResource($this->whenLoaded('mainVisitor')),
             'visitors' => VisitorResource::collection($this->whenLoaded('visitors')),
+            'advances' => AdvanceResource::collection($this->whenLoaded('advances')),
             'orders' => $this->whenLoaded('orders'),
             'creator' => $this->whenLoaded('creator'),
         ];

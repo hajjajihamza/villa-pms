@@ -127,10 +127,10 @@ export default function ReservationInvoice({ reservation, open, onOpenChange }: 
                                     <span>Total Consommations</span>
                                     <span>{formatNumber((reservation.total_orders_amount || 0), { endWith: 'DH' })}</span>
                                 </div>
-                                {/* <div className="flex justify-between items-center text-[10px] font-black text-emerald-600 tracking-widest">
+                                <div className="flex justify-between items-center text-[10px] font-black text-emerald-600 tracking-widest">
                                     <span>Avance</span>
                                     <span>- {formatNumber((reservation.advance_amount || 0), { endWith: 'DH' })}</span>
-                                </div> */}
+                                </div>
                                 <div className="flex justify-between items-center text-sm font-bold text-gray-500 tracking-widest">
                                     <span>Total Brut</span>
                                     <span className="text-black font-black">{formatNumber((reservation.total_price || 0) + (reservation.total_orders_amount || 0), { endWith: 'DH' })}</span>
