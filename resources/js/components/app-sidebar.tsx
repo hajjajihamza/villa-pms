@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { CalendarClock, CalendarDays, HandCoins, LayoutDashboard, LayoutGrid, Settings, ShoppingCart } from 'lucide-react';
 import DashboardController from '@/actions/App/Http/Controllers/Dashboard/DashboardController';
 import ExpenseController from '@/actions/App/Http/Controllers/Expense/ExpenseController';
@@ -31,37 +31,47 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    // ────────────────────────────────────────────────
+    // Props
+    // ────────────────────────────────────────────────
+    const user = usePage().props.auth.user;
 
     const mainNavItems: NavItem[] = [
         {
             title: 'Tableau de bord',
             href: DashboardController.index(),
             icon: LayoutGrid,
+            isVisible: true,
         },
         {
             title: 'Planning',
             href: PlanningController.index(),
             icon: CalendarDays,
+            isVisible: true,
         },
         {
             title: 'Reservations',
             href: ReservationController.index(),
-            icon: CalendarClock
+            icon: CalendarClock,
+            isVisible: true,
         },
         {
             title: 'POS Complet',
             href: PosController.index(),
             icon: LayoutDashboard,
+            isVisible: true,
         },
         {
             title: 'Depenses',
             href: ExpenseController.index(),
             icon: HandCoins,
+            isVisible: user.is_admin,
         },
         {
             title: 'Parametres',
             href: SettingController.index(),
             icon: Settings,
+            isVisible: user.is_admin,
         },
     ];
 

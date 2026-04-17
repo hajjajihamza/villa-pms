@@ -16,7 +16,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
         <SidebarGroup className="px-2 py-0">
             <SidebarGroupLabel>Plateforme</SidebarGroupLabel>
             <SidebarMenu>
-                {items.map((item) => (
+                {items.filter((item) => item.isVisible).map((item) => (
                     <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                             asChild

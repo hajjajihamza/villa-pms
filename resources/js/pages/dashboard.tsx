@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Suspense, useState } from 'react';
 import { StatCards } from '@/components/dashboard/stat-cards';
 import { ReservationVolume } from '@/components/dashboard/reservation-volume';
@@ -32,6 +32,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ────────────────────────────────────────────────
 export default function Dashboard() {
     // ────────────────────────────────────────────────
+    // Props
+    // ────────────────────────────────────────────────
+    const user = usePage().props.auth.user;
+
+    // ────────────────────────────────────────────────
     //  States & variables
     // ────────────────────────────────────────────────
     const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
@@ -45,24 +50,45 @@ export default function Dashboard() {
             description="Aperçu des performances de votre établissement."
             breadcrumbs={breadcrumbs}
             action={
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant={"outline"} className={cn("w-[280px] justify-start text-left font-normal", !selectedMonth && "text-muted-foreground")}>
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {selectedMonth ? format(selectedMonth, "MMM yyyy", { locale: fr }) : <span>Pick a month</span>}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <MonthPicker onMonthSelect={setSelectedMonth} selectedMonth={selectedMonth} />
-                    </PopoverContent>
-                </Popover>
+                user.is_admin && (
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant={'outline'}
+                                className={cn(
+                                    'w-[280px] justify-start text-left font-normal',
+                                    !selectedMonth && 'text-muted-foreground',
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {selectedMonth ? (
+                                    format(selectedMonth, 'MMM yyyy', {
+                                        locale: fr,
+                                    })
+                                ) : (
+                                    <span>Pick a month</span>
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <MonthPicker
+                                onMonthSelect={setSelectedMonth}
+                                selectedMonth={selectedMonth}
+                            />
+                        </PopoverContent>
+                    </Popover>
+                )
             }
         >
             <Head title="Tableau de bord" />
 
             {/* Stats */}
             <Suspense fallback={<DashboardSkeleton />}>
-                <DashboardContent month={format(selectedMonth, 'yyyy-MM')} />
+                {user.is_admin && (
+                    <DashboardContent
+                        month={format(selectedMonth, 'yyyy-MM')}
+                    />
+                )}
             </Suspense>
         </AppLayout>
     );
@@ -87,20 +113,20 @@ function DashboardContent({ month }: { month: string }) {
     if (!stats) return null;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="animate-in space-y-8 duration-500 fade-in">
             {/* Row 1: General Stats */}
             <StatCards stats={stats} />
 
             {/* Row 2: Consolidated Channel Analysis */}
             <div>
-                <div className='mb-2'>
+                <div className="mb-2">
                     <div className="flex items-center gap-2">
-                        <LayoutGrid className="w-5 h-5 text-indigo-500" />
+                        <LayoutGrid className="h-5 w-5 text-indigo-500" />
                         <h1 className="text-lg font-semibold">
                             Analyse des Canaux
                         </h1>
                     </div>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-sm text-muted-foreground">
                         Performance détaillée : Volume et Revenu par source
                     </p>
                 </div>

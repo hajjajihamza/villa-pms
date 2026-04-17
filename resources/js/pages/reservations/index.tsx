@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Archive, Bed, CalendarCheck, CalendarClock, CalendarX, List, Plus } from 'lucide-react';
 import { useState } from 'react';
 import ReservationController from '@/actions/App/Http/Controllers/Reservation/ReservationController';
@@ -51,13 +51,25 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ────────────────────────────────────────────────
 //  Component
 // ────────────────────────────────────────────────
-export default function ReservationIndex({ reservations, accommodations, activeTab }: Props) {
+export default function ReservationIndex({
+    reservations,
+    accommodations,
+    activeTab,
+}: Props) {
+    // ────────────────────────────────────────────────
+    // Props
+    // ────────────────────────────────────────────────
+    const user = usePage().props.auth.user;
+
     // ────────────────────────────────────────────────
     //  States & variables
     // ────────────────────────────────────────────────
     const [formOpen, setFormOpen] = useState(false);
-    const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
-    const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
+    const [editingReservation, setEditingReservation] =
+        useState<Reservation | null>(null);
+    const [selectedReservationId, setSelectedReservationId] = useState<
+        number | null
+    >(null);
 
     // ────────────────────────────────────────────────
     //  Render
@@ -69,7 +81,8 @@ export default function ReservationIndex({ reservations, accommodations, activeT
             description="Gerez les sejours, la validation et les visiteurs supplementaires."
             action={
                 <>
-                    <ExportVisitorsDropdown />
+                    {user.is_admin && <ExportVisitorsDropdown />}
+
                     <Button
                         onClick={() => {
                             setEditingReservation(null);
