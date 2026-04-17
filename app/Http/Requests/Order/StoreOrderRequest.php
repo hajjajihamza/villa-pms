@@ -19,6 +19,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'reservation_id' => ['nullable', 'exists:reservations,id'],
+            'date' => ['required', 'date'],
             'order_items' => ['required', 'array', 'min:1'],
             'order_items.*.product_id' => ['nullable', 'exists:products,id'],
             'order_items.*.product_name' => ['required', 'string', 'max:255'],

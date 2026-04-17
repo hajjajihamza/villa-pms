@@ -4,6 +4,7 @@ namespace App\Services\Order;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ class OrderService
             ->when($filters['date'] ?? null, function (Builder $query, $date) {
                 $query->whereDate('date', $date);
             })
-            ->latest();
+            ->orderByDesc('date');
 
         if (!empty($filters['search'])) {
             $search = strtolower($filters['search']);
@@ -62,7 +63,7 @@ class OrderService
         return DB::transaction(function () use ($data) {
             $order = Order::create([
                 'reservation_id' => $data['reservation_id'] ?? null,
-                'date' => now(),
+                'date' => Carbon::parse($data['date'])->setTimeFromTimeString(now()->toTimeString())->toDateTimeString(),
             ]);
 
             foreach ($data['order_items'] as $item) {
