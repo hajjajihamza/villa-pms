@@ -44,7 +44,6 @@ class Reservation extends Model
         'deleted_note',
         'created_by',
         'channel_id',
-        'accommodation_id',
     ];
 
     /**
