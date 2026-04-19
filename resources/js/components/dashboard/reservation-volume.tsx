@@ -76,7 +76,7 @@ export function ReservationVolume({ stats }: Props) {
                         {/* Bottom: revenu */}
                         <div className="flex justify-between items-center pt-1 border-t border-gray-100 dark:border-gray-800">
                             <p className="text-xs text-gray-400">Revenu</p>
-                            <p className="text-sm font-medium" style={{ color: channel.color }}>
+                            <p className="text-sm font-medium">
                                 {formatNumber(channel.amount, { endWith: 'DH' })}
                             </p>
                         </div>
@@ -126,7 +126,7 @@ export function ReservationVolume({ stats }: Props) {
                     {/* Revenue */}
                     <div className="w-28 shrink-0 text-right">
                         <p className="text-[11px] text-gray-400 mb-0.5">Revenu</p>
-                        <p className="text-sm font-medium" style={{ color: channel.color }}>
+                        <p className="text-sm font-medium">
                             {formatNumber(channel.amount, { endWith: 'DH' })}
                         </p>
                     </div>

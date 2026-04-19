@@ -9,6 +9,7 @@ use App\Models\IcalSource;
 use App\Models\Reservation;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Sabre\VObject\Reader;
@@ -49,44 +50,51 @@ class IcalService
     {
         $vcalendar = Reader::read($content);
 
-        foreach ($vcalendar->VEVENT as $event) {
-            $uid = (string) $event->UID;
-            $dtstart = Carbon::parse($event->DTSTART->getDateTime());
-            $dtend = Carbon::parse($event->DTEND->getDateTime());
+        // Si exist des reservation 
+        if ($vcalendar->VEVENT) {
+            foreach ($vcalendar->VEVENT as $event) {
+                $uid = (string) $event->UID;
+                $dtstart = Carbon::parse($event->DTSTART->getDateTime());
+                $dtend = Carbon::parse($event->DTEND->getDateTime());
 
-            $accommodation = $source->accommodation;
+                $accommodation = $source->accommodation;
 
-            // existing reservation by date interval overlap or uid
-            $existingReservation = Reservation::query()
-                ->where('check_in', '<', $dtend->format('Y-m-d'))
-                ->where('check_out', '>', $dtstart->format('Y-m-d'))
-                ->orWhere('uid', $uid)
-                ->first();
+                $existingReservation = Reservation::query()
+                    ->whereHas('accommodations', function (Builder $q) use ($accommodation) {
+                        $q->where('accommodation_reservation.accommodation_id', $accommodation->id);
+                    })
+                    ->whereNull('deleted_at')
+                    // Date overlap
+                    ->where('check_in', '<', $dtend->format('Y-m-d'))
+                    ->where('check_out', '>', $dtstart->format('Y-m-d'))
+                    ->orWhere('uid', $uid)
+                    ->first();
 
-            if ($existingReservation) {
-                continue;
+                if ($existingReservation) {
+                    continue;
+                }
+
+                $data = [
+                    'uid' => $uid,
+                    'channel_id' => $source->channel_id,
+                    'check_in' => $dtstart->format('Y-m-d'),
+                    'check_out' => $dtend->format('Y-m-d'),
+                    'daily_price' => $accommodation->daily_price,
+                    'service_price' => $accommodation->service_price,
+                    'created_by' => User::where('role', RoleEnum::ADMIN->value)->first()->id,
+                ];
+
+                if ($dtstart->lt(now())) {
+                    $data['real_check_in'] = $dtstart->format('Y-m-d');
+                    $data['real_check_out'] = $dtend->format('Y-m-d');
+                }
+
+                $reservation = Reservation::create($data);
+
+                $accommodation->reservations()->attach($reservation->id);
+
+                $source->update(['last_sync_at' => now()]);
             }
-
-            $data = [
-                'uid' => $uid,
-                'channel_id' => $source->channel_id,
-                'check_in' => $dtstart->format('Y-m-d'),
-                'check_out' => $dtend->format('Y-m-d'),
-                'daily_price' => $accommodation->daily_price,
-                'service_price' => $accommodation->service_price,
-                'created_by' => User::where('role', RoleEnum::ADMIN->value)->first()->id,
-            ];
-
-            if ($dtstart->lt(now())) {
-                $data['real_check_in'] = $dtstart->format('Y-m-d');
-                $data['real_check_out'] = $dtend->format('Y-m-d');
-            }
-
-            $reservation = Reservation::create($data);
-
-            $accommodation->reservations()->attach($reservation->id);
-
-            $source->update(['last_sync_at' => now()]);
         }
     }
 }
