@@ -84,7 +84,7 @@ class ReservationService
             ];
 
             $reservation = Reservation::create($reservationData);
-            
+
             $reservation->accommodations()->attach($data['accommodation_ids']);
 
              $reservation->visitors()->create([
@@ -121,11 +121,20 @@ class ReservationService
 
             $reservation->update($reservationData);
 
-            $reservation->mainVisitor()->first()->update([
+            $visitorData =[
                 'full_name' => $data['full_name'],
                 'phone' => $data['phone'],
                 'country' => $data['country'],
-            ]);
+            ];
+
+            // Créer le visiteur principale si ne pas exist.
+            $mainVisitor = $reservation->mainVisitor()->first();
+
+            if ($mainVisitor) {
+                $mainVisitor->update($visitorData);
+            } else {
+                $reservation->visitors()->create([...$visitorData, 'is_main' => true]);
+            }
 
             $reservation->accommodations()->sync($data['accommodation_ids']);
 
