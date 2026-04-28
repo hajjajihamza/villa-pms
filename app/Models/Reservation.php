@@ -184,10 +184,6 @@ class Reservation extends Model
                     return StatusEnum::CONFIRMED;
                 }
 
-                if ($this->id === 10) {
-                    Debugbar::debug($this->real_check_out, $today ,$today->gt(Carbon::parse($this->real_check_out)));
-                }
-
                 if ($this->real_check_out && $today->gt(Carbon::parse($this->real_check_out))) {
                     return StatusEnum::CHECKED_OUT;
                 }

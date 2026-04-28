@@ -18,7 +18,7 @@ class PosController extends Controller
     {
         $today = Carbon::today()->toDateTimeString();
         $products = Product::all();
-        $categories = ProductCategory::query()->orderBy('name', 'asc')->get();
+        $categories = ProductCategory::query()->orderBy('name')->get();
         $accommodations = Accommodation::all();
         $reservations = Reservation::where('check_out', '>', $today)
                     ->where('check_in', '>=', $today)
@@ -39,7 +39,7 @@ class PosController extends Controller
     public function indexV2(): Response
     {
         $products = Product::all();
-        $categories = ProductCategory::query()->orderBy('name', 'asc')->get();
+        $categories = ProductCategory::query()->orderBy('name')->get();
 
         return Inertia::render('pos/index-v2', [
             'products' => $products,

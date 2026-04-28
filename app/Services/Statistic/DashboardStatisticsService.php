@@ -24,10 +24,10 @@ class DashboardStatisticsService
 
     public function getReservationsAmountsByPeriod(Carbon $start, Carbon $end): float
     {
-        return (float) Reservation::query()
+        return (float) (Reservation::query()
             ->whereBetween('check_in', [$start->toDateString(), $end->toDateString()])
             ->select(DB::raw('SUM(daily_price * DATEDIFF(check_out, check_in)) as amount'))
-            ->value('amount') ?? 0;
+            ->value('amount') ?? 0);
     }
 
     // ────────────────────────────────────────────────
@@ -88,10 +88,10 @@ class DashboardStatisticsService
 
     public function getOrdersAmountByPeriod(Carbon $startDate, Carbon $endDate): float
     {
-        return (float) Order::query()
+        return (float) (Order::query()
             ->join('order_items', 'order_items.order_id', '=', 'orders.id')
             ->whereBetween('orders.date', [$startDate->toDateString(), $endDate->toDateString()])
             ->select(DB::raw('SUM(order_items.quantity * order_items.price) as total'))
-            ->value('total') ?? 0;
+            ->value('total') ?? 0);
     }
 }
